@@ -34,12 +34,14 @@ jobs:
           path: version.txt
 
   build:
+    name: Build APK and Creating Release
+    needs: [version]
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - run: |
+      - name: Extract secrets
+        run: |
           echo "${{secrets.RELEASE_KEYSTORE}}" > upload-keystore.jks.asc
           echo "${{secrets.RELEASE_ENV}}" > .env.asc
           echo "${{secrets.RELEASE_PROP}}" > key.properties.asc
