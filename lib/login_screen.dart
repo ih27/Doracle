@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -18,8 +19,14 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
       // Navigate to home screen
+      if (kDebugMode) {
+        print("logged in");
+      }
     } on FirebaseAuthException catch (e) {
       // Handle error
+      if (kDebugMode) {
+        print(e.message);
+      }
     }
   }
 
