@@ -35,3 +35,5 @@ Runner/GeneratedPluginRegistrant.*
 
 fastlane/.env.default
 fastlane/report.xml
+Gemfile.lock
+Podfile.lock

@@ -1,4 +1,4 @@
-name: Apple Release
+name: IOS Pipeline
 
 on:
   push:
