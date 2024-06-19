@@ -1,0 +1,22 @@
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/strscan-3.1.0/ext/strscan
+/Users/ihasanov/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+checking for onig_region_memsize() in ruby.h... yes
+checking for rb_reg_onig_match() in ruby.h... no
+creating Makefile
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/strscan-3.1.0/ext/strscan
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7ad2ts sitelibdir\=./.gem.20240619-32156-7ad2ts clean
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/strscan-3.1.0/ext/strscan
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7ad2ts sitelibdir\=./.gem.20240619-32156-7ad2ts
+compiling strscan.c
+linking shared-object strscan.bundle
+ld: warning: -multiply_defined is obsolete
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/strscan-3.1.0/ext/strscan
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7ad2ts sitelibdir\=./.gem.20240619-32156-7ad2ts install
+/usr/local/bin/ginstall -c -m 0755 strscan.bundle ./.gem.20240619-32156-7ad2ts
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/strscan-3.1.0/ext/strscan
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7ad2ts sitelibdir\=./.gem.20240619-32156-7ad2ts clean

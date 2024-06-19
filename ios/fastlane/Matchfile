@@ -1,0 +1,7 @@
+git_url("https://github.com/ih27/app-store-certs.git")
+
+storage_mode("git")
+
+type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
+
+username("ismail@passionpunch.studio") # Your Apple Developer Portal username

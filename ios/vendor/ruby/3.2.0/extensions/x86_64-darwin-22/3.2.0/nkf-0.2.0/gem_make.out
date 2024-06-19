@@ -1,0 +1,20 @@
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+/Users/ihasanov/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7zeigj sitelibdir\=./.gem.20240619-32156-7zeigj clean
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7zeigj sitelibdir\=./.gem.20240619-32156-7zeigj
+compiling nkf.c
+linking shared-object nkf.bundle
+ld: warning: -multiply_defined is obsolete
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7zeigj sitelibdir\=./.gem.20240619-32156-7zeigj install
+/usr/local/bin/ginstall -c -m 0755 nkf.bundle ./.gem.20240619-32156-7zeigj
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-32156-7zeigj sitelibdir\=./.gem.20240619-32156-7zeigj clean
