@@ -8,9 +8,6 @@ on:
 jobs:
   build-and-deploy-ios:
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: app
     steps:
       - name: Set up git and fetch all history for all branches and tags
         uses: actions/checkout@v4
