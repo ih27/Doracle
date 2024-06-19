@@ -1,9 +1,10 @@
 name: AAB Pipeline
 
 on:
-  push:
-    branches:
-      - main
+  fork # for now to disable this pipeline
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   version:
@@ -95,7 +96,7 @@ jobs:
           artifacts: "build/app/outputs/apk/release/*.apk,build/app/outputs/bundle/release/app-release.aab"
           tag: ${{steps.version.outputs.content}}
           commit: ${{github.sha}}
-      
+
       - name: Upload App Bundle
         uses: actions/upload-artifact@v4
         with:
