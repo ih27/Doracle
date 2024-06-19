@@ -1,28 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'signup_screen.dart'; // Import the SignUpScreen
+import 'login_screen.dart'; // Import the LoginScreen
 
-class LoginScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _login() async {
+  void _signUp() async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      // Navigate to home screen
+      // Navigate to home screen or login screen
       if (kDebugMode) {
-        print("logged in");
+        print("User registered");
       }
+      Navigator.pop(context); // Navigate back to login screen after sign up
     } on FirebaseAuthException catch (e) {
       // Handle error
       if (kDebugMode) {
@@ -31,17 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _navigateToSignUp() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SignUpScreen()),
-    );
+  void _navigateToLogin() {
+    Navigator.pop(context); // Navigate back to login screen
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: const Text('Sign Up')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -52,10 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
             TextField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: 'Password')),
-            ElevatedButton(onPressed: _login, child: const Text('Login')),
+            ElevatedButton(onPressed: _signUp, child: const Text('Sign Up')),
             TextButton(
-              onPressed: _navigateToSignUp,
-              child: const Text('Don\'t have an account? Sign Up'),
+              onPressed: _navigateToLogin,
+              child: const Text('Already have an account? Login'),
             ),
           ],
         ),
