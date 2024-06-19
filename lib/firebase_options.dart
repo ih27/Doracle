@@ -40,16 +40,16 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static String androidApiKey = '';
-  static String iosApiKey = '';
+  static late String androidApiKey;
+  static late String iosApiKey;
 
-  static loadEnv() async {
+  static Future<void> loadEnv() async {
     await dotenv.load(fileName: ".env");
     androidApiKey = dotenv.env['FIREBASE_ANDROID_API_KEY']!;
     iosApiKey = dotenv.env['FIREBASE_IOS_API_KEY']!;
   }
 
-  static FirebaseOptions android = FirebaseOptions(
+  static FirebaseOptions get android => FirebaseOptions(
     apiKey: androidApiKey,
     appId: '1:40432187550:android:5f901e6c801dbb8666638f',
     messagingSenderId: '40432187550',
@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'fort-un-tella.appspot.com',
   );
 
-  static FirebaseOptions ios = FirebaseOptions(
+  static FirebaseOptions get ios => FirebaseOptions(
     apiKey: iosApiKey,
     appId: '1:40432187550:ios:77ffd0ff003e653966638f',
     messagingSenderId: '40432187550',
