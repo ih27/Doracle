@@ -1,0 +1,18 @@
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.3.0/gems/nkf-0.2.0/ext/nkf
+/usr/local/opt/ruby/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.3.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-17786-9vtn5g sitelibdir\=./.gem.20240619-17786-9vtn5g clean
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.3.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-17786-9vtn5g sitelibdir\=./.gem.20240619-17786-9vtn5g
+compiling nkf.c
+linking shared-object nkf.bundle
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.3.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-17786-9vtn5g sitelibdir\=./.gem.20240619-17786-9vtn5g install
+/usr/bin/install -c -m 0755 nkf.bundle ./.gem.20240619-17786-9vtn5g
+
+current directory: /Users/ihasanov/Desktop/fortuntella/ios/vendor/ruby/3.3.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20240619-17786-9vtn5g sitelibdir\=./.gem.20240619-17786-9vtn5g clean

@@ -1,0 +1,3 @@
+app_identifier("com.pp.fortuntella") # The bundle identifier of your app
+apple_id("playstore.passionpunch@gmail.com") # Your Apple email address
+team_id("788TXQGUGH")
