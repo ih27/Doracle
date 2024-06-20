@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -16,15 +15,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool passwordVisible = true;
 
   void _signUp() async {
+    // Validation
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showErrorDialog('Email and password cannot be empty');
+      return;
+    }
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
       // Navigate to home screen or login screen
-      if (kDebugMode) {
-        print("User registered");
-      }
+      if (!mounted) return;
       Navigator.pop(context); // Navigate back to login screen after sign up
     } on FirebaseAuthException catch (e) {
       // Handle error

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'signup_screen.dart'; // Import the SignUpScreen
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,15 +17,17 @@ class _LoginScreenState extends State<LoginScreen> {
   bool passwordVisible = true;
 
   void _login() async {
+    // Validation
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showErrorDialog('Email and password cannot be empty');
+      return;
+    }
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
       // Navigate to home screen
-      if (kDebugMode) {
-        print("logged in");
-      }
     } on FirebaseAuthException catch (e) {
       // Handle error
       _showErrorDialog(e.message ?? 'An error occurred');
@@ -63,26 +65,31 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController _resetEmailController = TextEditingController();
+        final TextEditingController resetEmailController = TextEditingController();
         return AlertDialog(
-          title: Text('Reset Password'),
+          title: const Text('Reset Password'),
           content: TextField(
-            controller: _resetEmailController,
-            decoration: InputDecoration(labelText: 'Enter your email'),
+            controller: resetEmailController,
+            decoration: const InputDecoration(labelText: 'Enter your email'),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child:const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                _resetPassword(_resetEmailController.text);
+                // Validation
+                if (resetEmailController.text.isEmpty) {
+                  _showErrorDialog('Email cannot be empty');
+                  return;
+                }
+                _resetPassword(resetEmailController.text);
                 Navigator.of(context).pop();
               },
-              child: Text('Send'),
+              child: const Text('Send'),
             ),
           ],
         );
