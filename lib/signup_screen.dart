@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_screen.dart'; // Import the LoginScreen
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -29,10 +28,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Navigator.pop(context); // Navigate back to login screen after sign up
     } on FirebaseAuthException catch (e) {
       // Handle error
-      if (kDebugMode) {
-        print(e.message);
-      }
+      _showErrorDialog(e.message ?? 'An error occurred');
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Sign Up Failed'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _navigateToLogin() {
