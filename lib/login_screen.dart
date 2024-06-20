@@ -14,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool passwordVisible = false;
+  bool passwordVisible = true;
 
   void _login() async {
     try {
@@ -94,8 +94,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email')),
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email')),
             TextField(
               controller: _passwordController,
               obscureText: passwordVisible,

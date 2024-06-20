@@ -101,8 +101,8 @@ jobs:
         uses: slackapi/slack-github-action@v1.26.0
         with:
           channel-id: ${{vars.CHANNEL_ID}}
-          slack-message: "GitHub build result:${{github.event.head_commit.url}}\n
-                          https://github.com/ih27/FortunTella/releases/download/${{steps.version.outputs.content}}/app-arm64-v8a-release.apk"
+          slack-message: "Code changes:${{github.event.head_commit.url}}\n
+                          Android APK : https://github.com/ih27/FortunTella/releases/download/${{steps.version.outputs.content}}/app-arm64-v8a-release.apk"
         env:
           SLACK_BOT_TOKEN: ${{secrets.SLACK_BOT_TOKEN}}
 

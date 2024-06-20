@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart'; // Import the LoginScreen
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
@@ -12,6 +14,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool passwordVisible = true;
 
   void _signUp() async {
     try {
@@ -45,11 +48,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Column(
           children: [
             TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email')),
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email')),
             TextField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password')),
+              controller: _passwordController,
+              obscureText: passwordVisible,
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
+                labelText: 'Password', 
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      passwordVisible = !passwordVisible;
+                    });
+                  },
+                ),
+              ),
+            ),
             ElevatedButton(onPressed: _signUp, child: const Text('Sign Up')),
             TextButton(
               onPressed: _navigateToLogin,
