@@ -8,7 +8,7 @@ on:
 jobs:
   version:
     name: Version Number
-    runs-on: fortuntella-linux
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
   build:
     name: Build APK and Creating Release
     needs: [version]
-    runs-on: fortuntella-linux
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -116,7 +116,7 @@ jobs:
   # release:
   #   name: Release app to internal track
   #   needs: [build]
-  #   runs-on: fortuntella-linux
+  #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v4
   #     - name: Get appbundle from artifacts
