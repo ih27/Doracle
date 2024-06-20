@@ -20,16 +20,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _showErrorDialog('Email and password cannot be empty');
       return;
     }
+
     try {
       await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      // Navigate to home screen or login screen
+
       if (!mounted) return;
+      
       Navigator.pop(context); // Navigate back to login screen after sign up
     } on FirebaseAuthException catch (e) {
-      // Handle error
       _showErrorDialog(e.message ?? 'An error occurred');
     }
   }

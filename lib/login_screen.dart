@@ -22,14 +22,16 @@ class _LoginScreenState extends State<LoginScreen> {
       _showErrorDialog('Email and password cannot be empty');
       return;
     }
+    
     try {
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      // Navigate to home screen
+      // Clear the TextEditingController values upon successful login
+      _emailController.clear();
+      _passwordController.clear();
     } on FirebaseAuthException catch (e) {
-      // Handle error
       _showErrorDialog(e.message ?? 'An error occurred');
     }
   }
@@ -57,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _navigateToSignUp() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SignUpScreen()),
+      MaterialPageRoute(builder: (context) => const SignUpScreen()),
     );
   }
 
@@ -77,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child:const Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
