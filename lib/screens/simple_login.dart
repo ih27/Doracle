@@ -14,6 +14,8 @@ class SimpleLoginScreen extends StatefulWidget {
 class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   late String email, password;
   String? emailError, passwordError;
+  bool showPasswordRecovery = false;
+
   Function(String? email, String? password)? get onLogin => widget.onLogin;
   Function(String? email, String? password)? get onRegister => widget.onRegister;
   Function(String? email)? get onPasswordRecovery => widget.onPasswordRecovery;
@@ -49,7 +51,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
       isValid = false;
     }
 
-    if (password.isEmpty) {
+    if (!showPasswordRecovery && password.isEmpty) {
       setState(() {
         passwordError = 'Please enter a password';
       });
@@ -61,8 +63,14 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
 
   void submit() {
     if (validate()) {
-      if (onLogin != null) {
-        onLogin!(email, password);
+      if (showPasswordRecovery) {
+        if (onPasswordRecovery != null) {
+          onPasswordRecovery!(email);
+        }
+      } else {
+        if (onLogin != null) {
+          onLogin!(email, password);
+        }
       }
     }
   }
@@ -77,16 +85,16 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
         child: ListView(
           children: [
             SizedBox(height: screenHeight * .12),
-            const Text(
-              'Welcome,',
-              style: TextStyle(
+            Text(
+              showPasswordRecovery ? 'Recover Password' : 'Welcome',
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: screenHeight * .01),
             Text(
-              'Sign in to continue!',
+              showPasswordRecovery ? 'Enter your email to recover your password.' : 'Sign in to continue!',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.black.withOpacity(.6),
@@ -105,30 +113,35 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
               textInputAction: TextInputAction.next,
               autoFocus: true,
             ),
-            SizedBox(height: screenHeight * .025),
-            InputField(
-              onChanged: (value) {
-                setState(() {
-                  password = value;
-                });
-              },
-              onSubmitted: (val) => submit(),
-              labelText: 'Password',
-              errorText: passwordError,
-              obscureText: true,
-              textInputAction: TextInputAction.next,
-            ),
+            if (!showPasswordRecovery)
+              Column(
+                children: [
+                  SizedBox(height: screenHeight * .025),
+                  InputField(
+                    onChanged: (value) {
+                      setState(() {
+                        password = value;
+                      });
+                    },
+                    onSubmitted: (val) => submit(),
+                    labelText: 'Password',
+                    errorText: passwordError,
+                    obscureText: true,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ],
+              ),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  if (onPasswordRecovery != null) {
-                    onPasswordRecovery!(email);
-                  }
+                  setState(() {
+                    showPasswordRecovery = !showPasswordRecovery;
+                  });
                 },
-                child: const Text(
-                  'Forgot Password?',
-                  style: TextStyle(
+                child: Text(
+                  showPasswordRecovery ? 'Back to Login' : 'Forgot Password?',
+                  style: const TextStyle(
                     color: Colors.black,
                   ),
                 ),
@@ -138,35 +151,40 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
               height: screenHeight * .075,
             ),
             FormButton(
-              text: 'Log In',
+              text: showPasswordRecovery ? 'Recover' : 'Log In',
               onPressed: submit,
             ),
-            SizedBox(
-              height: screenHeight * .15,
-            ),
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SimpleRegisterScreen(onSubmitted: onRegister),
-                ),
-              ),
-              child: RichText(
-                text: const TextSpan(
-                  text: "I'm a new user, ",
-                  style: TextStyle(color: Colors.black),
-                  children: [
-                    TextSpan(
-                      text: 'Sign Up',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
+            if (!showPasswordRecovery)
+              Column(
+                children: [
+                  SizedBox(
+                    height: screenHeight * .15,
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SimpleRegisterScreen(onSubmitted: onRegister),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            )
+                    child: RichText(
+                      text: const TextSpan(
+                        text: "I'm a new user, ",
+                        style: TextStyle(color: Colors.black),
+                        children: [
+                          TextSpan(
+                            text: 'Sign Up',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              )
           ],
         ),
       ),
@@ -255,7 +273,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
           children: [
             SizedBox(height: screenHeight * .12),
             const Text(
-              'Create Account,',
+              'Create Account',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
