@@ -1,9 +1,9 @@
 name: IOS Pipeline
 
-on:
-  push:
-    branches:
-      - main-TBDLATER
+on: workflow_dispatch
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   build-and-deploy-ios:
