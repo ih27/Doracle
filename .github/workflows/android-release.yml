@@ -90,22 +90,33 @@ jobs:
       - run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=symbols
       #- run: flutter build appbundle --release --obfuscate --split-debug-info=symbols
 
-      - name: Create a Release in GitHub
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/app/outputs/apk/release/*.apk" #,build/app/outputs/bundle/release/app-release.aab"
-          tag: ${{steps.version.outputs.content}}
-          commit: ${{github.sha}}
+      # - name: Create a Release in GitHub
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     artifacts: "build/app/outputs/apk/release/*.apk" #,build/app/outputs/bundle/release/app-release.aab"
+      #     tag: ${{steps.version.outputs.content}}
+      #     commit: ${{github.sha}}
 
-      - name: Send an APK link to Slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.26.0
+      # - name: Send an APK link to Slack
+      #   id: slack
+      #   uses: slackapi/slack-github-action@v1.26.0
+      #   with:
+      #     channel-id: ${{vars.CHANNEL_ID}}
+      #     slack-message: "Code changes:${{github.event.head_commit.url}}\n
+      #                     Android APK : https://github.com/ih27/FortunTella/releases/download/${{steps.version.outputs.content}}/app-arm64-v8a-release.apk"
+      #   env:
+      #     SLACK_BOT_TOKEN: ${{secrets.SLACK_BOT_TOKEN}}
+      
+      - name: Send an APK to Slack
+        uses: MeilCli/slack-upload-file@v4
         with:
-          channel-id: ${{vars.CHANNEL_ID}}
-          slack-message: "Code changes:${{github.event.head_commit.url}}\n
-                          Android APK : https://github.com/ih27/FortunTella/releases/download/${{steps.version.outputs.content}}/app-arm64-v8a-release.apk"
-        env:
-          SLACK_BOT_TOKEN: ${{secrets.SLACK_BOT_TOKEN}}
+          slack_token: ${{secrets.SLACK_BOT_TOKEN}}
+          channel_id: ${{vars.CHANNEL_ID}}
+          content: 'file content'
+          file_type: 'apk'
+          file_name: 'build/app/outputs/apk/release/app-arm64-v8a-release.apk'
+          title: 'Fort-un-Tella'
+          initial_comment: 'Try the latest build'
 
       # - name: Upload App Bundle
       #   uses: actions/upload-artifact@v4
