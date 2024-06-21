@@ -14,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool passwordVisible = true;
+  bool passwordHidden = true;
 
   void _login() async {
     // Validation
@@ -22,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _showErrorDialog('Email and password cannot be empty');
       return;
     }
-    
+
     try {
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
@@ -67,7 +67,8 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController resetEmailController = TextEditingController();
+        final TextEditingController resetEmailController =
+            TextEditingController();
         return AlertDialog(
           title: const Text('Reset Password'),
           content: TextField(
@@ -125,17 +126,17 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: const InputDecoration(labelText: 'Email')),
             TextField(
               controller: _passwordController,
-              obscureText: passwordVisible,
+              obscureText: passwordHidden,
               decoration: InputDecoration(
                 border: const UnderlineInputBorder(),
-                labelText: 'Password', 
+                labelText: 'Password',
                 suffixIcon: IconButton(
                   icon: Icon(
-                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    passwordHidden ? Icons.visibility_off : Icons.visibility,
                   ),
                   onPressed: () {
                     setState(() {
-                      passwordVisible = !passwordVisible;
+                      passwordHidden = !passwordHidden;
                     });
                   },
                 ),

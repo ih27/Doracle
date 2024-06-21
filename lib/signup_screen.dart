@@ -12,7 +12,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool passwordVisible = true;
+  bool passwordHidden = true;
 
   void _signUp() async {
     // Validation
@@ -72,17 +72,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration: const InputDecoration(labelText: 'Email')),
             TextField(
               controller: _passwordController,
-              obscureText: passwordVisible,
+              obscureText: passwordHidden,
               decoration: InputDecoration(
                 border: const UnderlineInputBorder(),
                 labelText: 'Password', 
                 suffixIcon: IconButton(
                   icon: Icon(
-                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    passwordHidden ? Icons.visibility_off : Icons.visibility,
                   ),
                   onPressed: () {
                     setState(() {
-                      passwordVisible = !passwordVisible;
+                      passwordHidden = !passwordHidden;
                     });
                   },
                 ),
