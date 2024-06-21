@@ -113,7 +113,7 @@ jobs:
           slack_token: ${{secrets.SLACK_BOT_TOKEN}}
           channel_id: ${{vars.CHANNEL_ID}}
           file_type: 'apk'
-          file_name: 'build/app/outputs/apk/release/app-arm64-v8a-release.apk'
+          file_path: 'build/app/outputs/apk/release/app-arm64-v8a-release.apk'
           title: 'Fort-un-Tella'
           initial_comment: 'Try the latest build'
 
