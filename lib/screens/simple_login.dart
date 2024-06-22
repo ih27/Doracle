@@ -164,7 +164,12 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SimpleRegisterScreen(onSubmitted: onRegister),
+                        builder: (_) => SimpleRegisterScreen(onSubmitted: (email, password) {
+                          if (onRegister != null) {
+                            onRegister!(email, password);
+                            Navigator.pop(context); // Navigate back to login screen after successful registration
+                          }
+                        }),
                       ),
                     ),
                     child: RichText(
