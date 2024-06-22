@@ -16,7 +16,9 @@ jobs:
       - name: Extract .env variable
         run: |
           echo "${{secrets.RELEASE_ENV}}" > .env.asc
+          echo "${{secrets.RELEASE_GOOGLEPLIST}}" > GoogleService-Info.plist.asc
           gpg -d --passphrase "${{secrets.RELEASE_ENV_PASSWORD}}" --batch .env.asc > .env
+          gpg -d --passphrase "${{secrets.RELEASE_GOOGLEPLIST_PASSWORD}}" --batch GoogleService-Info.plist.asc > ios/Runner/GoogleService-Info.plist
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
