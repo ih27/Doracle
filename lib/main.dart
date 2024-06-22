@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +66,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
     if (email == null || password == null) return;
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-      // Add navigation to HomeScreen if needed
     } on FirebaseAuthException catch (e) {
       if (!mounted) return; // Ensure the widget is still mounted
       _showErrorDialog(e.message ?? 'An error occurred');
@@ -75,8 +75,12 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void _handleRegister(String? email, String? password) async {
     if (email == null || password == null) return;
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-      // Add navigation to HomeScreen if needed
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      // Add user data to Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+        'email': email,
+        'createdAt': Timestamp.now(),
+      });
     } on FirebaseAuthException catch (e) {
       if (!mounted) return; // Ensure the widget is still mounted
       _showErrorDialog(e.message ?? 'An error occurred');
