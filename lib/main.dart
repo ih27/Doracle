@@ -46,7 +46,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Login Failed'),
+          title: const Text('Error'),
           content: Text(message),
           actions: [
             TextButton(
@@ -87,7 +87,30 @@ class _AuthWrapperState extends State<AuthWrapper> {
     if (email == null) return;
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      // Handle password recovery success
+      if (!mounted) return; // Ensure the widget is still mounted
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Success'),
+            content: const Text('Password reset email sent. Please check your email.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SimpleLoginScreen()),
+                    );
+                  });
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return; // Ensure the widget is still mounted
       _showErrorDialog(e.message ?? 'An error occurred');
