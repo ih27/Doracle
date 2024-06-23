@@ -4,8 +4,9 @@ class SimpleLoginScreen extends StatefulWidget {
   final Function(String? email, String? password)? onLogin;
   final Function(String? email, String? password)? onRegister;
   final Function(String? email)? onPasswordRecovery;
+  final Function()? onGoogleSignIn;
 
-  const SimpleLoginScreen({this.onLogin, this.onRegister, this.onPasswordRecovery, super.key});
+  const SimpleLoginScreen({this.onLogin, this.onRegister, this.onPasswordRecovery, this.onGoogleSignIn, super.key});
 
   @override
   State<SimpleLoginScreen> createState() => _SimpleLoginScreenState();
@@ -19,6 +20,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   Function(String? email, String? password)? get onLogin => widget.onLogin;
   Function(String? email, String? password)? get onRegister => widget.onRegister;
   Function(String? email)? get onPasswordRecovery => widget.onPasswordRecovery;
+  Function()? get onGoogleSignIn => widget.onGoogleSignIn;
 
   @override
   void initState() {
@@ -187,9 +189,27 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                         ],
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(height: screenHeight * .075),
+                  ElevatedButton.icon(
+                    icon: Image.asset(
+                      'assets/google_logo.png', // Make sure to add a Google logo asset
+                      height: 24,
+                      width: 24,
+                    ),
+                    label: const Text('Sign in with Google'),
+                    onPressed: onGoogleSignIn,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
                 ],
-              )
+              ),
           ],
         ),
       ),

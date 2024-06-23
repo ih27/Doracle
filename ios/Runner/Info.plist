@@ -22,6 +22,21 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<!-- Google Sign-in Section -->
+		<key>GIDClientID</key>
+		<string>40432187550-hdtvr8m4vcp4cq2ao67ls54qfhd6j24c.apps.googleusercontent.com</string>		
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.40432187550-hdtvr8m4vcp4cq2ao67ls54qfhd6j24c</string>
+				</array>
+			</dict>
+		</array>
+		<!-- End of the Google Sign-in Section -->
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>ITSAppUsesNonExemptEncryption</key>

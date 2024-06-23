@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
 import 'screens/home.dart';
 import 'screens/simple_login.dart';
@@ -121,6 +122,38 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // The user canceled the sign-in
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Add user data to Firestore if it's a new user
+      if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+        await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+          'email': userCredential.user?.email,
+          'createdAt': Timestamp.now(),
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      _showErrorDialog(e.message ?? 'An error occurred');
+    } catch (e) {
+      _showErrorDialog('An error occurred while signing in with Google.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -135,6 +168,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
             onLogin: (email, password) => _handleLogin(email, password),
             onRegister: (email, password) => _handleRegister(email, password),
             onPasswordRecovery: (email) => _handlePasswordRecovery(email),
+            onGoogleSignIn: _handleGoogleSignIn,
           );
         }
       },
