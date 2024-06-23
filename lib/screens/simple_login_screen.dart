@@ -171,22 +171,14 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
               Column(
                 children: [
                   SizedBox(height: screenHeight * .075),
-                  ElevatedButton.icon(
+                  FormButton(
+                    text: 'Sign in with Google',
                     icon: Image.asset(
-                      'assets/google_logo.png', // Ensure you have this asset in your assets folder
+                      'assets/google_logo.png',
                       height: 24,
                       width: 24,
                     ),
-                    label: const Text('Sign in with Google'),
                     onPressed: onGoogleSignIn,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
                   ),
                   SizedBox(height: screenHeight * .15),
                   TextButton(
