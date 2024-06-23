@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fortuntella/main.dart';
+import 'package:fortuntella/screens/fortune_tell.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -93,6 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Center(
                           child: Text('Welcome, ${userData!['email']}'),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const FortuneTellScreen()),
+                            );
+                          },
+                          child: const Text('Go to Fortune Teller'),
                         ),
                       ],
                     ),
