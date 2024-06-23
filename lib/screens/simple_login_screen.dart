@@ -88,14 +88,13 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ListView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: screenHeight * .12),
+            const Spacer(flex: 2),
             Text(
               showPasswordRecovery ? 'Recover Password' : 'Welcome',
               style: const TextStyle(
@@ -103,7 +102,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: screenHeight * .01),
+            const SizedBox(height: 10),
             Text(
               showPasswordRecovery
                   ? 'Enter your email to recover your password.'
@@ -113,7 +112,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                 color: Colors.black.withOpacity(.6),
               ),
             ),
-            SizedBox(height: screenHeight * .12),
+            const SizedBox(height: 30),
             InputField(
               onChanged: (value) {
                 setState(() {
@@ -129,7 +128,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
             if (!showPasswordRecovery)
               Column(
                 children: [
-                  SizedBox(height: screenHeight * .025),
+                  const SizedBox(height: 15),
                   InputField(
                     onChanged: (value) {
                       setState(() {
@@ -160,9 +159,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                 ),
               ),
             ),
-            SizedBox(
-              height: screenHeight * .075,
-            ),
+            const SizedBox(height: 15),
             FormButton(
               text: showPasswordRecovery ? 'Recover' : 'Log In',
               onPressed: submit,
@@ -170,7 +167,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
             if (!showPasswordRecovery)
               Column(
                 children: [
-                  SizedBox(height: screenHeight * .075),
+                  const SizedBox(height: 15),
                   FormButton(
                     text: 'Sign in with Google',
                     icon: Image.asset(
@@ -180,40 +177,41 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                     ),
                     onPressed: onGoogleSignIn,
                   ),
-                  SizedBox(height: screenHeight * .15),
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SimpleRegisterScreen(
-                          onSubmitted: (email, password) {
-                            if (onRegister != null) {
-                              onRegister!(email, password);
-                              Navigator.pop(
-                                  context); // Navigate back to login screen after successful registration
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    child: RichText(
-                      text: const TextSpan(
-                        text: "I'm a new user, ",
-                        style: TextStyle(color: Colors.black),
-                        children: [
-                          TextSpan(
-                            text: 'Sign Up',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
+            const Spacer(flex: 1),
+            TextButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SimpleRegisterScreen(
+                    onSubmitted: (email, password) {
+                      if (onRegister != null) {
+                        onRegister!(email, password);
+                        Navigator.pop(
+                            context); // Navigate back to login screen after successful registration
+                      }
+                    },
+                  ),
+                ),
+              ),
+              child: RichText(
+                text: const TextSpan(
+                  text: "I'm a new user, ",
+                  style: TextStyle(color: Colors.black),
+                  children: [
+                    TextSpan(
+                      text: 'Sign Up',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),

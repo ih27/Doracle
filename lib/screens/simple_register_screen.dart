@@ -74,14 +74,13 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ListView(
-                   children: [
-            SizedBox(height: screenHeight * .12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(flex: 1),
             const Text(
               'Create Account',
               style: TextStyle(
@@ -89,7 +88,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: screenHeight * .01),
+            const SizedBox(height: 8),
             Text(
               'Sign up to get started!',
               style: TextStyle(
@@ -97,7 +96,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
                 color: Colors.black.withOpacity(.6),
               ),
             ),
-            SizedBox(height: screenHeight * .12),
+            const SizedBox(height: 24),
             InputField(
               onChanged: (value) {
                 setState(() {
@@ -110,7 +109,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
               textInputAction: TextInputAction.next,
               autoFocus: true,
             ),
-            SizedBox(height: screenHeight * .025),
+            const SizedBox(height: 16),
             InputField(
               onChanged: (value) {
                 setState(() {
@@ -122,7 +121,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
               obscureText: true,
               textInputAction: TextInputAction.next,
             ),
-            SizedBox(height: screenHeight * .025),
+            const SizedBox(height: 16),
             InputField(
               onChanged: (value) {
                 setState(() {
@@ -135,16 +134,12 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
               obscureText: true,
               textInputAction: TextInputAction.done,
             ),
-            SizedBox(
-              height: screenHeight * .075,
-            ),
+            const SizedBox(height: 24),
             FormButton(
               text: 'Sign Up',
               onPressed: submit,
             ),
-            SizedBox(
-              height: screenHeight * .125,
-            ),
+            const Spacer(flex: 2),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: RichText(
@@ -162,7 +157,8 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
                   ],
                 ),
               ),
-            )
+            ),
+            const SizedBox(height: 30), // Adjust this value to position the button above the bottom of the screen
           ],
         ),
       ),
