@@ -13,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic>? userData;
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -21,10 +23,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchUserData() async {
-    if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get()
+            .timeout(const Duration(seconds: 10)); // Timeout after 10 seconds
+
+        setState(() {
+          userData = userDoc.data() as Map<String, dynamic>?;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        userData = userDoc.data() as Map<String, dynamic>?;
+        isLoading = false;
+        errorMessage = 'Failed to fetch user data. Please try again.';
       });
     }
   }
@@ -51,10 +71,32 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: userData == null
-            ? const CircularProgressIndicator()
-            : Text('Welcome, ${userData!['email']}'),
+      body: RefreshIndicator(
+        onRefresh: _fetchUserData,
+        child: Center(
+          child: isLoading
+              ? const CircularProgressIndicator()
+              : errorMessage != null
+                  ? ListView(
+                      children: [
+                        Center(child: Text(errorMessage!)),
+                        const SizedBox(height: 16),
+                        const Center(
+                          child: Text(
+                            'Pull down to retry',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView(
+                      children: [
+                        Center(
+                          child: Text('Welcome, ${userData!['email']}'),
+                        ),
+                      ],
+                    ),
+        ),
       ),
     );
   }
