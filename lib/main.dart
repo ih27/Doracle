@@ -124,7 +124,16 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   Future<void> _handleGoogleSignIn() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      /// The scopes required by this application
+      const List<String> scopes = <String>[
+        'email', 'profile', 'openid'
+      ];
+
+      GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: scopes,
+      );
+      // #enddocregion Initialize
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         // The user canceled the sign-in
         return;
