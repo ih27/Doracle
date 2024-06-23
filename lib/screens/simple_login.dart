@@ -6,7 +6,13 @@ class SimpleLoginScreen extends StatefulWidget {
   final Function(String? email)? onPasswordRecovery;
   final Function()? onGoogleSignIn;
 
-  const SimpleLoginScreen({this.onLogin, this.onRegister, this.onPasswordRecovery, this.onGoogleSignIn, super.key});
+  const SimpleLoginScreen({
+    this.onLogin,
+    this.onRegister,
+    this.onPasswordRecovery,
+    this.onGoogleSignIn,
+    super.key
+  });
 
   @override
   State<SimpleLoginScreen> createState() => _SimpleLoginScreenState();
@@ -96,7 +102,9 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
             ),
             SizedBox(height: screenHeight * .01),
             Text(
-              showPasswordRecovery ? 'Enter your email to recover your password.' : 'Sign in to continue!',
+              showPasswordRecovery
+                  ? 'Enter your email to recover your password.'
+                  : 'Sign in to continue!',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.black.withOpacity(.6),
@@ -159,19 +167,38 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
             if (!showPasswordRecovery)
               Column(
                 children: [
-                  SizedBox(
-                    height: screenHeight * .15,
+                  SizedBox(height: screenHeight * .075),
+                  ElevatedButton.icon(
+                    icon: Image.asset(
+                      'assets/google_logo.png', // Ensure you have this asset in your assets folder
+                      height: 24,
+                      width: 24,
+                    ),
+                    label: const Text('Sign in with Google'),
+                    onPressed: onGoogleSignIn,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
                   ),
+                  SizedBox(height: screenHeight * .15),
                   TextButton(
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SimpleRegisterScreen(onSubmitted: (email, password) {
-                          if (onRegister != null) {
-                            onRegister!(email, password);
-                            Navigator.pop(context); // Navigate back to login screen after successful registration
-                          }
-                        }),
+                        builder: (_) => SimpleRegisterScreen(
+                          onSubmitted: (email, password) {
+                            if (onRegister != null) {
+                              onRegister!(email, password);
+                              Navigator.pop(
+                                  context); // Navigate back to login screen after successful registration
+                            }
+                          },
+                        ),
                       ),
                     ),
                     child: RichText(
@@ -188,24 +215,6 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * .075),
-                  ElevatedButton.icon(
-                    icon: Image.asset(
-                      'assets/google_logo.png', // Make sure to add a Google logo asset
-                      height: 24,
-                      width: 24,
-                    ),
-                    label: const Text('Sign in with Google'),
-                    onPressed: onGoogleSignIn,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
                 ],

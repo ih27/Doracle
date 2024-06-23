@@ -28,6 +28,7 @@ flutter:
   assets:
     - .env
     - assets/splash/background.png
+    - assets/google_logo.png
 
 flutter_launcher_icons:
   android: true
