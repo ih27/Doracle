@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'firebase_options.dart';
 import 'screens/home.dart';
@@ -25,11 +27,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SafeArea(
+    if (Platform.isIOS) {
+      return const CupertinoApp(
+          home: SafeArea(
         child: AuthWrapper(),
-      ),
-    );
+      ));
+    } else {
+      return const MaterialApp(
+          home: SafeArea(
+        child: AuthWrapper(),
+      ));
+    }
   }
 }
 
@@ -53,8 +61,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
         } else {
           return SimpleLoginScreen(
             onLogin: (email, password) => handleLogin(context, email, password),
-            onRegister: (email, password) => handleRegister(context, email, password),
-            onPasswordRecovery: (email) => handlePasswordRecovery(context, email),
+            onRegister: (email, password) =>
+                handleRegister(context, email, password),
+            onPasswordRecovery: (email) =>
+                handlePasswordRecovery(context, email),
             onGoogleSignIn: () => handleGoogleSignIn(context),
           );
         }
