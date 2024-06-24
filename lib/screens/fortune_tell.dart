@@ -56,7 +56,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       });
     } catch (e) {
       setState(() {
-        _fortune = 'Failed to fetch fortune. Please try again.';
+        _fortune = 'Failed to fetch fortune. Error: $e';
         _isLoading = false;
       });
     }
