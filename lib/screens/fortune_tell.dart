@@ -48,7 +48,15 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       completionStream.listen(
         (streamChatCompletion) {
           setState(() {
-            _fortune += streamChatCompletion.choices.first.delta.content as String;
+            // Check for null values and iterate through the list
+            final deltaContent = streamChatCompletion.choices.first.delta.content;
+            if (deltaContent != null) {
+              for (var contentItem in deltaContent) {
+                if (contentItem != null && contentItem.text != null) {
+                  _fortune += contentItem.text!;
+                }
+              }
+            }
           });
         },
         onDone: () {
