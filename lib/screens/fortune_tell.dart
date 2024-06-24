@@ -42,14 +42,20 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
-      Stream<OpenAIStreamCompletionModel> completionStream =
+      Stream<OpenAIStreamChatCompletionModel> completionStream =
           _openAIService.getFortune(_questionController.text);
 
-      await for (var event in completionStream) {
-        setState(() {
-          _fortune += event.choices.first.text; // Accumulate the text
-        });
-      }
+      completionStream.listen(
+        (streamChatCompletion) {
+          setState(() {
+            _fortune += streamChatCompletion.choices.first.delta.content
+                as String; // Accumulate the text
+          });
+        },
+        onDone: () {
+          _fortune += '🔮';
+        },
+      );
 
       setState(() {
         _isLoading = false;
