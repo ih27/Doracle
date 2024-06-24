@@ -48,18 +48,22 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       completionStream.listen(
         (streamChatCompletion) {
           setState(() {
-            _fortune += streamChatCompletion.choices.first.delta.content
-                as String; // Accumulate the text
+            _fortune += streamChatCompletion.choices.first.delta.content as String;
           });
         },
         onDone: () {
-          _fortune += '🔮';
+          setState(() {
+            _fortune += '🔮';
+            _isLoading = false;
+          });
+        },
+        onError: (error) {
+          setState(() {
+            _fortune = 'Unexpected error occured. Error: $error';
+            _isLoading = false;
+          });
         },
       );
-
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       setState(() {
         _fortune = 'Failed to fetch fortune. Error: $e';
