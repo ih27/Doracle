@@ -1,3 +1,4 @@
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fortuntella/services/openai_service.dart';
@@ -12,7 +13,7 @@ class FortuneTellScreen extends StatefulWidget {
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final TextEditingController _questionController = TextEditingController();
   late OpenAIService _openAIService;
-  String? _fortune;
+  String _fortune = '';
   bool _isLoading = false;
 
   @override
@@ -37,13 +38,20 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   void _getFortune() async {
     setState(() {
       _isLoading = true;
-      _fortune = null;
+      _fortune = '';
     });
 
     try {
-      final fortune = await _openAIService.getFortune(_questionController.text);
+      Stream<OpenAIStreamCompletionModel> completionStream =
+          _openAIService.getFortune(_questionController.text);
+
+      await for (var event in completionStream) {
+        setState(() {
+          _fortune += event.choices.first.text; // Accumulate the text
+        });
+      }
+
       setState(() {
-        _fortune = fortune;
         _isLoading = false;
       });
     } catch (e) {
@@ -87,10 +95,11 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             const SizedBox(height: 24),
             if (_isLoading)
               const CircularProgressIndicator()
-            else if (_fortune != null)
+            else if (_fortune.isNotEmpty)
               Text(
-                _fortune!,
-                style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+                _fortune,
+                style:
+                    const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
                 textAlign: TextAlign.center,
               ),
           ],
