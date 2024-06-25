@@ -30,8 +30,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       _fortuneTeller = OpenAIFortuneTeller();
     } else {
       _fortuneTeller = GeminiFortuneTeller();
-    }
-    print('Initialized fortune teller: $_selectedFortuneTeller'); // Debug statement
+    } // Debug statement
   }
 
   void _getFortune() {
@@ -81,8 +80,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _selectedFortuneTeller = newValue;
         _initializeFortuneTeller();
       });
-    }
-    print('Selected fortune teller: $_selectedFortuneTeller'); // Debug statement
+    } // Debug statement
   }
 
   @override

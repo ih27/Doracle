@@ -8,7 +8,7 @@ class GeminiFortuneTeller implements FortuneTeller {
   late Stream completionStream;
 
   GeminiFortuneTeller()
-      : _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY)']!);
+      : _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY']!);
 
   @override
   Stream<String> getFortune(String question) {
