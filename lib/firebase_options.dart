@@ -40,17 +40,8 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static late String androidApiKey;
-  static late String iosApiKey;
-
-  static Future<void> loadEnv() async {
-    await dotenv.load(fileName: ".env");
-    androidApiKey = dotenv.env['FIREBASE_ANDROID_API_KEY']!;
-    iosApiKey = dotenv.env['FIREBASE_IOS_API_KEY']!;
-  }
-
   static FirebaseOptions get android => FirebaseOptions(
-    apiKey: androidApiKey,
+    apiKey: dotenv.env['FIREBASE_ANDROID_API_KEY']!,
     appId: '1:40432187550:android:5f901e6c801dbb8666638f',
     messagingSenderId: '40432187550',
     projectId: 'fort-un-tella',
@@ -58,7 +49,7 @@ class DefaultFirebaseOptions {
   );
 
   static FirebaseOptions get ios => FirebaseOptions(
-    apiKey: iosApiKey,
+    apiKey: dotenv.env['FIREBASE_IOS_API_KEY']!,
     appId: '1:40432187550:ios:77ffd0ff003e653966638f',
     messagingSenderId: '40432187550',
     projectId: 'fort-un-tella',

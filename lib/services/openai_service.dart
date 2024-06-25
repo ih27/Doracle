@@ -6,11 +6,10 @@ class OpenAIService {
   final systemMessage = OpenAIChatCompletionChoiceMessageModel(
     content: [
       OpenAIChatCompletionChoiceMessageContentItemModel.text(
-        'I want you to act like a wise fortune '
-        'teller. I want you to respond and answer like her using the tone, manner, '
-        'and vocabulary a wise fortune teller would use. Do not write any explanations. '
-        'You will act like you know all and see all about the future.'
-      )
+          'I want you to act like a wise fortune '
+          'teller. I want you to respond and answer like her using the tone, manner, '
+          'and vocabulary a wise fortune teller would use. Do not write any explanations. '
+          'You will act like you know all and see all about the future.')
     ],
     role: OpenAIChatMessageRole.system,
   );
@@ -20,7 +19,7 @@ class OpenAIService {
     OpenAI.requestsTimeOut = const Duration(seconds: 60);
   }
 
-  Stream getFortune(String question) {
+  Stream<OpenAIStreamChatCompletionModel> getFortune(String question) {
     final userMessage = OpenAIChatCompletionChoiceMessageModel(content: [
       OpenAIChatCompletionChoiceMessageContentItemModel.text(question)
     ], role: OpenAIChatMessageRole.user);

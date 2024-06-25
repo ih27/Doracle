@@ -1,6 +1,8 @@
+// fortune_tell_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:fortuntella/services/openai_service.dart';
+import 'package:fortuntella/controllers/fortune_teller.dart';
+import 'package:fortuntella/controllers/openai_fortune_teller.dart';
+import 'package:fortuntella/controllers/gemini_fortune_teller.dart';
 import 'package:fortuntella/widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
@@ -12,7 +14,7 @@ class FortuneTellScreen extends StatefulWidget {
 
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final TextEditingController _questionController = TextEditingController();
-  late OpenAIService _openAIService;
+  late FortuneTeller _fortuneTeller;
   String _fortune = '';
   bool _isLoading = false;
   String _selectedFortuneTeller = 'OpenAI';
@@ -21,54 +23,33 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   @override
   void initState() {
     super.initState();
-    _loadApiKeyAndInitializeService();
+    _initializeFortuneTeller();
   }
 
-  Future<void> _loadApiKeyAndInitializeService() async {
-    await dotenv.load(fileName: ".env");
-    String? apiKey = dotenv.env['OPENAI_API_KEY'];
-
-    if (apiKey != null) {
-      _openAIService = OpenAIService(apiKey);
+  void _initializeFortuneTeller() {
+    if (_selectedFortuneTeller == 'OpenAI') {
+      _fortuneTeller = OpenAIFortuneTeller();
     } else {
-      setState(() {
-        _fortune = 'API key not found. Please check your .env file.';
-      });
+      _fortuneTeller = GeminiFortuneTeller();
     }
   }
 
-  void _getFortune() async {
+  void _getFortune() {
     setState(() {
       _isLoading = true;
       _fortune = '';
     });
 
     try {
-      Stream completionStream =
-          _openAIService.getFortune(_questionController.text);
-
-      completionStream.listen(
-        (streamChatCompletion) {
+      _fortuneTeller.onFortuneReceived(
+        (fortunePart) {
           setState(() {
-            final deltaContent = streamChatCompletion.choices.first.delta.content;
-            if (deltaContent != null) {
-              for (var contentItem in deltaContent) {
-                if (contentItem != null && contentItem.text != null) {
-                  _fortune += contentItem.text!;
-                }
-              }
-            }
+            _fortune += fortunePart;
           });
         },
-        onDone: () {
+        (error) {
           setState(() {
-            _fortune += '🔮';
-            _isLoading = false;
-          });
-        },
-        onError: (error) {
-          setState(() {
-            _fortune = 'Unexpected error occurred. Error: $error';
+            _fortune = error;
             _isLoading = false;
           });
         },
@@ -79,6 +60,13 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _onFortuneTellerChanged(String? newValue) {
+    setState(() {
+      _selectedFortuneTeller = newValue!;
+      _initializeFortuneTeller();
+    });
   }
 
   @override
@@ -100,20 +88,12 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             const SizedBox(height: 24),
             Row(
               children: [
-                const Text(
-                  'Choose your fortune teller:',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(width: 10),
+                const Text('Choose your fortune teller:'),
+                const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButton<String>(
-                    isExpanded: true,
                     value: _selectedFortuneTeller,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedFortuneTeller = newValue!;
-                      });
-                    },
+                    onChanged: _onFortuneTellerChanged,
                     items: _fortuneTellers
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
