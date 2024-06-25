@@ -54,16 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Future<void> _signOut() async {
-  //   await FirebaseAuth.instance.signOut();
-  //   // After sign out, navigate back to login screen
-  //   if (!mounted) return;
-  //   Navigator.pushReplacement(
-  //     context,
-  //     MaterialPageRoute(builder: (context) => const AuthWrapper()),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,41 +68,50 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: _fetchUserData,
-        child: Center(
-          child: isLoading
-              ? const CircularProgressIndicator()
-              : errorMessage != null
-                  ? ListView(
-                      children: [
-                        Center(child: Text(errorMessage!)),
-                        const SizedBox(height: 16),
-                        const Center(
-                          child: Text(
-                            'Pull down to retry',
-                            style: TextStyle(color: Colors.grey),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              Center(
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : errorMessage != null
+                        ? Column(
+                            children: [
+                              Text(errorMessage!),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Pull down to retry',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            children: [
+                              Text(
+                                'Welcome, ${userData!['email']}',
+                                style: const TextStyle(fontSize: 24),
+                              ),
+                              const SizedBox(height: 30),
+                              FormButton(
+                                text: '🚶‍➡️ 🚪 => 🔮',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const FortuneTellScreen()),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    )
-                  : ListView(
-                      children: [
-                        Center(
-                          child: Text('Welcome, ${userData!['email']}'),
-                        ),
-                        const SizedBox(height: 24),
-                        FormButton(
-                          text: '🚶‍➡️ 🚪 => 🔮',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const FortuneTellScreen()),
-                            );
-                          }
-                        )
-                      ],
-                    ),
+              ),
+              const Spacer(flex: 2),
+            ],
+          ),
         ),
       ),
     );
