@@ -1,4 +1,3 @@
-// fortune_tell_screen.dart
 import 'package:flutter/material.dart';
 import 'package:fortuntella/controllers/fortune_teller.dart';
 import 'package:fortuntella/controllers/openai_fortune_teller.dart';
@@ -14,7 +13,7 @@ class FortuneTellScreen extends StatefulWidget {
 
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final TextEditingController _questionController = TextEditingController();
-  late FortuneTeller _fortuneTeller;
+  FortuneTeller? _fortuneTeller;
   String _fortune = '';
   bool _isLoading = false;
   String _selectedFortuneTeller = 'OpenAI';
@@ -32,6 +31,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     } else {
       _fortuneTeller = GeminiFortuneTeller();
     }
+    print('Initialized fortune teller: $_selectedFortuneTeller'); // Debug statement
   }
 
   void _getFortune() {
@@ -41,19 +41,32 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
-      _fortuneTeller.onFortuneReceived(
-        (fortunePart) {
-          setState(() {
-            _fortune += fortunePart;
-          });
-        },
-        (error) {
-          setState(() {
-            _fortune = error;
-            _isLoading = false;
-          });
-        },
-      );
+      if (_fortuneTeller != null) {
+        _fortuneTeller!.getFortune(_questionController.text).listen(
+          (fortunePart) {
+            setState(() {
+              _fortune += fortunePart;
+            });
+          },
+          onDone: () {
+            setState(() {
+              _fortune += '🔮';
+              _isLoading = false;
+            });
+          },
+          onError: (error) {
+            setState(() {
+              _fortune = 'Unexpected error occurred. Error: $error';
+              _isLoading = false;
+            });
+          },
+        );
+      } else {
+        setState(() {
+          _fortune = 'No fortune teller selected.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _fortune = 'Failed to fetch fortune. Error: $e';
@@ -63,10 +76,13 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   void _onFortuneTellerChanged(String? newValue) {
-    setState(() {
-      _selectedFortuneTeller = newValue!;
-      _initializeFortuneTeller();
-    });
+    if (newValue != null) {
+      setState(() {
+        _selectedFortuneTeller = newValue;
+        _initializeFortuneTeller();
+      });
+    }
+    print('Selected fortune teller: $_selectedFortuneTeller'); // Debug statement
   }
 
   @override
