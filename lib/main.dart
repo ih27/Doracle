@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'firebase_options.dart';
-import 'screens/home.dart';
+import 'screens/home_screen.dart';
 import 'screens/simple_login_screen.dart';
 import 'auth_handlers.dart';
 

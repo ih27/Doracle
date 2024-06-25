@@ -18,6 +18,7 @@ dependencies:
   google_sign_in: ^6.2.1
   http: ^1.2.1
   dart_openai: ^5.1.0
+  google_generative_ai: ^0.4.3
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,3 @@
-import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fortuntella/services/openai_service.dart';
@@ -42,7 +41,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
-      Stream<OpenAIStreamChatCompletionModel> completionStream =
+      Stream completionStream =
           _openAIService.getFortune(_questionController.text);
 
       completionStream.listen(

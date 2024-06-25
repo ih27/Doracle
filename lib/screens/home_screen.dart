@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fortuntella/main.dart';
-import 'package:fortuntella/screens/fortune_tell.dart';
+import 'package:fortuntella/screens/fortune_tell_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
