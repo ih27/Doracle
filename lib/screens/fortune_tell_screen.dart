@@ -44,31 +44,36 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _fortuneTeller!.getFortune(_questionController.text).listen(
           (fortunePart) {
             setState(() {
-              _fortuneSpans.add(TextSpan(text: fortunePart));
+              _fortuneSpans = List.from(_fortuneSpans)
+                ..add(TextSpan(text: fortunePart));
             });
           },
           onDone: () {
             setState(() {
-              _fortuneSpans.add(const TextSpan(text: '🔮'));
+              _fortuneSpans = List.from(_fortuneSpans)
+                ..add(const TextSpan(text: '🔮'));
               _isLoading = false;
             });
           },
           onError: (error) {
             setState(() {
-              _fortuneSpans.add(TextSpan(text: 'Unexpected error occurred. Error: $error'));
+              _fortuneSpans = List.from(_fortuneSpans)
+                ..add(TextSpan(text: 'Unexpected error occurred. Error: $error'));
               _isLoading = false;
             });
           },
         );
       } else {
         setState(() {
-          _fortuneSpans.add(const TextSpan(text: 'No fortune teller selected.'));
+          _fortuneSpans = List.from(_fortuneSpans)
+            ..add(const TextSpan(text: 'No fortune teller selected.'));
           _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _fortuneSpans.add(TextSpan(text: 'Failed to fetch fortune. Error: $e'));
+        _fortuneSpans = List.from(_fortuneSpans)
+          ..add(TextSpan(text: 'Failed to fetch fortune. Error: $e'));
         _isLoading = false;
       });
     }
@@ -134,7 +139,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
               onPressed: _getFortune,
             ),
             const SizedBox(height: 24),
-            if (_isLoading) const CircularProgressIndicator(),
+            if (_isLoading)
+              const CircularProgressIndicator(),
             if (_fortuneSpans.isNotEmpty)
               Expanded(
                 child: SingleChildScrollView(
