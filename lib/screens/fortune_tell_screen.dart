@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fortuntella/services/openai_service.dart';
+import 'package:fortuntella/widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   const FortuneTellScreen({super.key});
@@ -14,6 +15,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   late OpenAIService _openAIService;
   String _fortune = '';
   bool _isLoading = false;
+  String _selectedFortuneTeller = 'OpenAI';
+  final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
 
   @override
   void initState() {
@@ -47,7 +50,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       completionStream.listen(
         (streamChatCompletion) {
           setState(() {
-            // Check for null values and iterate through the list
             final deltaContent = streamChatCompletion.choices.first.delta.content;
             if (deltaContent != null) {
               for (var contentItem in deltaContent) {
@@ -66,7 +68,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         },
         onError: (error) {
           setState(() {
-            _fortune = 'Unexpected error occured. Error: $error';
+            _fortune = 'Unexpected error occurred. Error: $error';
             _isLoading = false;
           });
         },
@@ -96,6 +98,34 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
+            Row(
+              children: [
+                const Text(
+                  'Choose your fortune teller:',
+                  style: TextStyle(fontSize: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: _selectedFortuneTeller,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedFortuneTeller = newValue!;
+                      });
+                    },
+                    items: _fortuneTellers
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             TextField(
               controller: _questionController,
               decoration: const InputDecoration(
@@ -105,9 +135,9 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
               maxLines: 3,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            FormButton(
+              text: 'Get Fortune',
               onPressed: _getFortune,
-              child: const Text('Get Fortune'),
             ),
             const SizedBox(height: 24),
             if (_isLoading)
