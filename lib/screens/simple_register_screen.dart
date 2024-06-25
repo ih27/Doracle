@@ -106,8 +106,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
               labelText: 'Email',
               errorText: emailError,
               keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autoFocus: true,
+              textInputAction: TextInputAction.next
             ),
             const SizedBox(height: 16),
             InputField(

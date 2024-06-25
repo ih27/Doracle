@@ -149,7 +149,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
                       children: _fortuneSpans,
                       style: const TextStyle(
                         fontSize: 18,
-                        fontStyle: FontStyle.italic,
+                        fontStyle: FontStyle.normal,
                         color: Colors.black,
                       ),
                     ),

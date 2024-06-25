@@ -122,8 +122,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
               labelText: 'Email',
               errorText: emailError,
               keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autoFocus: true,
+              textInputAction: TextInputAction.next
             ),
             if (!showPasswordRecovery)
               Column(
