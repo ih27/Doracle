@@ -49,7 +49,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasData) {
-          return const HomeScreen();
+          return HomeScreen(
+            onLogout: () => handleSignOut(context),
+          );
         } else {
           return SimpleLoginScreen(
             onLogin: (email, password) => handleLogin(context, email, password),

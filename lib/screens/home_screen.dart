@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fortuntella/main.dart';
 import 'package:fortuntella/screens/fortune_tell_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function()? onLogout;
+
+  const HomeScreen({this.onLogout, super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -16,6 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
+
+  Function()? get onLogout => widget.onLogout;
 
   @override
   void initState() {
@@ -50,15 +53,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    // After sign out, navigate back to login screen
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const AuthWrapper()),
-    );
-  }
+  // Future<void> _signOut() async {
+  //   await FirebaseAuth.instance.signOut();
+  //   // After sign out, navigate back to login screen
+  //   if (!mounted) return;
+  //   Navigator.pushReplacement(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => const AuthWrapper()),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _signOut,
+            onPressed: onLogout,
           ),
         ],
       ),
@@ -100,7 +103,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const FortuneTellScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const FortuneTellScreen()),
                             );
                           },
                           child: const Text('Go to Fortune Teller'),

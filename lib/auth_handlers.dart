@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'screens/simple_login_screen.dart';
 
@@ -119,5 +120,25 @@ Future<void> handleGoogleSignIn(BuildContext context) async {
   } catch (e) {
     if (!context.mounted) return;
     showErrorDialog(context, 'An error occurred while signing in with Google.');
+  }
+}
+
+Future<void> handleSignOut(BuildContext context) async {
+  try {
+    await FirebaseAuth.instance.signOut();
+
+    // Disconnect from GoogleSignIn
+    GoogleSignIn googleSignIn = GoogleSignIn();
+    await googleSignIn.disconnect();
+
+    if (!context.mounted) return; // Ensure the widget is still mounted
+
+    // Navigate back to the login screen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const AuthWrapper()),
+    );
+  } catch (e) {
+    showErrorDialog(context, 'An error occurred while signing out.');
   }
 }
