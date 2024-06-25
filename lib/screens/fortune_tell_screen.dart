@@ -14,7 +14,7 @@ class FortuneTellScreen extends StatefulWidget {
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final TextEditingController _questionController = TextEditingController();
   FortuneTeller? _fortuneTeller;
-  List<String> _fortuneParts = [];
+  List<TextSpan> _fortuneSpans = [];
   bool _isLoading = false;
   String _selectedFortuneTeller = 'OpenAI';
   final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
@@ -36,7 +36,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   void _getFortune() {
     setState(() {
       _isLoading = true;
-      _fortuneParts = [];
+      _fortuneSpans = [];
     });
 
     try {
@@ -44,31 +44,31 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _fortuneTeller!.getFortune(_questionController.text).listen(
           (fortunePart) {
             setState(() {
-              _fortuneParts.add(fortunePart);
+              _fortuneSpans.add(TextSpan(text: fortunePart));
             });
           },
           onDone: () {
             setState(() {
-              _fortuneParts.add('🔮');
+              _fortuneSpans.add(const TextSpan(text: '🔮'));
               _isLoading = false;
             });
           },
           onError: (error) {
             setState(() {
-              _fortuneParts.add('Unexpected error occurred. Error: $error');
+              _fortuneSpans.add(TextSpan(text: 'Unexpected error occurred. Error: $error'));
               _isLoading = false;
             });
           },
         );
       } else {
         setState(() {
-          _fortuneParts.add('No fortune teller selected.');
+          _fortuneSpans.add(const TextSpan(text: 'No fortune teller selected.'));
           _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _fortuneParts.add('Failed to fetch fortune. Error: $e');
+        _fortuneSpans.add(TextSpan(text: 'Failed to fetch fortune. Error: $e'));
         _isLoading = false;
       });
     }
@@ -135,24 +135,21 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             ),
             const SizedBox(height: 24),
             if (_isLoading) const CircularProgressIndicator(),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _fortuneParts.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      _fortuneParts[index],
+            if (_fortuneSpans.isNotEmpty)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: RichText(
+                    text: TextSpan(
+                      children: _fortuneSpans,
                       style: const TextStyle(
                         fontSize: 18,
                         fontStyle: FontStyle.italic,
+                        color: Colors.black,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
