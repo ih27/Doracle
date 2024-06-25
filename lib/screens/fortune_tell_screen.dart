@@ -14,7 +14,7 @@ class FortuneTellScreen extends StatefulWidget {
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final TextEditingController _questionController = TextEditingController();
   FortuneTeller? _fortuneTeller;
-  String _fortune = '';
+  List<String> _fortuneParts = [];
   bool _isLoading = false;
   String _selectedFortuneTeller = 'OpenAI';
   final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
@@ -30,13 +30,13 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       _fortuneTeller = OpenAIFortuneTeller();
     } else {
       _fortuneTeller = GeminiFortuneTeller();
-    } // Debug statement
+    }
   }
 
   void _getFortune() {
     setState(() {
       _isLoading = true;
-      _fortune = '';
+      _fortuneParts = [];
     });
 
     try {
@@ -44,31 +44,31 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _fortuneTeller!.getFortune(_questionController.text).listen(
           (fortunePart) {
             setState(() {
-              _fortune += fortunePart;
+              _fortuneParts.add(fortunePart);
             });
           },
           onDone: () {
             setState(() {
-              _fortune += '🔮';
+              _fortuneParts.add('🔮');
               _isLoading = false;
             });
           },
           onError: (error) {
             setState(() {
-              _fortune = 'Unexpected error occurred. Error: $error';
+              _fortuneParts.add('Unexpected error occurred. Error: $error');
               _isLoading = false;
             });
           },
         );
       } else {
         setState(() {
-          _fortune = 'No fortune teller selected.';
+          _fortuneParts.add('No fortune teller selected.');
           _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _fortune = 'Failed to fetch fortune. Error: $e';
+        _fortuneParts.add('Failed to fetch fortune. Error: $e');
         _isLoading = false;
       });
     }
@@ -80,7 +80,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _selectedFortuneTeller = newValue;
         _initializeFortuneTeller();
       });
-    } // Debug statement
+    }
   }
 
   @override
@@ -134,15 +134,25 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
               onPressed: _getFortune,
             ),
             const SizedBox(height: 24),
-            if (_isLoading)
-              const CircularProgressIndicator()
-            else if (_fortune.isNotEmpty)
-              Text(
-                _fortune,
-                style:
-                    const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
-                textAlign: TextAlign.center,
+            if (_isLoading) const CircularProgressIndicator(),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _fortuneParts.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Text(
+                      _fortuneParts[index],
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
               ),
+            ),
           ],
         ),
       ),
