@@ -1,23 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/repositories/user_repository.dart';
+import 'package:fortuntella/repositories/firestore_user_repository.dart';
 
 class HomeScreen extends StatefulWidget {
-  final Function()? onLogout;
-
-  const HomeScreen({this.onLogout, super.key});
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final UserRepository userRepository = FirestoreUserRepository();
   User? user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
-
-  Function()? get onLogout => widget.onLogout;
 
   @override
   void initState() {
@@ -33,14 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       if (user != null) {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get()
-            .timeout(const Duration(seconds: 10)); // Timeout after 10 seconds
-
+        userData = await userRepository.getUser(user!.uid);
         setState(() {
-          userData = userDoc.data() as Map<String, dynamic>?;
           isLoading = false;
         });
       }
