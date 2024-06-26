@@ -37,6 +37,9 @@ jobs:
     name: Build APK and Creating Release
     needs: [version]
     runs-on: ubuntu-latest
+    outputs:
+      release_number: ${{steps.vars.outputs.release_number}}
+      version_code: ${{steps.vars.outputs.version_code}}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
