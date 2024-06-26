@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:fortuntella/screens/main_screen.dart';
 import 'firebase_options.dart';
-import 'screens/home_screen.dart';
 import 'screens/simple_login_screen.dart';
 import 'auth_handlers.dart';
 
@@ -22,7 +22,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   runApp(const MyApp());
   FlutterNativeSplash.remove();
 }
@@ -33,9 +33,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-        home: SafeArea(
-      child: AuthWrapper(),
-    ));
+      home: SafeArea(
+        child: AuthWrapper(),
+      ),
+    );
   }
 }
 
@@ -55,9 +56,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasData) {
-          return HomeScreen(
-            onLogout: () => handleSignOut(context),
-          );
+          return MainScreen();
         } else {
           return SimpleLoginScreen(
             onLogin: (email, password) => handleLogin(context, email, password),

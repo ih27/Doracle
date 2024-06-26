@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+
+class ShopScreen extends StatefulWidget {
+  const ShopScreen({super.key});
+
+  @override
+  _ShopScreenState createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends State<ShopScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Shop'),
+      ),
+      body: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Spacer(flex: 2),
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    'Welcome to the shop!',
+                    style: TextStyle(fontSize: 24),
+                  ),
+                ],
+              ),
+            ),
+            Spacer(flex: 2),
+          ],
+        ),
+      ),
+    );
+  }
+}
