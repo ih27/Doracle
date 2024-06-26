@@ -51,8 +51,6 @@ platform :ios do
     build_number = bump_build_number()
     version_name = get_version_name()
 
-    sh("pod","--version")
-
     Dir.chdir "../.." do
       puts "*** Build flutter iOS release for version #{version_name}+#{build_number} ***"
       sh("flutter", "build", "ipa", "--release", "--obfuscate", "--split-debug-info=symbols", "--build-number=#{build_number}", "--build-name=#{version_name}")
