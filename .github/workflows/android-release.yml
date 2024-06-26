@@ -64,13 +64,15 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: version1.txt
-
-      - name: Get run number
+      
+      - name: Set release number and version code variable
         id: vars
-        run: echo "new_run_number=$((${{github.run_number}} + 100))" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "release_number=${{steps.version.outputs.content}}" >> "$GITHUB_OUTPUT"
+          echo "version_code=$((${{github.run_number}} + 100))" >> "$GITHUB_OUTPUT"      
 
       - name: Update Version in YAML
-        run: sed -i 's/99.99.99+99/${{steps.version.outputs.content}}+${{steps.vars.outputs.new_run_number}}/g' pubspec.yaml
+        run: sed -i 's/99.99.99+99/${{steps.vars.outputs.release_number}}+${{steps.vars.outputs.version_code}}/g' pubspec.yaml
 
       - name: Update Keystore Password in Gradle Properties
         run: sed -i 's/#{STORE_PASSWORD}#/${{secrets.STORE_PASSWORD}}/g' android/key.properties
@@ -115,7 +117,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "build/app/outputs/apk/release/*.apk,build/app/outputs/bundle/release/app-release.aab"
-          tag: ${{steps.version.outputs.content}}
+          tag: ${{steps.vars.outputs.release_number}}
           commit: ${{github.sha}}
 
       - name: Upload App Bundle
@@ -142,3 +144,11 @@ jobs:
           releaseFiles: app-release.aab
           track: internal
           status: completed
+      - name: Send an AAB link to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: ${{vars.CHANNEL_ID}}
+          slack-message: "🦄 You can test <https://play.google.com/apps/internaltest/4700816935968840426|Fort-un-Tella AAB> 👾 [*${{needs.build.outputs.release_number}}* (${{needs.build.outputs.version_code}})] 🤖"
+        env:
+          SLACK_BOT_TOKEN: ${{secrets.SLACK_BOT_TOKEN}}
