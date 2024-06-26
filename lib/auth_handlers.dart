@@ -1,30 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/helpers/show_error.dart';
 import 'package:fortuntella/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'screens/simple_login_screen.dart';
-
-void showErrorDialog(BuildContext context, String message) {
-  if (!context.mounted) return; // Ensure the widget is still mounted
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
-}
 
 Future<void> handleLogin(BuildContext context, String? email, String? password) async {
   if (email == null || password == null) return;

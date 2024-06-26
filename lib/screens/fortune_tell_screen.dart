@@ -58,7 +58,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           onError: (error) {
             setState(() {
               _fortuneSpans = List.from(_fortuneSpans)
-                ..add(TextSpan(text: 'Unexpected error occurred. Error: $error'));
+                ..add(
+                    TextSpan(text: 'Unexpected error occurred. Error: $error'));
               _isLoading = false;
             });
           },
@@ -90,74 +91,68 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fortune Teller'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Ask your question and get a fortune reading!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                const Text('Choose your fortune teller:'),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButton<String>(
-                    value: _selectedFortuneTeller,
-                    onChanged: _onFortuneTellerChanged,
-                    items: _fortuneTellers
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _questionController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Your Question',
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
-            FormButton(
-              text: 'Get Fortune',
-              onPressed: _getFortune,
-            ),
-            const SizedBox(height: 24),
-            if (_isLoading)
-              const CircularProgressIndicator(),
-            if (_fortuneSpans.isNotEmpty)
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Ask your question and get a fortune reading!',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              const Text('Choose your fortune teller:'),
+              const SizedBox(width: 16),
               Expanded(
-                child: SingleChildScrollView(
-                  child: RichText(
-                    text: TextSpan(
-                      children: _fortuneSpans,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontStyle: FontStyle.normal,
-                        color: Colors.black,
-                      ),
+                child: DropdownButton<String>(
+                  value: _selectedFortuneTeller,
+                  onChanged: _onFortuneTellerChanged,
+                  items: _fortuneTellers
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _questionController,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Your Question',
+            ),
+            maxLines: 3,
+          ),
+          const SizedBox(height: 24),
+          FormButton(
+            text: 'Get Fortune',
+            onPressed: _getFortune,
+          ),
+          const SizedBox(height: 24),
+          if (_isLoading) const CircularProgressIndicator(),
+          if (_fortuneSpans.isNotEmpty)
+            Expanded(
+              child: SingleChildScrollView(
+                child: RichText(
+                  text: TextSpan(
+                    children: _fortuneSpans,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontStyle: FontStyle.normal,
+                      color: Colors.black,
                     ),
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

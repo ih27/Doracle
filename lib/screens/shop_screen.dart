@@ -15,29 +15,24 @@ class _ShopScreenState extends State<ShopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shop'),
-      ),
-      body: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Spacer(flex: 2),
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Welcome to the shop!',
-                    style: TextStyle(fontSize: 24),
-                  ),
-                ],
-              ),
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Spacer(flex: 2),
+          Center(
+            child: Column(
+              children: [
+                Text(
+                  'Welcome to the shop!',
+                  style: TextStyle(fontSize: 24),
+                ),
+              ],
             ),
-            Spacer(flex: 2),
-          ],
-        ),
+          ),
+          Spacer(flex: 2),
+        ],
       ),
     );
   }

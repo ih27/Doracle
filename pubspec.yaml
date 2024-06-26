@@ -19,6 +19,7 @@ dependencies:
   http: ^1.2.1
   dart_openai: ^5.1.0
   google_generative_ai: ^0.4.3
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fortuntella/main.dart';
 import 'home_screen.dart';
 import 'fortune_tell_screen.dart';
 import 'shop_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,15 +20,39 @@ class _MainScreenState extends State<MainScreen> {
     ShopScreen(),
   ];
 
+  static const List<String> _titles = [
+    'Home',
+    'Fortune Tell',
+    'Shop',
+  ];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  Future<void> _handleSignOut() async {
+    await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const AuthWrapper()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(_titles[_selectedIndex]),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _handleSignOut,
+          ),
+        ],
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _widgetOptions,

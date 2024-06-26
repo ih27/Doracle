@@ -54,50 +54,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: onLogout,
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _fetchUserData,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
-              Center(
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : errorMessage != null
-                        ? Column(
-                            children: [
-                              Text(errorMessage!),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Pull down to retry',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          )
-                        : Column(
-                            children: [
-                              Text(
-                                'Welcome, ${userData!['email']}',
-                                style: const TextStyle(fontSize: 24),
-                              )
-                            ],
-                          ),
-              ),
-              const Spacer(flex: 2),
-            ],
-          ),
+    return RefreshIndicator(
+      onRefresh: _fetchUserData,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(flex: 2),
+            Center(
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : errorMessage != null
+                      ? Column(
+                          children: [
+                            Text(errorMessage!),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Pull down to retry',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            Text(
+                              'Welcome, ${userData!['email']}',
+                              style: const TextStyle(fontSize: 24),
+                            )
+                          ],
+                        ),
+            ),
+            const Spacer(flex: 2),
+          ],
         ),
       ),
     );
