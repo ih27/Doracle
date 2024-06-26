@@ -67,10 +67,10 @@ jobs:
 
       - name: Get run number
         id: vars
-        run: echo "new_run_number=$((${{github.run_number}} + 100))" >> .env
+        run: echo "new_run_number=$((${{github.run_number}} + 100))" >> "$GITHUB_OUTPUT"
 
       - name: Update Version in YAML
-        run: sed -i 's/99.99.99+99/${{steps.version.outputs.content}}+${{env.new_run_number}}/g' pubspec.yaml
+        run: sed -i 's/99.99.99+99/${{steps.version.outputs.content}}+${{steps.vars.outputs.new_run_number}}/g' pubspec.yaml
 
       - name: Update Keystore Password in Gradle Properties
         run: sed -i 's/#{STORE_PASSWORD}#/${{secrets.STORE_PASSWORD}}/g' android/key.properties
