@@ -19,9 +19,7 @@ dependencies:
   google_generative_ai: ^0.4.3
   in_app_purchase: ^3.2.0
   cloud_functions: ^5.0.2
-  adobe_xd: ^2.0.1
   rive: ^0.13.8
-  sign_in_with_apple: ^6.1.1
 
 dev_dependencies:
   flutter_lints: ^4.0.0
