@@ -39,7 +39,7 @@ class _ShopScreenState extends State<ShopScreen> {
             'Welcome to the shop!',
             style: TextStyle(fontSize: 24),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 100),
           Expanded(
             child: _productItems.isEmpty
                 ? const Center(child: CircularProgressIndicator())

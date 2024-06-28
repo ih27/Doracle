@@ -18,6 +18,21 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   String? errorMessage;
 
+  SMITrigger? _shakeInput;
+  bool isPlaying = false;
+
+  void _onRiveInit(Artboard artboard) {
+    final controller =
+        StateMachineController.fromArtboard(artboard, 'State Machine 1');
+    artboard.addController(controller!);
+    _shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
+  }
+
+  void _shake() {
+    isPlaying = !isPlaying;
+    _shakeInput?.fire();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -77,14 +92,49 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: const TextStyle(fontSize: 24),
                               ),
                               const SizedBox(height: 24),
-                              const SizedBox(
-                                height: 300, // Set a fixed height for the Rive animation
-                                child: RiveAnimation.asset(
-                                  'assets/animations/pes.riv',
-                                  fit: BoxFit.cover,
-                                  stateMachines: ['Shake'],
+                              Align(
+                                alignment: const AlignmentDirectional(0, 0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Container(
+                                        width: 300,
+                                        height: 300,
+                                        decoration: const BoxDecoration(
+                                          color: Color.fromRGBO(
+                                              121, 121, 188, 0.498),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: SizedBox(
+                                            width: 150,
+                                            height: 130,
+                                            child: RiveAnimation.asset(
+                                              'assets/animations/pes.riv',
+                                              artboard: 'Pes Animace',
+                                              fit: BoxFit.none,
+                                              onInit: _onRiveInit,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    FloatingActionButton(
+                                      onPressed: _shake,
+                                      tooltip: 'Shake',
+                                      child: Icon(
+                                        isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              )
                             ],
                           ),
               ),

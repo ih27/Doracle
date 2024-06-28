@@ -21,7 +21,8 @@ class ProductItem {
       title: productDetails.title,
       description: productDetails.description,
       price: productDetails.price,
-      isConsumable: productDetails.id.startsWith('consumable_'), // Example condition
+      isConsumable:
+          productDetails.id.startsWith('product_'), // Example condition
     );
   }
 }
