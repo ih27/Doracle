@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:fortuntella/helpers/show_error.dart';
 import 'package:fortuntella/models/product_item.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class Purchases {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
@@ -48,7 +50,7 @@ class Purchases {
       if (purchaseDetails.status == PurchaseStatus.pending) {
         // Handle pending state
       } else if (purchaseDetails.status == PurchaseStatus.purchased) {
-        _deliverProduct(purchaseDetails);
+        _handlePurchase(purchaseDetails);
       } else if (purchaseDetails.status == PurchaseStatus.error) {
         showErrorDialog(_context, "Purchase error: ${purchaseDetails.error?.message}");
       }
@@ -58,6 +60,39 @@ class Purchases {
       }
     }
   }
+
+  Future<void> _handlePurchase(PurchaseDetails purchaseDetails) async {
+    String platform;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      platform = 'android';
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      platform = 'ios';
+    } else {
+      platform = 'unknown';
+    }
+
+    await _verifyPurchase(_context, purchaseDetails, platform);
+  }
+
+  Future<void> _verifyPurchase(BuildContext context, PurchaseDetails purchaseDetails, String platform) async {
+    try {
+      final callable = FirebaseFunctions.instance.httpsCallable('verifyPurchase');
+      final result = await callable.call({
+        'purchaseToken': purchaseDetails.verificationData.serverVerificationData,
+        'productId': purchaseDetails.productID,
+        'platform': platform,
+      });
+
+      if (result.data['success']) {
+        // Handle success - update UI or deliver content
+      } else {
+        // Handle failure - show error message
+        showErrorDialog(context, result.data['message']);
+      }
+    } catch (e) {
+      showErrorDialog(context, 'Failed to verify purchase. Error: $e');
+    }
+}
 
   Future<void> buyProduct(ProductItem productItem) async {
     try {
@@ -72,12 +107,7 @@ class Purchases {
       showErrorDialog(_context, "Failed to buy product: ${productItem.title}. Error: $e");
     }
   }
-
-  void _deliverProduct(PurchaseDetails purchaseDetails) {
-    // Handle the delivery of the purchased product
-    // This might include adding credits or unlocking features
-  }
-
+  
   List<ProductItem> getProductItems() {
     return _products.map((productDetails) => ProductItem.fromProductDetails(productDetails)).toList();
   }
