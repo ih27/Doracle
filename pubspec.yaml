@@ -16,15 +16,12 @@ dependencies:
   flutter_native_splash: ^2.4.0
   cloud_firestore: ^5.0.1
   google_sign_in: ^6.2.1
-  http: ^1.2.1
   dart_openai: ^5.1.0
   google_generative_ai: ^0.4.3
   in_app_purchase: ^3.2.0
   cloud_functions: ^5.0.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.13.1
 

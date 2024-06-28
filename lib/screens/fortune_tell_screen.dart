@@ -20,7 +20,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   String _selectedFortuneTeller = 'OpenAI';
   final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
   List<String> _randomQuestions = [];
-  final int _numberOfQuestions = 20;
+  final int _numberOfQuestionsPerCategory = 2;
 
   @override
   void initState() {
@@ -38,8 +38,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   Future<void> _fetchRandomQuestions() async {
-    _randomQuestions =
-        await FirestoreService.fetchRandomQuestions(_numberOfQuestions);
+    _randomQuestions = await FirestoreService.fetchRandomQuestions(
+        _numberOfQuestionsPerCategory);
   }
 
   void _getFortune(String question) {

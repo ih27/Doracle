@@ -48,3 +48,6 @@ KC878DUKLS.p8
 
 # Firebase functions related
 /functions/
+
+# Admin related python scripts
+/admin/
