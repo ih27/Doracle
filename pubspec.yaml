@@ -21,6 +21,7 @@ dependencies:
   cloud_functions: ^5.0.2
   adobe_xd: ^2.0.1
   rive: ^0.13.8
+  sign_in_with_apple: ^6.1.1
 
 dev_dependencies:
   flutter_lints: ^4.0.0
@@ -32,6 +33,7 @@ flutter:
     - .env
     - assets/splash/background.png
     - assets/google_logo.png
+    - assets/apple_logo.png
     - assets/animations/pes.riv
 
 flutter_launcher_icons:

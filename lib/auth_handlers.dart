@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -25,7 +26,7 @@ Future<void> handleRegister(
     BuildContext context, String? email, String? password) async {
   if (email == null || password == null) return;
   try {
-    UserCredential userCredential = await FirebaseAuth.instance
+    final userCredential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
     await userRepository.addUser(userCredential.user!, {
       'email': email,
@@ -74,7 +75,7 @@ Future<void> handleGoogleSignIn(BuildContext context) async {
   try {
     const List<String> scopes = <String>['email', 'profile', 'openid'];
 
-    GoogleSignIn googleSignIn = GoogleSignIn(
+    final googleSignIn = GoogleSignIn(
       scopes: scopes,
     );
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -90,14 +91,10 @@ Future<void> handleGoogleSignIn(BuildContext context) async {
       idToken: googleAuth.idToken,
     );
 
-    UserCredential userCredential =
+    final userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
 
-    if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-      await userRepository.addUser(userCredential.user!, {
-        'email': userCredential.user?.email,
-      });
-    }
+    await _associateEmailWith(userCredential);
   } on FirebaseAuthException catch (e) {
     if (!context.mounted) return;
     showErrorDialog(context, e.message ?? 'An error occurred');
@@ -107,11 +104,30 @@ Future<void> handleGoogleSignIn(BuildContext context) async {
   }
 }
 
+Future<void> handleAppleSignIn(BuildContext context) async {
+  try {
+    final appleProvider = AppleAuthProvider();
+    final userCredential =
+        await FirebaseAuth.instance.signInWithProvider(appleProvider);
+
+    await _associateEmailWith(userCredential);
+  } on FirebaseAuthException catch (e) {
+    if (!context.mounted) return;
+    showErrorDialog(context, e.message ?? 'An error occurred');
+  } catch (e) {
+    if (!context.mounted) return;
+    showErrorDialog(context, 'An error occurred while signing in with Apple.');
+  }
+}
+
 Future<void> handleSignOut(BuildContext context) async {
   try {
     await FirebaseAuth.instance.signOut();
-    GoogleSignIn googleSignIn = GoogleSignIn();
-    await googleSignIn.disconnect();
+
+    if (Platform.isAndroid) {
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.disconnect();
+    }
 
     if (!context.mounted) return;
     Navigator.pushReplacement(
@@ -120,5 +136,13 @@ Future<void> handleSignOut(BuildContext context) async {
     );
   } catch (e) {
     showErrorDialog(context, 'An error occurred while signing out.');
+  }
+}
+
+Future<void> _associateEmailWith(UserCredential userCredential) async {
+  if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+    await userRepository.addUser(userCredential.user!, {
+      'email': userCredential.user?.email,
+    });
   }
 }

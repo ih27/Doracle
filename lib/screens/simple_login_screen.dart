@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:fortuntella/widgets/form_button.dart';
 import 'package:fortuntella/widgets/input_field.dart';
@@ -7,13 +8,13 @@ class SimpleLoginScreen extends StatefulWidget {
   final Function(String? email, String? password)? onLogin;
   final Function(String? email, String? password)? onRegister;
   final Function(String? email)? onPasswordRecovery;
-  final Function()? onGoogleSignIn;
+  final Function()? onPlatformSignIn;
 
   const SimpleLoginScreen({
     this.onLogin,
     this.onRegister,
     this.onPasswordRecovery,
-    this.onGoogleSignIn,
+    this.onPlatformSignIn,
     super.key,
   });
 
@@ -27,9 +28,10 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   bool showPasswordRecovery = false;
 
   Function(String? email, String? password)? get onLogin => widget.onLogin;
-  Function(String? email, String? password)? get onRegister => widget.onRegister;
+  Function(String? email, String? password)? get onRegister =>
+      widget.onRegister;
   Function(String? email)? get onPasswordRecovery => widget.onPasswordRecovery;
-  Function()? get onGoogleSignIn => widget.onGoogleSignIn;
+  Function()? get onPlatformSignIn => widget.onPlatformSignIn;
 
   @override
   void initState() {
@@ -122,7 +124,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
               labelText: 'Email',
               errorText: emailError,
               keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next
+              textInputAction: TextInputAction.next,
             ),
             if (!showPasswordRecovery)
               Column(
@@ -168,13 +170,17 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                 children: [
                   const SizedBox(height: 15),
                   FormButton(
-                    text: 'Sign in with Google',
+                    text: Platform.isIOS
+                        ? 'Sign in with Apple'
+                        : 'Sign in with Google',
                     icon: Image.asset(
-                      'assets/google_logo.png',
+                      Platform.isIOS
+                          ? 'assets/apple_logo.png'
+                          : 'assets/google_logo.png',
                       height: 24,
                       width: 24,
                     ),
-                    onPressed: onGoogleSignIn,
+                    onPressed: onPlatformSignIn,
                   ),
                 ],
               ),

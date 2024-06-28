@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +10,18 @@ import 'firebase_options.dart';
 import 'screens/simple_login_screen.dart';
 import 'auth_handlers.dart';
 
-const int splashDuration = 2;
+const int splashDuration = 1;
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Firebase and dotenv in parallel
+  await Future.wait([
+    dotenv.load(fileName: ".env"),
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+  ]);
+
   await Future.delayed(const Duration(seconds: splashDuration));
 
   SystemChrome.setPreferredOrientations([
@@ -48,13 +54,21 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
+  void _handlePlatformSignIn(BuildContext context) {
+    if (Platform.isAndroid) {
+      handleGoogleSignIn(context);
+    } else if (Platform.isIOS) {
+      handleAppleSignIn(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           return const MainScreen();
         } else {
@@ -64,7 +78,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 handleRegister(context, email, password),
             onPasswordRecovery: (email) =>
                 handlePasswordRecovery(context, email),
-            onGoogleSignIn: () => handleGoogleSignIn(context),
+            onPlatformSignIn: () => _handlePlatformSignIn(context),
           );
         }
       },
