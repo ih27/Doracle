@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fortuntella/controllers/fortune_teller.dart';
 import 'package:fortuntella/controllers/openai_fortune_teller.dart';
 import 'package:fortuntella/controllers/gemini_fortune_teller.dart';
+import 'package:fortuntella/services/firestore_service.dart';
 import 'package:fortuntella/widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
@@ -18,11 +19,14 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   bool _isLoading = false;
   String _selectedFortuneTeller = 'OpenAI';
   final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
+  List<String> _randomQuestions = [];
+  final int _numberOfQuestions = 20;
 
   @override
   void initState() {
     super.initState();
     _initializeFortuneTeller();
+    _fetchRandomQuestions();
   }
 
   void _initializeFortuneTeller() {
@@ -33,7 +37,12 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     }
   }
 
-  void _getFortune() {
+  Future<void> _fetchRandomQuestions() async {
+    _randomQuestions =
+        await FirestoreService.fetchRandomQuestions(_numberOfQuestions);
+  }
+
+  void _getFortune(String question) {
     setState(() {
       _isLoading = true;
       _fortuneSpans = [];
@@ -41,7 +50,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
 
     try {
       if (_fortuneTeller != null) {
-        _fortuneTeller!.getFortune(_questionController.text).listen(
+        _fortuneTeller!.getFortune(question).listen(
           (fortunePart) {
             setState(() {
               _fortuneSpans = List.from(_fortuneSpans)
@@ -89,8 +98,16 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     }
   }
 
+  void _onQuestionSelected(String question) {
+    _getFortune(question);
+  }
+
   @override
   Widget build(BuildContext context) {
+    return _fortuneSpans.isEmpty ? _buildInitialScreen() : _buildAnswerScreen();
+  }
+
+  Widget _buildInitialScreen() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -133,27 +150,76 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           const SizedBox(height: 24),
           FormButton(
             text: 'Get Fortune',
-            onPressed: _getFortune,
+            onPressed: () => _getFortune(_questionController.text),
           ),
           const SizedBox(height: 24),
+          Carousel(
+            questions: _randomQuestions,
+            onQuestionSelected: _onQuestionSelected,
+          ),
           if (_isLoading) const CircularProgressIndicator(),
-          if (_fortuneSpans.isNotEmpty)
-            Expanded(
-              child: SingleChildScrollView(
-                child: RichText(
-                  text: TextSpan(
-                    children: _fortuneSpans,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontStyle: FontStyle.normal,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAnswerScreen() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          RichText(
+            text: TextSpan(
+              children: _fortuneSpans,
+              style: const TextStyle(
+                fontSize: 18,
+                fontStyle: FontStyle.normal,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          FormButton(
+            text: 'Continue',
+            onPressed: () {
+              setState(() {
+                _questionController.clear();
+                _fortuneSpans = [];
+                _fetchRandomQuestions();
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Carousel extends StatelessWidget {
+  final List<String> questions;
+  final Function(String) onQuestionSelected;
+
+  const Carousel(
+      {super.key, required this.questions, required this.onQuestionSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: questions.map((question) {
+        return GestureDetector(
+          onTap: () => onQuestionSelected(question),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 4.0),
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: Text(question),
+          ),
+        );
+      }).toList(),
     );
   }
 }

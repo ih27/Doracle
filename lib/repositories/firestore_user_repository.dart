@@ -13,7 +13,11 @@ class FirestoreUserRepository implements UserRepository {
 
   @override
   Future<Map<String, dynamic>?> getUser(String userId) async {
-    DocumentSnapshot userDoc = await _firestore.collection('users').doc(userId).get().timeout(const Duration(seconds: 10));
+    DocumentSnapshot userDoc = await _firestore
+        .collection('users')
+        .doc(userId)
+        .get()
+        .timeout(const Duration(seconds: 10));
     return userDoc.data() as Map<String, dynamic>?;
   }
 }
