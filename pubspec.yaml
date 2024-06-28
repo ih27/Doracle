@@ -20,6 +20,7 @@ dependencies:
   google_generative_ai: ^0.4.3
   in_app_purchase: ^3.2.0
   cloud_functions: ^5.0.2
+  rive: ^0.13.8
 
 dev_dependencies:
   flutter_lints: ^4.0.0
@@ -31,6 +32,7 @@ flutter:
     - .env
     - assets/splash/background.png
     - assets/google_logo.png
+    - assets/animations/pes.riv
 
 flutter_launcher_icons:
   android: true

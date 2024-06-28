@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fortuntella/repositories/user_repository.dart';
 import 'package:fortuntella/repositories/firestore_user_repository.dart';
+import 'package:rive/rive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,37 +49,48 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _fetchUserData,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(flex: 2),
-            Center(
-              child: isLoading
-                  ? const CircularProgressIndicator()
-                  : errorMessage != null
-                      ? Column(
-                          children: [
-                            Text(errorMessage!),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Pull down to retry',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          children: [
-                            Text(
-                              'Welcome, ${userData!['email']}',
-                              style: const TextStyle(fontSize: 24),
-                            )
-                          ],
-                        ),
-            ),
-            const Spacer(flex: 2),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 24), // Provide some spacing at the top
+              Center(
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : errorMessage != null
+                        ? Column(
+                            children: [
+                              Text(errorMessage!),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Pull down to retry',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            children: [
+                              Text(
+                                'Welcome, ${userData!['email']}',
+                                style: const TextStyle(fontSize: 24),
+                              ),
+                              const SizedBox(height: 24),
+                              const SizedBox(
+                                height: 300, // Set a fixed height for the Rive animation
+                                child: RiveAnimation.asset(
+                                  'assets/animations/pes.riv',
+                                  fit: BoxFit.cover,
+                                  stateMachines: ['Shake'],
+                                ),
+                              ),
+                            ],
+                          ),
+              ),
+              const SizedBox(height: 24), // Provide some spacing at the bottom
+            ],
+          ),
         ),
       ),
     );

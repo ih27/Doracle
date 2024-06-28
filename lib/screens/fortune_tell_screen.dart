@@ -38,8 +38,11 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   Future<void> _fetchRandomQuestions() async {
-    _randomQuestions = await FirestoreService.fetchRandomQuestions(
+    final randomQuestions = await FirestoreService.fetchRandomQuestions(
         _numberOfQuestionsPerCategory);
+    setState(() {
+      _randomQuestions = randomQuestions;
+    });
   }
 
   void _getFortune(String question) {
@@ -153,9 +156,24 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             onPressed: () => _getFortune(_questionController.text),
           ),
           const SizedBox(height: 24),
-          Carousel(
-            questions: _randomQuestions,
-            onQuestionSelected: _onQuestionSelected,
+          Expanded(
+            child: ListView.builder(
+              itemCount: _randomQuestions.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => _onQuestionSelected(_randomQuestions[index]),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Text(_randomQuestions[index]),
+                  ),
+                );
+              },
+            ),
           ),
           if (_isLoading) const CircularProgressIndicator(),
         ],
@@ -169,13 +187,17 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          RichText(
-            text: TextSpan(
-              children: _fortuneSpans,
-              style: const TextStyle(
-                fontSize: 18,
-                fontStyle: FontStyle.normal,
-                color: Colors.black,
+          Expanded(
+            child: SingleChildScrollView(
+              child: RichText(
+                text: TextSpan(
+                  children: _fortuneSpans,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontStyle: FontStyle.normal,
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ),
           ),
@@ -192,34 +214,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class Carousel extends StatelessWidget {
-  final List<String> questions;
-  final Function(String) onQuestionSelected;
-
-  const Carousel(
-      {super.key, required this.questions, required this.onQuestionSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: questions.map((question) {
-        return GestureDetector(
-          onTap: () => onQuestionSelected(question),
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Text(question),
-          ),
-        );
-      }).toList(),
     );
   }
 }
