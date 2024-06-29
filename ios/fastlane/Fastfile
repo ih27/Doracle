@@ -64,6 +64,9 @@ platform :ios do
       archive_path: "../build/ios/archive/Runner.xcarchive",
     )
 
+    puts "Upload symbols to Crashlytics"
+    upload_symbols_to_crashlytics
+
     puts "*** Upload app to testflight ***"
     upload_to_testflight(api_key: api_key)
 
