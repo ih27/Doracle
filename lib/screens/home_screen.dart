@@ -29,7 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _shake() {
-    isPlaying = !isPlaying;
+    setState(() {
+      isPlaying = !isPlaying;
+    });
     _shakeInput?.fire();
   }
 
@@ -131,6 +133,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ? Icons.pause
                                             : Icons.play_arrow,
                                       ),
+                                    ),
+                                    FloatingActionButton(
+                                      onPressed: () => throw Exception(),
+                                      tooltip: 'TestButton',
+                                      child: const Text("Throw Test Exception"),
                                     ),
                                   ],
                                 ),
