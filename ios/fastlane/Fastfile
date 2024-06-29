@@ -52,6 +52,8 @@ platform :ios do
     version_name = get_version_name()
 
     Dir.chdir "../.." do
+      puts "*** Installing Flutterfire CLI tools ***"
+      sh("dart", "pub", "global", "activate", "flutterfire_cli")
       puts "*** Build flutter iOS release for version #{version_name}+#{build_number} ***"
       sh("flutter", "build", "ipa", "--release", "--obfuscate", "--split-debug-info=symbols", "--build-number=#{build_number}", "--build-name=#{version_name}")
     end
