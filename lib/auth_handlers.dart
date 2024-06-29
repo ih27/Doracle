@@ -106,9 +106,9 @@ Future<void> handleGoogleSignIn(BuildContext context) async {
 
 Future<void> handleAppleSignIn(BuildContext context) async {
   try {
-    final appleProvider = AppleAuthProvider();
-    appleProvider.addScope('name');
-    appleProvider.addScope('email');
+    final appleProvider = AppleAuthProvider()
+      ..addScope('name')
+      ..addScope('email');
     final userCredential =
         await FirebaseAuth.instance.signInWithProvider(appleProvider);
 

@@ -116,6 +116,13 @@ jobs:
       - name: Build an AAB
         run: flutter build appbundle --release --obfuscate --split-debug-info=symbols
 
+      - name: Upload Crashlytics symbols
+        uses: w9jds/firebase-action@master
+        with:
+          args: crashlytics:symbols:upload --app=${{vars.FIREBASE_ANDROID_APP_ID}} symbols
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
       - name: Create a Release in GitHub
         uses: ncipollo/release-action@v1
         with:
