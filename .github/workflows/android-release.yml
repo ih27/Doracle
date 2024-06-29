@@ -53,6 +53,8 @@ jobs:
           gpg -d --passphrase "${{secrets.RELEASE_ENV_PASSWORD}}" --batch .env.asc > .env
           gpg -d --passphrase "${{secrets.RELEASE_PROP_PASSWORD}}" --batch key.properties.asc > android/key.properties
           gpg -d --passphrase "${{secrets.RELEASE_GOOGLEJSON_PASSWORD}}" --batch google-services.json.asc > android/app/google-services.json
+          echo "${{secrets.GCP_SA_KEY}}" > gcp_key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
 
       - name: Get version.txt
         uses: actions/download-artifact@v4
@@ -115,13 +117,12 @@ jobs:
 
       - name: Build an AAB
         run: flutter build appbundle --release --obfuscate --split-debug-info=symbols
+      
+      - name: Install Firebase CLI
+        run: curl -sL https://firebase.tools | bash
 
       - name: Upload Crashlytics symbols
-        uses: w9jds/firebase-action@master
-        with:
-          args: crashlytics:symbols:upload --app=${{vars.FIREBASE_ANDROID_APP_ID}} symbols
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: firebase crashlytics:symbols:upload --app=${{vars.FIREBASE_ANDROID_APP_ID}} symbols
 
       - name: Create a Release in GitHub
         uses: ncipollo/release-action@v1
