@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:fortuntella/widgets/form_button.dart';
-import 'package:fortuntella/widgets/input_field.dart';
+import '../widgets/form_button.dart';
+import '../widgets/input_field.dart';
 import 'simple_register_screen.dart';
 
 class SimpleLoginScreen extends StatefulWidget {

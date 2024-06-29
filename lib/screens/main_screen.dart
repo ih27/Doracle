@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fortuntella/main.dart';
+import '../auth_wrapper.dart';
 import 'home_screen.dart';
 import 'fortune_tell_screen.dart';
 import 'shop_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -32,15 +31,6 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Future<void> _handleSignOut() async {
-    await FirebaseAuth.instance.signOut();
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const AuthWrapper()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _handleSignOut,
+            onPressed: () => handleSignOut(context),
           ),
         ],
       ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fortuntella/controllers/fortune_teller.dart';
-import 'package:fortuntella/controllers/openai_fortune_teller.dart';
-import 'package:fortuntella/controllers/gemini_fortune_teller.dart';
-import 'package:fortuntella/services/firestore_service.dart';
-import 'package:fortuntella/widgets/form_button.dart';
+import '../controllers/fortune_teller.dart';
+import '../controllers/openai_fortune_teller.dart';
+import '../controllers/gemini_fortune_teller.dart';
+import '../services/firestore_service.dart';
+import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   const FortuneTellScreen({super.key});

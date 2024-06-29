@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fortuntella/repositories/user_repository.dart';
-import 'package:fortuntella/repositories/firestore_user_repository.dart';
 import 'package:rive/rive.dart';
+import '../repositories/user_repository.dart';
+import '../repositories/firestore_user_repository.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

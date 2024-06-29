@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fortuntella/widgets/form_button.dart';
-import 'package:fortuntella/widgets/input_field.dart';
+import '../widgets/form_button.dart';
+import '../widgets/input_field.dart';
 
 class SimpleRegisterScreen extends StatefulWidget {
   final Function(String? email, String? password)? onSubmitted;

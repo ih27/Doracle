@@ -1,7 +1,7 @@
 import 'package:dart_openai/dart_openai.dart';
-import 'package:fortuntella/controllers/fortune_teller.dart';
-import 'package:fortuntella/services/openai_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'fortune_teller.dart';
+import '../services/openai_service.dart';
 
 class OpenAIFortuneTeller implements FortuneTeller {
   final OpenAIService _openAIService;

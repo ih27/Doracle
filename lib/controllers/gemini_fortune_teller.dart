@@ -1,7 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:fortuntella/controllers/fortune_teller.dart';
-import 'package:fortuntella/services/gemini_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'fortune_teller.dart';
+import '../services/gemini_service.dart';
 
 class GeminiFortuneTeller implements FortuneTeller {
   final GeminiService _geminiService;

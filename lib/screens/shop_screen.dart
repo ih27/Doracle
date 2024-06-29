@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fortuntella/controllers/purchaser.dart';
-import 'package:fortuntella/models/product_item.dart';
+import '../controllers/purchaser.dart';
+import '../models/product_item.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});

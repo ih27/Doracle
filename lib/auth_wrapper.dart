@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:fortuntella/helpers/show_error.dart';
-import 'package:fortuntella/main.dart';
-import 'package:fortuntella/repositories/user_repository.dart';
-import 'package:fortuntella/repositories/firestore_user_repository.dart';
+import '../helpers/show_error.dart';
+import '../repositories/user_repository.dart';
+import '../repositories/firestore_user_repository.dart';
+import 'screens/main_screen.dart';
 import 'screens/simple_login_screen.dart';
 
 final UserRepository userRepository = FirestoreUserRepository();
@@ -146,5 +146,45 @@ Future<void> _associateEmailWith(UserCredential userCredential) async {
     await userRepository.addUser(userCredential.user!, {
       'email': userCredential.user?.email,
     });
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  _AuthWrapperState createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  void _handlePlatformSignIn(BuildContext context) {
+    if (Platform.isAndroid) {
+      handleGoogleSignIn(context);
+    } else if (Platform.isIOS) {
+      handleAppleSignIn(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          return const MainScreen();
+        } else {
+          return SimpleLoginScreen(
+            onLogin: (email, password) => handleLogin(context, email, password),
+            onRegister: (email, password) =>
+                handleRegister(context, email, password),
+            onPasswordRecovery: (email) =>
+                handlePasswordRecovery(context, email),
+            onPlatformSignIn: () => _handlePlatformSignIn(context),
+          );
+        }
+      },
+    );
   }
 }

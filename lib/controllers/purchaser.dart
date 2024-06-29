@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:fortuntella/helpers/show_error.dart';
-import 'package:fortuntella/models/product_item.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import '../helpers/show_error.dart';
+import '../models/product_item.dart';
 
 class Purchases {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
