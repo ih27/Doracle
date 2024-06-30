@@ -45,7 +45,7 @@ app.*.map.json
 
 .env
 google-playstore-uploader.json
-KC878DUKLS.p8
+*.p8
 
 # Firebase functions related
 /functions/

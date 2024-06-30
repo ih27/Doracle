@@ -2,9 +2,10 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../helpers/show_error.dart';
-import '../repositories/user_repository.dart';
-import '../repositories/firestore_user_repository.dart';
+import 'helpers/constants.dart';
+import 'helpers/show_snackbar.dart';
+import 'repositories/user_repository.dart';
+import 'repositories/firestore_user_repository.dart';
 import 'screens/main_screen.dart';
 import 'screens/simple_login_screen.dart';
 
@@ -16,9 +17,11 @@ Future<void> handleLogin(
   try {
     await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password);
-  } on FirebaseAuthException catch (e) {
     if (!context.mounted) return;
-    showErrorDialog(context, e.message ?? 'An error occurred');
+    showInfoSnackBar(context, InfoMessages.loginSuccess);
+  } on FirebaseAuthException {
+    if (!context.mounted) return;
+    showErrorSnackBar(context, InfoMessages.loginFailure);
   }
 }
 
@@ -31,9 +34,11 @@ Future<void> handleRegister(
     await userRepository.addUser(userCredential.user!, {
       'email': email,
     });
-  } on FirebaseAuthException catch (e) {
     if (!context.mounted) return;
-    showErrorDialog(context, e.message ?? 'An error occurred');
+    showInfoSnackBar(context, InfoMessages.registerSuccess);
+  } on FirebaseAuthException {
+    if (!context.mounted) return;
+    showErrorSnackBar(context, InfoMessages.registerFailure);
   }
 }
 
@@ -42,32 +47,10 @@ Future<void> handlePasswordRecovery(BuildContext context, String? email) async {
   try {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
     if (!context.mounted) return;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Success'),
-          content:
-              const Text('Password reset email sent. Please check your email.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SimpleLoginScreen()),
-                );
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  } on FirebaseAuthException catch (e) {
+    showInfoSnackBar(context, InfoMessages.passwordResetSuccess);
+  } on FirebaseAuthException {
     if (!context.mounted) return;
-    showErrorDialog(context, e.message ?? 'An error occurred');
+    showErrorSnackBar(context, InfoMessages.passwordResetFailure);
   }
 }
 
@@ -95,12 +78,11 @@ Future<void> handleGoogleSignIn(BuildContext context) async {
         await FirebaseAuth.instance.signInWithCredential(credential);
 
     await _associateEmailWith(userCredential);
-  } on FirebaseAuthException catch (e) {
     if (!context.mounted) return;
-    showErrorDialog(context, e.message ?? 'An error occurred');
+    showInfoSnackBar(context, InfoMessages.loginSuccess);
   } catch (e) {
     if (!context.mounted) return;
-    showErrorDialog(context, 'An error occurred while signing in with Google.');
+    showErrorSnackBar(context, InfoMessages.loginFailure);
   }
 }
 
@@ -113,12 +95,11 @@ Future<void> handleAppleSignIn(BuildContext context) async {
         await FirebaseAuth.instance.signInWithProvider(appleProvider);
 
     await _associateEmailWith(userCredential);
-  } on FirebaseAuthException catch (e) {
     if (!context.mounted) return;
-    showErrorDialog(context, e.message ?? 'An error occurred');
+    showInfoSnackBar(context, InfoMessages.loginSuccess);
   } catch (e) {
     if (!context.mounted) return;
-    showErrorDialog(context, 'An error occurred while signing in with Apple.');
+    showErrorSnackBar(context, InfoMessages.loginFailure);
   }
 }
 
@@ -136,8 +117,10 @@ Future<void> handleSignOut(BuildContext context) async {
       context,
       MaterialPageRoute(builder: (context) => const AuthWrapper()),
     );
+    showInfoSnackBar(context, InfoMessages.logoutSuccess);
   } catch (e) {
-    showErrorDialog(context, 'An error occurred while signing out.');
+    if (!context.mounted) return;
+    showErrorSnackBar(context, InfoMessages.logoutFailure);
   }
 }
 
