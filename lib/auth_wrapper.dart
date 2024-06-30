@@ -11,6 +11,10 @@ import 'screens/simple_login_screen.dart';
 
 final UserRepository userRepository = FirestoreUserRepository();
 
+User? currentUser() {
+  return FirebaseAuth.instance.currentUser;
+}
+
 Future<void> handleLogin(
     BuildContext context, String? email, String? password) async {
   if (email == null || password == null) return;

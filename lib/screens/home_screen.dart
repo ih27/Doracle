@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/auth_wrapper.dart';
 import 'package:rive/rive.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/firestore_user_repository.dart';
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final UserRepository userRepository = FirestoreUserRepository();
-  User? user = FirebaseAuth.instance.currentUser;
+  User? user = currentUser();
   Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;

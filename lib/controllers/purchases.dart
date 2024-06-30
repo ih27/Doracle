@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/auth_wrapper.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -18,7 +19,8 @@ class PurchasesController {
     if (apiKey == null) {
       throw Exception('RevenueCat API key not found in .env file');
     }
-    await Purchases.configure(PurchasesConfiguration(apiKey));
+    await Purchases.configure(
+        PurchasesConfiguration(apiKey)..appUserID = currentUser()?.uid);
   }
 
   static Future<List<Package>> fetchPackages() async {
