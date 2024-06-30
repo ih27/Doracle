@@ -19,7 +19,9 @@ class InfoMessages {
   static const registerSuccess = 'You signed up successfully.';
   static const registerFailure = 'There was an error while signing you up.';
 
-  static const passwordResetSuccess = 'Password reset email sent successfully.';
+  static const invalidEmailAddress = 'Please enter a valid email address.';
+  static const passwordReset =
+      'If an account exists for this email, a password reset link has been sent.';
   static const passwordResetFailure =
       'There was an error while resetting your password.';
 

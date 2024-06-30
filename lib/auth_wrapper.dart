@@ -47,12 +47,20 @@ Future<void> handleRegister(
 }
 
 Future<void> handlePasswordRecovery(BuildContext context, String? email) async {
-  if (email == null) return;
+  if (email == null || email.trim().isEmpty) {
+    showErrorSnackBar(context, InfoMessages.invalidEmailAddress);
+    return;
+  }
+
   try {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
     if (!context.mounted) return;
-    showInfoSnackBar(context, InfoMessages.passwordResetSuccess);
+    showInfoSnackBar(context, InfoMessages.passwordReset);
   } on FirebaseAuthException {
+    if (!context.mounted) return;
+    // Generic message to user, regardless of the specific error
+    showInfoSnackBar(context, InfoMessages.passwordReset);
+  } catch (e) {
     if (!context.mounted) return;
     showErrorSnackBar(context, InfoMessages.passwordResetFailure);
   }

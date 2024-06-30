@@ -3,6 +3,7 @@ import '../controllers/fortune_teller.dart';
 import '../controllers/openai_fortune_teller.dart';
 import '../controllers/gemini_fortune_teller.dart';
 import '../helpers/constants.dart';
+import '../helpers/show_snackbar.dart';
 import '../services/firestore_service.dart';
 import '../widgets/form_button.dart';
 
@@ -48,6 +49,11 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   void _getFortune(String question) {
+      if (question.trim().isEmpty) {
+      showErrorSnackBar(context, 'Please enter a question.');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _isFortuneCompleted = false;
@@ -74,7 +80,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           onError: (error) {
             setState(() {
               _fortuneSpans = List.from(_fortuneSpans)
-                ..add(TextSpan(text: 'Unexpected error occurred. Error: $error'));
+                ..add(const TextSpan(text: 'Unexpected error occurred'));
               _isLoading = false;
               _isFortuneCompleted = true;
             });
@@ -91,7 +97,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     } catch (e) {
       setState(() {
         _fortuneSpans = List.from(_fortuneSpans)
-          ..add(TextSpan(text: 'Failed to fetch fortune. Error: $e'));
+          ..add(const TextSpan(text: 'Failed to fetch fortune'));
         _isLoading = false;
         _isFortuneCompleted = true;
       });

@@ -20,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String? errorMessage;
 
   SMITrigger? _shakeInput;
-  bool isPlaying = false;
 
   void _onRiveInit(Artboard artboard) {
     final controller =
@@ -30,9 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _shake() {
-    setState(() {
-      isPlaying = !isPlaying;
-    });
     _shakeInput?.fire();
   }
 
@@ -88,58 +84,58 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           )
-                        : Column(
-                            children: [
-                              Text(
-                                'Welcome, ${userData!['email']}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 24),
-                              Align(
-                                alignment: const AlignmentDirectional(0, 0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Container(
-                                        width: 300,
-                                        height: 300,
-                                        decoration: const BoxDecoration(
-                                          color: Color.fromRGBO(
-                                              121, 121, 188, 0.498),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Padding(
+                        : userData != null
+                            ? Column(
+                                children: [
+                                  Text(
+                                    'Welcome, ${userData!['email'] ?? 'User'}',
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Align(
+                                    alignment: const AlignmentDirectional(0, 0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
                                           padding: const EdgeInsets.all(10),
-                                          child: SizedBox(
-                                            width: 150,
-                                            height: 130,
-                                            child: RiveAnimation.asset(
-                                              'assets/animations/pes.riv',
-                                              artboard: 'Pes Animace',
-                                              fit: BoxFit.none,
-                                              onInit: _onRiveInit,
+                                          child: Container(
+                                            width: 300,
+                                            height: 300,
+                                            decoration: const BoxDecoration(
+                                              color: Color.fromRGBO(
+                                                  121, 121, 188, 0.498),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: SizedBox(
+                                                width: 150,
+                                                height: 130,
+                                                child: RiveAnimation.asset(
+                                                  'assets/animations/pes.riv',
+                                                  artboard: 'Pes Animace',
+                                                  fit: BoxFit.none,
+                                                  onInit: _onRiveInit,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
+                                        FloatingActionButton(
+                                          onPressed: _shake,
+                                          tooltip: 'Shake',
+                                          child: const Icon(Icons.animation),
+                                        ),
+                                      ],
                                     ),
-                                    FloatingActionButton(
-                                      onPressed: _shake,
-                                      tooltip: 'Shake',
-                                      child: Icon(
-                                        isPlaying
-                                            ? Icons.pause
-                                            : Icons.play_arrow,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  )
+                                ],
                               )
-                            ],
-                          ),
+                            : const Text(
+                                'No user data available. Pull down to refresh.'),
               ),
               const SizedBox(height: 24), // Provide some spacing at the bottom
             ],
