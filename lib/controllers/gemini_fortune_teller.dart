@@ -4,31 +4,17 @@ import 'fortune_teller.dart';
 import '../services/gemini_service.dart';
 
 class GeminiFortuneTeller implements FortuneTeller {
-  final GeminiService _geminiService;
+  late GeminiService _geminiService;
   late Stream completionStream;
 
-  GeminiFortuneTeller()
-      : _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY']!);
+  GeminiFortuneTeller(String instructions) {
+    _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY']!, instructions);
+  }
 
   @override
   Stream<String> getFortune(String question) {
     Stream<GenerateContentResponse> completionStream =
         _geminiService.getFortune(question);
     return completionStream.map((event) => event.text ?? '');
-  }
-
-  @override
-  void onFortuneReceived(Function(String) callback, Function(String) onError) {
-    completionStream.listen(
-      (fortunePart) {
-        callback(fortunePart);
-      },
-      onDone: () {
-        callback('🔮');
-      },
-      onError: (error) {
-        onError('Unexpected error occurred. Error: $error');
-      },
-    );
   }
 }

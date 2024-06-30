@@ -134,11 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             : Icons.play_arrow,
                                       ),
                                     ),
-                                    FloatingActionButton(
-                                      onPressed: () => throw Exception(),
-                                      tooltip: 'TestButton',
-                                      child: const Text("Throw Test Exception"),
-                                    ),
                                   ],
                                 ),
                               )

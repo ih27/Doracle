@@ -4,12 +4,13 @@ import 'fortune_teller.dart';
 import '../services/openai_service.dart';
 
 class OpenAIFortuneTeller implements FortuneTeller {
-  final OpenAIService _openAIService;
+  late OpenAIService _openAIService;
   late Stream completionStream;
 
-  OpenAIFortuneTeller()
-      : _openAIService = OpenAIService(dotenv.env['OPENAI_API_KEY']!);
-
+  OpenAIFortuneTeller(String instructions) {
+    _openAIService = OpenAIService(dotenv.env['OPENAI_API_KEY']!, instructions);
+  }
+  
   @override
   Stream<String> getFortune(String question) {
     Stream<OpenAIStreamChatCompletionModel> completionStream =
@@ -20,20 +21,5 @@ class OpenAIFortuneTeller implements FortuneTeller {
               .join() ??
           '';
     });
-  }
-
-  @override
-  void onFortuneReceived(Function(String) callback, Function(String) onError) {
-    completionStream.listen(
-      (fortunePart) {
-        callback(fortunePart);
-      },
-      onDone: () {
-        callback('🔮');
-      },
-      onError: (error) {
-        onError('Unexpected error occurred. Error: $error');
-      },
-    );
   }
 }

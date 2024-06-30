@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/fortune_teller.dart';
 import '../controllers/openai_fortune_teller.dart';
 import '../controllers/gemini_fortune_teller.dart';
+import '../helpers/constants.dart';
 import '../services/firestore_service.dart';
 import '../widgets/form_button.dart';
 
@@ -31,9 +32,9 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
 
   void _initializeFortuneTeller() {
     if (_selectedFortuneTeller == 'OpenAI') {
-      _fortuneTeller = OpenAIFortuneTeller();
+      _fortuneTeller = OpenAIFortuneTeller(PersonaInstructions.fortuneTeller);
     } else {
-      _fortuneTeller = GeminiFortuneTeller();
+      _fortuneTeller = GeminiFortuneTeller(PersonaInstructions.wiseSage);
     }
   }
 
