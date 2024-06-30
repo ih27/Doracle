@@ -6,6 +6,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PurchasesController {
   static Future<void> initialize() async {
+    if (await Purchases.isConfigured) {
+      return; // SDK is already configured
+    }
+
     await Purchases.setLogLevel(LogLevel.debug);
     late String keyName;
 
@@ -24,6 +28,7 @@ class PurchasesController {
   }
 
   static Future<List<Package>> fetchPackages() async {
+    await _ensureInitialized();
     try {
       Offerings offerings = await Purchases.getOfferings();
       if (offerings.current != null) {
@@ -37,6 +42,7 @@ class PurchasesController {
 
   static Future<bool> purchasePackage(
       BuildContext context, Package package) async {
+    await _ensureInitialized();
     try {
       CustomerInfo customerInfo = await Purchases.purchasePackage(package);
       return customerInfo.entitlements.active.isNotEmpty;
@@ -46,6 +52,7 @@ class PurchasesController {
   }
 
   static Future<bool> checkEntitlement(String entitlementId) async {
+    await _ensureInitialized();
     try {
       CustomerInfo customerInfo = await Purchases.getCustomerInfo();
       return customerInfo.entitlements.active.containsKey(entitlementId);
@@ -56,11 +63,18 @@ class PurchasesController {
   }
 
   static Future<bool> restorePurchases(BuildContext context) async {
+    await _ensureInitialized();
     try {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       return customerInfo.entitlements.active.isNotEmpty;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<void> _ensureInitialized() async {
+    if (!await Purchases.isConfigured) {
+      await initialize();
     }
   }
 }
