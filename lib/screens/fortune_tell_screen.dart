@@ -18,6 +18,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   FortuneTeller? _fortuneTeller;
   List<TextSpan> _fortuneSpans = [];
   bool _isLoading = false;
+  bool _isFortuneCompleted = false;
   String _selectedFortuneTeller = 'OpenAI';
   final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
   List<String> _randomQuestions = [];
@@ -49,6 +50,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   void _getFortune(String question) {
     setState(() {
       _isLoading = true;
+      _isFortuneCompleted = false;
       _fortuneSpans = [];
     });
 
@@ -66,14 +68,15 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
               _fortuneSpans = List.from(_fortuneSpans)
                 ..add(const TextSpan(text: '🔮'));
               _isLoading = false;
+              _isFortuneCompleted = true;
             });
           },
           onError: (error) {
             setState(() {
               _fortuneSpans = List.from(_fortuneSpans)
-                ..add(
-                    TextSpan(text: 'Unexpected error occurred. Error: $error'));
+                ..add(TextSpan(text: 'Unexpected error occurred. Error: $error'));
               _isLoading = false;
+              _isFortuneCompleted = true;
             });
           },
         );
@@ -82,6 +85,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           _fortuneSpans = List.from(_fortuneSpans)
             ..add(const TextSpan(text: 'No fortune teller selected.'));
           _isLoading = false;
+          _isFortuneCompleted = true;
         });
       }
     } catch (e) {
@@ -89,6 +93,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         _fortuneSpans = List.from(_fortuneSpans)
           ..add(TextSpan(text: 'Failed to fetch fortune. Error: $e'));
         _isLoading = false;
+        _isFortuneCompleted = true;
       });
     }
   }
@@ -161,16 +166,20 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             child: ListView.builder(
               itemCount: _randomQuestions.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () => _onQuestionSelected(_randomQuestions[index]),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4.0),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4.0),
+                return Center(
+                  child: IntrinsicWidth(
+                    child: GestureDetector(
+                      onTap: () => _onQuestionSelected(_randomQuestions[index]),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Text(_randomQuestions[index]),
+                      ),
                     ),
-                    child: Text(_randomQuestions[index]),
                   ),
                 );
               },
@@ -203,16 +212,18 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          FormButton(
-            text: 'Continue',
-            onPressed: () {
-              setState(() {
-                _questionController.clear();
-                _fortuneSpans = [];
-                _fetchRandomQuestions();
-              });
-            },
-          ),
+          if (_isFortuneCompleted)
+            FormButton(
+              text: 'Continue',
+              onPressed: () {
+                setState(() {
+                  _questionController.clear();
+                  _fortuneSpans = [];
+                  _isFortuneCompleted = false;
+                  _fetchRandomQuestions();
+                });
+              },
+            ),
         ],
       ),
     );

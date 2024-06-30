@@ -105,30 +105,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
-  cloud_functions:
-    dependency: "direct main"
-    description:
-      name: cloud_functions
-      sha256: "4062d11b890b4b6a7e07ecb4fa9c1346614eab9edabacaf9b3a2d7be90ccf44a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.2"
-  cloud_functions_platform_interface:
-    dependency: transitive
-    description:
-      name: cloud_functions_platform_interface
-      sha256: "0a3592a7a5d09714d4c1802f6ed5b071ca571b0073b0f18d3899bfab863a8820"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.5.31"
-  cloud_functions_web:
-    dependency: transitive
-    description:
-      name: cloud_functions_web
-      sha256: b7948d01a8e425fe73dd22df3c621fd4f743a1330fd214445a6965f971cf2ed6
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.9.9"
   collection:
     dependency: transitive
     description:
@@ -432,38 +408,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
-  in_app_purchase:
-    dependency: "direct main"
-    description:
-      name: in_app_purchase
-      sha256: "960f26a08d9351fb8f89f08901f8a829d41b04d45a694b8f776121d9e41dcad6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.0"
-  in_app_purchase_android:
-    dependency: transitive
-    description:
-      name: in_app_purchase_android
-      sha256: b18871cffd4ec8911171864bfc0060c983be96215080a0847c29ef9147f439ef
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.6+1"
-  in_app_purchase_platform_interface:
-    dependency: transitive
-    description:
-      name: in_app_purchase_platform_interface
-      sha256: "1d353d38251da5b9fea6635c0ebfc6bb17a2d28d0e86ea5e083bf64244f1fb4c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.0"
-  in_app_purchase_storekit:
-    dependency: transitive
-    description:
-      name: in_app_purchase_storekit
-      sha256: "9a087c3c051266642468f031737c5a09f6fd90ff2b21d953e130563f3fd4cb34"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.17"
   json_annotation:
     dependency: transitive
     description:
