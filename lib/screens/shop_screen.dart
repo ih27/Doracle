@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import '../controllers/purchases_controller.dart';
+import '../controllers/purchases.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 

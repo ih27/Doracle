@@ -1,12 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../helpers/show_snackbar.dart';
 
 class PurchasesController {
   static Future<void> initialize() async {
     await Purchases.setLogLevel(LogLevel.debug);
-    final apiKey = dotenv.env['REVENUECAT_API_KEY'];
+    late String keyName;
+
+    if (Platform.isAndroid) {
+      keyName = 'REVENUECAT_ANDROID_API_KEY';
+    } else if (Platform.isIOS) {
+      keyName = 'REVENUECAT_IOS_API_KEY';
+    }
+
+    final apiKey = dotenv.env[keyName];
     if (apiKey == null) {
       throw Exception('RevenueCat API key not found in .env file');
     }
@@ -31,9 +39,6 @@ class PurchasesController {
       CustomerInfo customerInfo = await Purchases.purchasePackage(package);
       return customerInfo.entitlements.active.isNotEmpty;
     } catch (e) {
-      if (context.mounted) {
-        showErrorSnackBar(context, 'Error making purchase: $e');
-      }
       return false;
     }
   }
@@ -53,9 +58,6 @@ class PurchasesController {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       return customerInfo.entitlements.active.isNotEmpty;
     } catch (e) {
-      if (context.mounted) {
-        showErrorSnackBar(context, 'Error restoring purchases: $e');
-      }
       return false;
     }
   }
