@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fortuntella/auth_wrapper.dart';
 import 'package:rive/rive.dart';
-import '../repositories/user_repository.dart';
 import '../repositories/firestore_user_repository.dart';
+import '../services/user_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final UserRepository userRepository = FirestoreUserRepository();
+  final UserService userService = UserService(FirestoreUserRepository());
   User? user = currentUser();
   Map<String, dynamic>? userData;
   bool isLoading = true;
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       if (user != null) {
-        userData = await userRepository.getUser(user!.uid);
+        userData = await userService.getUser(user!.uid);
         setState(() {
           isLoading = false;
         });
