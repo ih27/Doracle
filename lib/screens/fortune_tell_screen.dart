@@ -1,7 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../controllers/fortune_teller.dart';
 import '../controllers/openai_fortune_teller.dart';
-import '../controllers/gemini_fortune_teller.dart';
 import '../helpers/constants.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/firestore_user_repository.dart';
@@ -23,8 +23,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   List<TextSpan> _fortuneSpans = [];
   bool _isLoading = false;
   bool _isFortuneCompleted = false;
-  String _selectedFortuneTeller = 'OpenAI';
-  final List<String> _fortuneTellers = ['OpenAI', 'Gemini'];
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
 
@@ -32,16 +30,23 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   void initState() {
     super.initState();
     _userService = UserService(FirestoreUserRepository());
-    _initializeFortuneTeller();
     _fetchRandomQuestions();
   }
 
+  String _getRandomPersonaInstruction() {
+    final personas = [
+      PersonaInstructions.louisCK,
+      PersonaInstructions.jerrySeinfeld,
+      PersonaInstructions.rickyGervais,
+      PersonaInstructions.georgeCarlin,
+      PersonaInstructions.kevinHart,
+    ];
+    return personas[Random().nextInt(personas.length)];
+  }
+
   void _initializeFortuneTeller() {
-    if (_selectedFortuneTeller == 'OpenAI') {
-      _fortuneTeller = OpenAIFortuneTeller(PersonaInstructions.fortuneTeller, _userService);
-    } else {
-      _fortuneTeller = GeminiFortuneTeller(PersonaInstructions.wiseSage, _userService);
-    }
+    final randomPersona = _getRandomPersonaInstruction();
+    _fortuneTeller = OpenAIFortuneTeller(randomPersona, _userService);
   }
 
   Future<void> _fetchRandomQuestions() async {
@@ -53,7 +58,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   void _getFortune(String question) {
-      if (question.trim().isEmpty) {
+    if (question.trim().isEmpty) {
       showErrorSnackBar(context, 'Please enter a question.');
       return;
     }
@@ -65,6 +70,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
+      _initializeFortuneTeller(); // Initialize with a random persona for each fortune request
       if (_fortuneTeller != null) {
         _fortuneTeller!.getFortune(question).listen(
           (fortunePart) {
@@ -93,7 +99,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       } else {
         setState(() {
           _fortuneSpans = List.from(_fortuneSpans)
-            ..add(const TextSpan(text: 'No fortune teller selected.'));
+            ..add(const TextSpan(text: 'Failed to contact our fortune teller.'));
           _isLoading = false;
           _isFortuneCompleted = true;
         });
@@ -104,15 +110,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           ..add(const TextSpan(text: 'Failed to fetch fortune'));
         _isLoading = false;
         _isFortuneCompleted = true;
-      });
-    }
-  }
-
-  void _onFortuneTellerChanged(String? newValue) {
-    if (newValue != null) {
-      setState(() {
-        _selectedFortuneTeller = newValue;
-        _initializeFortuneTeller();
       });
     }
   }
@@ -136,26 +133,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
             'Ask your question and get a fortune reading!',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              const Text('Choose your fortune teller:'),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: _selectedFortuneTeller,
-                  onChanged: _onFortuneTellerChanged,
-                  items: _fortuneTellers
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 24),
           TextField(
