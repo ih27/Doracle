@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
-import 'repositories/user_repository.dart';
 import 'repositories/firestore_user_repository.dart';
 import 'screens/main_screen.dart';
 import 'screens/simple_login_screen.dart';
+import 'services/user_service.dart';
 
-final UserRepository userRepository = FirestoreUserRepository();
+final UserService userService = UserService(FirestoreUserRepository());
 
 User? currentUser() {
   return FirebaseAuth.instance.currentUser;
@@ -35,7 +35,7 @@ Future<void> handleRegister(
   try {
     final userCredential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
-    await userRepository.addUser(userCredential.user!, {
+    await userService.addUser(userCredential.user!, {
       'email': email,
     });
     if (!context.mounted) return;
@@ -138,7 +138,7 @@ Future<void> handleSignOut(BuildContext context) async {
 
 Future<void> _associateEmailWith(UserCredential userCredential) async {
   if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-    await userRepository.addUser(userCredential.user!, {
+    await userService.addUser(userCredential.user!, {
       'email': userCredential.user?.email,
     });
   }

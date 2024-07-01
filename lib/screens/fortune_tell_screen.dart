@@ -4,7 +4,9 @@ import '../controllers/openai_fortune_teller.dart';
 import '../controllers/gemini_fortune_teller.dart';
 import '../helpers/constants.dart';
 import '../helpers/show_snackbar.dart';
+import '../repositories/firestore_user_repository.dart';
 import '../services/firestore_service.dart';
+import '../services/user_service.dart';
 import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class FortuneTellScreen extends StatefulWidget {
 
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final TextEditingController _questionController = TextEditingController();
+  late UserService _userService;
   FortuneTeller? _fortuneTeller;
   List<TextSpan> _fortuneSpans = [];
   bool _isLoading = false;
@@ -28,15 +31,16 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   @override
   void initState() {
     super.initState();
+    _userService = UserService(FirestoreUserRepository());
     _initializeFortuneTeller();
     _fetchRandomQuestions();
   }
 
   void _initializeFortuneTeller() {
     if (_selectedFortuneTeller == 'OpenAI') {
-      _fortuneTeller = OpenAIFortuneTeller(PersonaInstructions.fortuneTeller);
+      _fortuneTeller = OpenAIFortuneTeller(PersonaInstructions.fortuneTeller, _userService);
     } else {
-      _fortuneTeller = GeminiFortuneTeller(PersonaInstructions.wiseSage);
+      _fortuneTeller = GeminiFortuneTeller(PersonaInstructions.wiseSage, _userService);
     }
   }
 
