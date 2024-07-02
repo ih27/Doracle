@@ -21,6 +21,7 @@ dependencies:
   firebase_crashlytics: ^4.0.2
   firebase_analytics: ^11.1.0
   purchases_flutter: ^6.29.4
+  firebase_app_check: ^0.3.0+2
 
 dev_dependencies:
   flutter_lints: ^4.0.0

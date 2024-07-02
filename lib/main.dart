@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,9 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  // Activate App Check
+  await FirebaseAppCheck.instance.activate();
 
   runApp(const MyApp());
   FlutterNativeSplash.remove();
