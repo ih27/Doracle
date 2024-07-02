@@ -35,7 +35,7 @@ Future<void> handleRegister(
   try {
     final userCredential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
-    await userService.addUser(userCredential.user!, {
+    await userService.addUser(userCredential.user!.uid, {
       'email': email,
     });
     if (!context.mounted) return;
@@ -138,7 +138,7 @@ Future<void> handleSignOut(BuildContext context) async {
 
 Future<void> _associateEmailWith(UserCredential userCredential) async {
   if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-    await userService.addUser(userCredential.user!, {
+    await userService.addUser(userCredential.user!.uid, {
       'email': userCredential.user?.email,
     });
   }

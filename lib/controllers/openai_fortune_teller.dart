@@ -7,11 +7,13 @@ import '../services/user_service.dart';
 class OpenAIFortuneTeller extends FortuneTeller {
   late OpenAIService _openAIService;
 
-  OpenAIFortuneTeller(UserService userService, String personaName, String personaInstructions) 
+  OpenAIFortuneTeller(
+      UserService userService, String personaName, String personaInstructions)
       : super(userService, personaName, personaInstructions) {
-    _openAIService = OpenAIService(dotenv.env['OPENAI_API_KEY']!, personaInstructions);
+    _openAIService =
+        OpenAIService(dotenv.env['OPENAI_API_KEY']!, personaInstructions);
   }
-  
+
   @override
   Stream<String> getFortune(String question) async* {
     // Update user's fortune data
@@ -20,7 +22,7 @@ class OpenAIFortuneTeller extends FortuneTeller {
     // Get the fortune from OpenAI
     Stream<OpenAIStreamChatCompletionModel> completionStream =
         _openAIService.getFortune(question);
-    
+
     await for (var event in completionStream) {
       yield event.choices.first.delta.content
               ?.map((contentItem) => contentItem?.text ?? '')

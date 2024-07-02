@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'user_repository.dart';
 
 class FirestoreUserRepository implements UserRepository {
@@ -7,12 +6,12 @@ class FirestoreUserRepository implements UserRepository {
   final _collectionName = 'users';
 
   @override
-  Future<void> addUser(User user, Map<String, dynamic> userData) async {
+  Future<void> addUser(String userId, Map<String, dynamic> userData) async {
     userData['createdAt'] = Timestamp.now();
     userData['questionHistory'] = [];
     userData['questionsAsked'] = 0;
     userData['totalQuestionsAsked'] = 0;
-    await _firestore.collection(_collectionName).doc(user.uid).set(userData);
+    await _firestore.collection(_collectionName).doc(userId).set(userData);
   }
 
   @override
@@ -26,7 +25,8 @@ class FirestoreUserRepository implements UserRepository {
   }
 
   @override
-  Future<void> updateUserFortuneData(String userId, String question, String persona) async {
+  Future<void> updateUserFortuneData(
+      String userId, String question, String persona) async {
     final userRef = _firestore.collection(_collectionName).doc(userId);
 
     await _firestore.runTransaction((transaction) async {
@@ -40,18 +40,20 @@ class FirestoreUserRepository implements UserRepository {
       final List<Map<String, dynamic>> questionHistory =
           List<Map<String, dynamic>>.from(userData['questionHistory'] ?? []);
       final int questionsAsked = (userData['questionsAsked'] ?? 0) + 1;
-      final int totalQuestionsAsked = (userData['totalQuestionsAsked'] ?? 0) + 1;
+      final int totalQuestionsAsked =
+          (userData['totalQuestionsAsked'] ?? 0) + 1;
 
       questionHistory.add({
         'question': question,
         'persona': persona,
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': Timestamp.now().millisecondsSinceEpoch,
       });
 
       transaction.update(userRef, {
         'questionHistory': questionHistory,
         'questionsAsked': questionsAsked,
         'totalQuestionsAsked': totalQuestionsAsked,
+        'lastQuestionTimestamp': FieldValue.serverTimestamp(),
       });
     });
   }
