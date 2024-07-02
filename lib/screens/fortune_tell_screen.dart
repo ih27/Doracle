@@ -25,6 +25,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   bool _isFortuneCompleted = false;
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
+  String? _lastUsedPersona;
 
   @override
   void initState() {
@@ -41,7 +42,15 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       PersonaInstructions.georgeCarlin,
       PersonaInstructions.kevinHart,
     ];
-    return personas[Random().nextInt(personas.length)];
+
+    // Remove the last used persona from the list of options
+    if (_lastUsedPersona != null) {
+      personas.remove(_lastUsedPersona);
+    }
+
+    final selectedPersona = personas[Random().nextInt(personas.length)];
+    _lastUsedPersona = selectedPersona;
+    return selectedPersona;
   }
 
   void _initializeFortuneTeller() {
