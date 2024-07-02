@@ -14,10 +14,10 @@ class UserService {
     return await _userRepository.getUser(userId);
   }
 
-  Future<void> updateUserFortuneData(String question) async {
+  Future<void> updateUserFortuneData(String question, String persona) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await _userRepository.updateUserFortuneData(user.uid, question);
+      await _userRepository.updateUserFortuneData(user.uid, question, persona);
     }
   }
 

@@ -75,13 +75,13 @@ class FirestoreService {
     return _personasCache; // This line should never be reached due to the fallback, but Dart requires it
   }
 
-  static Future<String> getRandomPersonaInstruction() async {
+  static Future<Map<String, String>> getRandomPersona() async {
     if (_personasCache.isEmpty) {
       await fetchPersonas();
     }
     if (_personasCache.isEmpty) {
       // This should never happen due to the fallback in fetchPersonas, but just in case:
-      return DefaultPersona.instructions;
+      return {'name': 'Default', 'instructions': DefaultPersona.instructions};
     }
 
     List<String> availablePersonas = _personasCache.keys.toList();
@@ -94,12 +94,15 @@ class FirestoreService {
     final random = Random().nextInt(availablePersonas.length);
     final selectedPersona = availablePersonas[random];
     _lastUsedPersona = selectedPersona;
-    return _personasCache[selectedPersona]!;
+    return {
+      'name': selectedPersona,
+      'instructions': _personasCache[selectedPersona]!,
+    };
   }
 
   static Map<String, String> _getDefaultPersonas() {
     return {
-      'default': DefaultPersona.instructions,
+      'Default': DefaultPersona.instructions,
     };
   }
 }

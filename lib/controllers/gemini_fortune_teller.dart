@@ -4,19 +4,18 @@ import 'fortune_teller.dart';
 import '../services/gemini_service.dart';
 import '../services/user_service.dart';
 
-class GeminiFortuneTeller implements FortuneTeller {
+class GeminiFortuneTeller extends FortuneTeller {
   late GeminiService _geminiService;
-  @override
-  final UserService userService;
 
-  GeminiFortuneTeller(String instructions, this.userService) {
-    _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY']!, instructions);
+  GeminiFortuneTeller(UserService userService, String personaName, String personaInstructions) 
+      : super(userService, personaName, personaInstructions) {
+    _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY']!, personaInstructions);
   }
 
   @override
   Stream<String> getFortune(String question) async* {
     // Update user's fortune data
-    await userService.updateUserFortuneData(question);
+    await userService.updateUserFortuneData(question, personaName);
 
     // Get the fortune from Gemini
     Stream<GenerateContentResponse> completionStream =

@@ -26,7 +26,7 @@ class FirestoreUserRepository implements UserRepository {
   }
 
   @override
-  Future<void> updateUserFortuneData(String userId, String question) async {
+  Future<void> updateUserFortuneData(String userId, String question, String persona) async {
     final userRef = _firestore.collection(_collectionName).doc(userId);
 
     await _firestore.runTransaction((transaction) async {
@@ -37,13 +37,16 @@ class FirestoreUserRepository implements UserRepository {
       }
 
       final userData = userDoc.data() as Map<String, dynamic>;
-      final List<String> questionHistory =
-          List<String>.from(userData['questionHistory'] ?? []);
+      final List<Map<String, dynamic>> questionHistory =
+          List<Map<String, dynamic>>.from(userData['questionHistory'] ?? []);
       final int questionsAsked = (userData['questionsAsked'] ?? 0) + 1;
-      final int totalQuestionsAsked =
-          (userData['totalQuestionsAsked'] ?? 0) + 1;
+      final int totalQuestionsAsked = (userData['totalQuestionsAsked'] ?? 0) + 1;
 
-      questionHistory.add(question);
+      questionHistory.add({
+        'question': question,
+        'persona': persona,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
       transaction.update(userRef, {
         'questionHistory': questionHistory,

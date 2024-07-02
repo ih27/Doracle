@@ -32,8 +32,12 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   Future<void> _initializeFortuneTeller() async {
-    final randomPersona = await FirestoreService.getRandomPersonaInstruction();
-    _fortuneTeller = OpenAIFortuneTeller(randomPersona, _userService);
+    final personaData = await FirestoreService.getRandomPersona();
+    _fortuneTeller = OpenAIFortuneTeller(
+      _userService,
+      personaData['name']!,
+      personaData['instructions']!
+    );
   }
 
   Future<void> _fetchRandomQuestions() async {

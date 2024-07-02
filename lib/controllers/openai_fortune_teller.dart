@@ -4,19 +4,18 @@ import 'fortune_teller.dart';
 import '../services/openai_service.dart';
 import '../services/user_service.dart';
 
-class OpenAIFortuneTeller implements FortuneTeller {
+class OpenAIFortuneTeller extends FortuneTeller {
   late OpenAIService _openAIService;
-  @override
-  final UserService userService;
 
-  OpenAIFortuneTeller(String instructions, this.userService) {
-    _openAIService = OpenAIService(dotenv.env['OPENAI_API_KEY']!, instructions);
+  OpenAIFortuneTeller(UserService userService, String personaName, String personaInstructions) 
+      : super(userService, personaName, personaInstructions) {
+    _openAIService = OpenAIService(dotenv.env['OPENAI_API_KEY']!, personaInstructions);
   }
   
   @override
   Stream<String> getFortune(String question) async* {
     // Update user's fortune data
-    await userService.updateUserFortuneData(question);
+    await userService.updateUserFortuneData(question, personaName);
 
     // Get the fortune from OpenAI
     Stream<OpenAIStreamChatCompletionModel> completionStream =
