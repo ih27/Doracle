@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../auth_wrapper.dart';
+import '../repositories/firestore_fortune_content_repository.dart';
 import 'home_screen.dart';
 import 'fortune_tell_screen.dart';
 import 'shop_screen.dart';
@@ -13,15 +14,22 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    FortuneTellScreen(),
-    ShopScreen(),
-  ];
+  late List<Widget> _widgetOptions;
+  final _fortuneContentRepository = FirestoreFortuneContentRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _widgetOptions = <Widget>[
+      const HomeScreen(),
+      FortuneTellScreen(fortuneContentRepository: _fortuneContentRepository),
+      const ShopScreen(),
+    ];
+  }
 
   static const List<String> _titles = [
     'Home',
-    'Fortune Tell',
+    'Doragle',
     'Shop',
   ];
 

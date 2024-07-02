@@ -3,12 +3,14 @@ import '../controllers/fortune_teller.dart';
 import '../controllers/openai_fortune_teller.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/firestore_user_repository.dart';
-import '../services/firestore_service.dart';
+import '../repositories/fortune_content_repository.dart';
 import '../services/user_service.dart';
 import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
-  const FortuneTellScreen({super.key});
+  final FortuneContentRepository fortuneContentRepository;
+
+  const FortuneTellScreen({super.key, required this.fortuneContentRepository});
 
   @override
   _FortuneTellScreenState createState() => _FortuneTellScreenState();
@@ -32,17 +34,15 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   }
 
   Future<void> _initializeFortuneTeller() async {
-    final personaData = await FirestoreService.getRandomPersona();
+    final personaData =
+        await widget.fortuneContentRepository.getRandomPersona();
     _fortuneTeller = OpenAIFortuneTeller(
-      _userService,
-      personaData['name']!,
-      personaData['instructions']!
-    );
+        _userService, personaData['name']!, personaData['instructions']!);
   }
 
   Future<void> _fetchRandomQuestions() async {
-    final randomQuestions = await FirestoreService.fetchRandomQuestions(
-        _numberOfQuestionsPerCategory);
+    final randomQuestions = await widget.fortuneContentRepository
+        .fetchRandomQuestions(_numberOfQuestionsPerCategory);
     setState(() {
       _randomQuestions = randomQuestions;
     });
@@ -90,8 +90,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       } else {
         setState(() {
           _fortuneSpans = List.from(_fortuneSpans)
-            ..add(
-                const TextSpan(text: 'Our puppy is not in the mood...'));
+            ..add(const TextSpan(text: 'Our puppy is not in the mood...'));
           _isLoading = false;
           _isFortuneCompleted = true;
         });
