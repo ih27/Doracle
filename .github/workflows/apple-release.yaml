@@ -34,6 +34,7 @@ jobs:
           architecture: x64
           cache: true
       - name: Build and Deploy to TestFlight
+        id: build_deploy
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
@@ -43,3 +44,11 @@ jobs:
         run: |
           cd ./ios
           bundle exec fastlane release_beta
+      - name: Send an AAB link to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: ${{vars.CHANNEL_ID}}
+          slack-message: " You can test <itms-beta://testflight.apple.com/v1/app/6504555731|Testflight> [*${{steps.build_deploy.outputs.VERSION_NUMBER}}* (${{steps.build_deploy.outputs.BUILD_NUMBER}})] "
+        env:
+          SLACK_BOT_TOKEN: ${{secrets.SLACK_BOT_TOKEN}}

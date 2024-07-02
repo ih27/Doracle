@@ -51,6 +51,10 @@ platform :ios do
     build_number = bump_build_number()
     version_name = get_version_name()
 
+    # Output version and build number to be picked up by GitHub Actions
+    sh("echo \"VERSION_NUMBER=#{version_name}\" >> $GITHUB_OUTPUT")
+    sh("echo \"BUILD_NUMBER=#{build_number}\" >> $GITHUB_OUTPUT")
+
     Dir.chdir "../.." do
       puts "*** Installing Flutterfire CLI tools ***"
       sh("dart", "pub", "global", "activate", "flutterfire_cli")
