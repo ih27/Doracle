@@ -1,8 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../controllers/fortune_teller.dart';
 import '../controllers/openai_fortune_teller.dart';
-import '../helpers/constants.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/firestore_user_repository.dart';
 import '../services/firestore_service.dart';
@@ -25,7 +23,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   bool _isFortuneCompleted = false;
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
-  String? _lastUsedPersona;
 
   @override
   void initState() {
@@ -34,27 +31,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     _fetchRandomQuestions();
   }
 
-  String _getRandomPersonaInstruction() {
-    final personas = [
-      PersonaInstructions.louisCK,
-      PersonaInstructions.jerrySeinfeld,
-      PersonaInstructions.rickyGervais,
-      PersonaInstructions.georgeCarlin,
-      PersonaInstructions.kevinHart,
-    ];
-
-    // Remove the last used persona from the list of options
-    if (_lastUsedPersona != null) {
-      personas.remove(_lastUsedPersona);
-    }
-
-    final selectedPersona = personas[Random().nextInt(personas.length)];
-    _lastUsedPersona = selectedPersona;
-    return selectedPersona;
-  }
-
-  void _initializeFortuneTeller() {
-    final randomPersona = _getRandomPersonaInstruction();
+  Future<void> _initializeFortuneTeller() async {
+    final randomPersona = await FirestoreService.getRandomPersonaInstruction();
     _fortuneTeller = OpenAIFortuneTeller(randomPersona, _userService);
   }
 
@@ -66,7 +44,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
   }
 
-  void _getFortune(String question) {
+  void _getFortune(String question) async {
     if (question.trim().isEmpty) {
       showErrorSnackBar(context, 'Please enter a question.');
       return;
@@ -79,7 +57,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
-      _initializeFortuneTeller(); // Initialize with a random persona for each fortune request
+      await _initializeFortuneTeller(); // Initialize with a random persona for each fortune request
       if (_fortuneTeller != null) {
         _fortuneTeller!.getFortune(question).listen(
           (fortunePart) {
@@ -108,7 +86,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       } else {
         setState(() {
           _fortuneSpans = List.from(_fortuneSpans)
-            ..add(const TextSpan(text: 'Failed to contact our fortune teller.'));
+            ..add(
+                const TextSpan(text: 'Our puppy is not in the mood...'));
           _isLoading = false;
           _isFortuneCompleted = true;
         });
@@ -116,7 +95,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     } catch (e) {
       setState(() {
         _fortuneSpans = List.from(_fortuneSpans)
-          ..add(const TextSpan(text: 'Failed to fetch fortune'));
+          ..add(const TextSpan(text: 'Confused puppy.'));
         _isLoading = false;
         _isFortuneCompleted = true;
       });
