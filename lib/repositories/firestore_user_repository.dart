@@ -4,6 +4,7 @@ import 'user_repository.dart';
 
 class FirestoreUserRepository implements UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _collectionName = 'users';
 
   @override
   Future<void> addUser(User user, Map<String, dynamic> userData) async {
@@ -11,13 +12,13 @@ class FirestoreUserRepository implements UserRepository {
     userData['questionHistory'] = [];
     userData['questionsAsked'] = 0;
     userData['totalQuestionsAsked'] = 0;
-    await _firestore.collection('users').doc(user.uid).set(userData);
+    await _firestore.collection(_collectionName).doc(user.uid).set(userData);
   }
 
   @override
   Future<Map<String, dynamic>?> getUser(String userId) async {
     DocumentSnapshot userDoc = await _firestore
-        .collection('users')
+        .collection(_collectionName)
         .doc(userId)
         .get()
         .timeout(const Duration(seconds: 10));
@@ -26,7 +27,7 @@ class FirestoreUserRepository implements UserRepository {
 
   @override
   Future<void> updateUserFortuneData(String userId, String question) async {
-    final userRef = _firestore.collection('users').doc(userId);
+    final userRef = _firestore.collection(_collectionName).doc(userId);
 
     await _firestore.runTransaction((transaction) async {
       final userDoc = await transaction.get(userRef);
@@ -36,9 +37,11 @@ class FirestoreUserRepository implements UserRepository {
       }
 
       final userData = userDoc.data() as Map<String, dynamic>;
-      final List<String> questionHistory = List<String>.from(userData['questionHistory'] ?? []);
+      final List<String> questionHistory =
+          List<String>.from(userData['questionHistory'] ?? []);
       final int questionsAsked = (userData['questionsAsked'] ?? 0) + 1;
-      final int totalQuestionsAsked = (userData['totalQuestionsAsked'] ?? 0) + 1;
+      final int totalQuestionsAsked =
+          (userData['totalQuestionsAsked'] ?? 0) + 1;
 
       questionHistory.add(question);
 
@@ -48,5 +51,13 @@ class FirestoreUserRepository implements UserRepository {
         'totalQuestionsAsked': totalQuestionsAsked,
       });
     });
+  }
+
+  @override
+  Future<void> updateUserField<T>(String userId, String field, T value) async {
+    await _firestore
+        .collection(_collectionName)
+        .doc(userId)
+        .update({field: value});
   }
 }

@@ -19,5 +19,29 @@ class UserService {
     if (user != null) {
       await _userRepository.updateUserFortuneData(user.uid, question);
     }
-  }  
+  }
+
+  Future<T?> getUserField<T>(String field) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userData = await getUser(user.uid);
+      return userData?[field] as T?;
+    }
+    return null;
+  }
+
+  Future<void> updateUserField<T>(String field, T value) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _userRepository.updateUserField(user.uid, field, value);
+    }
+  }
+
+  Future<Map<String, dynamic>?> getCurrentUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return await getUser(user.uid);
+    }
+    return null;
+  }
 }
