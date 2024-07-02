@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import '../controllers/fortune_teller.dart';
 import '../controllers/openai_fortune_teller.dart';
 import '../helpers/show_snackbar.dart';
-import '../repositories/firestore_user_repository.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../services/user_service.dart';
 import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   final FortuneContentRepository fortuneContentRepository;
+  final UserService userService;
 
-  const FortuneTellScreen({super.key, required this.fortuneContentRepository});
+  const FortuneTellScreen({
+    super.key,
+    required this.fortuneContentRepository,
+    required this.userService,
+  });
 
   @override
   _FortuneTellScreenState createState() => _FortuneTellScreenState();
@@ -29,7 +33,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   @override
   void initState() {
     super.initState();
-    _userService = UserService(FirestoreUserRepository());
+    _userService = widget.userService;
     _fetchRandomQuestions();
   }
 

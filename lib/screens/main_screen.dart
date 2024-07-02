@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../auth_wrapper.dart';
 import '../repositories/firestore_fortune_content_repository.dart';
+import '../repositories/firestore_user_repository.dart';
+import '../services/user_service.dart';
 import 'home_screen.dart';
 import 'fortune_tell_screen.dart';
 import 'shop_screen.dart';
@@ -16,13 +18,17 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   late List<Widget> _widgetOptions;
   final _fortuneContentRepository = FirestoreFortuneContentRepository();
+  final _userService = UserService(FirestoreUserRepository());
 
   @override
   void initState() {
     super.initState();
     _widgetOptions = <Widget>[
       const HomeScreen(),
-      FortuneTellScreen(fortuneContentRepository: _fortuneContentRepository),
+      FortuneTellScreen(
+        fortuneContentRepository: _fortuneContentRepository,
+        userService: _userService,
+      ),
       const ShopScreen(),
     ];
   }
@@ -56,18 +62,18 @@ class _MainScreenState extends State<MainScreen> {
         children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home),
+            label: _titles[0],
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star),
-            label: 'Fortune Tell',
+            icon: const Icon(Icons.star),
+            label: _titles[1],
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Shop',
+            icon: const Icon(Icons.shopping_cart),
+            label: _titles[2],
           ),
         ],
         currentIndex: _selectedIndex,
