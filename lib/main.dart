@@ -10,10 +10,7 @@ import 'dependency_injection.dart';
 import 'firebase_options.dart';
 import 'auth_wrapper.dart';
 import 'theme.dart';
-import 'services/firestore_service.dart';
 import 'controllers/purchases.dart';
-
-const int splashDuration = 1;
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +41,6 @@ void main() async {
   // Set up GetIt dependencies and initialize important components
   setupDependencies();
   await getIt<PurchasesController>().initialize();
-  await FirestoreService.initializeQuestionsCache();
 
   runApp(const MyApp());
   FlutterNativeSplash.remove();

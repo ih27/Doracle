@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           // Generated code for this IconButton Widget...
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 20, 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 20, 0),
             child: IconButton(
               icon: const Icon(
                 Icons.settings_suggest_rounded,
@@ -59,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
           )
         ],
         centerTitle: true,
-        toolbarHeight: 50,
+        toolbarHeight: 60,
         elevation: 0,
       ),
       body: Navigator(

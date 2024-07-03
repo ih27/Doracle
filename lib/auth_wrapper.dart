@@ -7,6 +7,7 @@ import 'helpers/show_snackbar.dart';
 import 'repositories/firestore_user_repository.dart';
 import 'screens/main_screen.dart';
 import 'screens/simple_login_screen.dart';
+import 'services/firestore_service.dart';
 import 'services/user_service.dart';
 
 final UserService userService = UserService(FirestoreUserRepository());
@@ -152,6 +153,21 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      if (user != null) {
+        // User is signed in, initialize Firestore cache in the background
+        await FirestoreService.initializeQuestionsCache();
+      }
+    });
+  }
+
   void _handlePlatformSignIn(BuildContext context) {
     if (Platform.isAndroid) {
       handleGoogleSignIn(context);
