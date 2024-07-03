@@ -37,7 +37,7 @@ flutter:
     - assets/splash/background.png
     - assets/google_logo.png
     - assets/apple_logo.png
-    - assets/animations/pes.riv
+    - assets/animations/meraki_dog.riv
 
 flutter_launcher_icons:
   android: true

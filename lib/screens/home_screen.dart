@@ -59,8 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: RiveAnimation.asset(
-                    'assets/animations/pes.riv',
-                    artboard: 'Pes Animace',
+                    'assets/animations/meraki_dog.riv',
+                    artboard: 'meraki_dog',
                     fit: BoxFit.contain,
                     onInit: _onRiveInit,
                   ),
