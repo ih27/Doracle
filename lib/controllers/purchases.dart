@@ -5,8 +5,10 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PurchasesController {
-  static Future<void> initialize() async {
-    if (await Purchases.isConfigured) {
+  bool _isInitialized = false;
+
+  Future<void> initialize() async {
+    if (_isInitialized) {
       return; // SDK is already configured
     }
 
@@ -25,9 +27,11 @@ class PurchasesController {
     }
     await Purchases.configure(
         PurchasesConfiguration(apiKey)..appUserID = currentUser()?.uid);
+
+    _isInitialized = true;
   }
 
-  static Future<List<Package>> fetchPackages() async {
+  Future<List<Package>> fetchPackages() async {
     await _ensureInitialized();
     try {
       Offerings offerings = await Purchases.getOfferings();
@@ -40,8 +44,7 @@ class PurchasesController {
     return [];
   }
 
-  static Future<bool> purchasePackage(
-      BuildContext context, Package package) async {
+  Future<bool> purchasePackage(BuildContext context, Package package) async {
     await _ensureInitialized();
     try {
       CustomerInfo customerInfo = await Purchases.purchasePackage(package);
@@ -51,7 +54,7 @@ class PurchasesController {
     }
   }
 
-  static Future<bool> checkEntitlement(String entitlementId) async {
+  Future<bool> checkEntitlement(String entitlementId) async {
     await _ensureInitialized();
     try {
       CustomerInfo customerInfo = await Purchases.getCustomerInfo();
@@ -62,7 +65,7 @@ class PurchasesController {
     }
   }
 
-  static Future<bool> restorePurchases(BuildContext context) async {
+  Future<bool> restorePurchases(BuildContext context) async {
     await _ensureInitialized();
     try {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
@@ -72,8 +75,8 @@ class PurchasesController {
     }
   }
 
-  static Future<void> _ensureInitialized() async {
-    if (!await Purchases.isConfigured) {
+  Future<void> _ensureInitialized() async {
+    if (!_isInitialized) {
       await initialize();
     }
   }

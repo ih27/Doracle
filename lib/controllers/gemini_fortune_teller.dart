@@ -1,15 +1,16 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'fortune_teller.dart';
 import '../services/gemini_service.dart';
-import '../services/user_service.dart';
 
 class GeminiFortuneTeller extends FortuneTeller {
-  late GeminiService _geminiService;
+  final GeminiService geminiService;
 
-  GeminiFortuneTeller(UserService userService, String personaName, String personaInstructions) 
-      : super(userService, personaName, personaInstructions) {
-    _geminiService = GeminiService(dotenv.env['GEMINI_API_KEY']!, personaInstructions);
+  GeminiFortuneTeller(super.userService, super.personaName, this.geminiService);
+
+  @override
+  void setPersona(String newPersonaName, String newInstructions) {
+    personaName = newPersonaName;
+    geminiService.setInstructions(newInstructions);
   }
 
   @override
@@ -19,8 +20,8 @@ class GeminiFortuneTeller extends FortuneTeller {
 
     // Get the fortune from Gemini
     Stream<GenerateContentResponse> completionStream =
-        _geminiService.getFortune(question);
-    
+        geminiService.getFortune(question);
+
     await for (var event in completionStream) {
       yield event.text ?? '';
     }

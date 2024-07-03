@@ -1,29 +1,23 @@
 import 'package:flutter/material.dart';
 import '../controllers/fortune_teller.dart';
-import '../controllers/openai_fortune_teller.dart';
+import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
-import '../services/user_service.dart';
 import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
-  final FortuneContentRepository fortuneContentRepository;
-  final UserService userService;
-
-  const FortuneTellScreen({
-    super.key,
-    required this.fortuneContentRepository,
-    required this.userService,
-  });
+  const FortuneTellScreen({super.key});
 
   @override
   _FortuneTellScreenState createState() => _FortuneTellScreenState();
 }
 
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
+  final FortuneContentRepository _fortuneContentRepository =
+      getIt<FortuneContentRepository>();
+  late FortuneTeller _fortuneTeller;
+
   final TextEditingController _questionController = TextEditingController();
-  late UserService _userService;
-  FortuneTeller? _fortuneTeller;
   List<TextSpan> _fortuneSpans = [];
   bool _isLoading = false;
   bool _isFortuneCompleted = false;
@@ -33,19 +27,19 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   @override
   void initState() {
     super.initState();
-    _userService = widget.userService;
     _fetchRandomQuestions();
   }
 
   Future<void> _initializeFortuneTeller() async {
-    final personaData =
-        await widget.fortuneContentRepository.getRandomPersona();
-    _fortuneTeller = OpenAIFortuneTeller(
-        _userService, personaData['name']!, personaData['instructions']!);
+    final personaData = await _fortuneContentRepository.getRandomPersona();
+    setFortuneTellerPersona(
+      personaData['name']!,
+      personaData['instructions']!,
+    );
   }
 
   Future<void> _fetchRandomQuestions() async {
-    final randomQuestions = await widget.fortuneContentRepository
+    final randomQuestions = await _fortuneContentRepository
         .fetchRandomQuestions(_numberOfQuestionsPerCategory);
     setState(() {
       _randomQuestions = randomQuestions;
@@ -65,44 +59,35 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
-      await _initializeFortuneTeller(); // Initialize with a random persona for each fortune request
-      if (_fortuneTeller != null) {
-        _fortuneTeller!.getFortune(question).listen(
-          (fortunePart) {
-            setState(() {
-              _fortuneSpans = List.from(_fortuneSpans)
-                ..add(TextSpan(text: fortunePart));
-            });
-          },
-          onDone: () {
-            setState(() {
-              _fortuneSpans = List.from(_fortuneSpans)
-                ..add(const TextSpan(text: '🔮'));
-              _isLoading = false;
-              _isFortuneCompleted = true;
-            });
-          },
-          onError: (error) {
-            setState(() {
-              _fortuneSpans = List.from(_fortuneSpans)
-                ..add(const TextSpan(text: 'Unexpected error occurred'));
-              _isLoading = false;
-              _isFortuneCompleted = true;
-            });
-          },
-        );
-      } else {
-        setState(() {
-          _fortuneSpans = List.from(_fortuneSpans)
-            ..add(const TextSpan(text: 'Our puppy is not in the mood...'));
-          _isLoading = false;
-          _isFortuneCompleted = true;
-        });
-      }
-    } catch (e) {
+      await _initializeFortuneTeller();
+      _fortuneTeller.getFortune(question).listen(
+        (fortunePart) {
+          setState(() {
+            _fortuneSpans = List.from(_fortuneSpans)
+              ..add(TextSpan(text: fortunePart));
+          });
+        },
+        onDone: () {
+          setState(() {
+            _fortuneSpans = List.from(_fortuneSpans)
+              ..add(const TextSpan(text: '🔮'));
+            _isLoading = false;
+            _isFortuneCompleted = true;
+          });
+        },
+        onError: (error) {
+          setState(() {
+            _fortuneSpans = List.from(_fortuneSpans)
+              ..add(const TextSpan(text: 'Unexpected error occurred'));
+            _isLoading = false;
+            _isFortuneCompleted = true;
+          });
+        },
+      );
+        } catch (e) {
       setState(() {
         _fortuneSpans = List.from(_fortuneSpans)
-          ..add(const TextSpan(text: 'Confused puppy.'));
+          ..add(const TextSpan(text: 'Our puppy is not in the mood...'));
         _isLoading = false;
         _isFortuneCompleted = true;
       });

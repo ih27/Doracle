@@ -2,15 +2,25 @@ import 'package:dart_openai/dart_openai.dart';
 
 class OpenAIService {
   final String apiKey;
+  String instructions;
   final String model = 'gpt-3.5-turbo';
   late OpenAIChatCompletionChoiceMessageModel systemMessage;
 
-  OpenAIService(this.apiKey, String instructions) {
+  OpenAIService(this.apiKey, this.instructions) {
     OpenAI.apiKey = apiKey;
     OpenAI.requestsTimeOut = const Duration(seconds: 60);
+    _initializeSystemMessage();
+  }
+
+  void _initializeSystemMessage() {
     systemMessage = OpenAIChatCompletionChoiceMessageModel(content: [
       OpenAIChatCompletionChoiceMessageContentItemModel.text(instructions)
     ], role: OpenAIChatMessageRole.system);
+  }
+
+  void setInstructions(String newInstructions) {
+    instructions = newInstructions;
+    _initializeSystemMessage();
   }
 
   Stream<OpenAIStreamChatCompletionModel> getFortune(String question) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import '../dependency_injection.dart';
 import '../controllers/purchases.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
@@ -12,6 +13,7 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
+  final PurchasesController _purchasesController = getIt<PurchasesController>();
   List<Package> _packages = [];
   bool _isLoading = true;
 
@@ -23,13 +25,13 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Future<void> _loadPackages() async {
     setState(() => _isLoading = true);
-    _packages = await PurchasesController.fetchPackages();
+    _packages = await _purchasesController.fetchPackages();
     setState(() => _isLoading = false);
   }
 
   Future<void> _handlePurchase(Package package) async {
     setState(() => _isLoading = true);
-    bool success = await PurchasesController.purchasePackage(context, package);
+    bool success = await _purchasesController.purchasePackage(context, package);
     setState(() => _isLoading = false);
     if (success) {
       if (!mounted) return;
@@ -40,7 +42,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Future<void> _handleRestore() async {
     setState(() => _isLoading = true);
-    bool success = await PurchasesController.restorePurchases(context);
+    bool success = await _purchasesController.restorePurchases(context);
     setState(() => _isLoading = false);
     if (success) {
       if (!mounted) return;

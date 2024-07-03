@@ -2,10 +2,10 @@ import '../services/user_service.dart';
 
 abstract class FortuneTeller {
   final UserService userService;
-  final String personaName;
-  final String personaInstructions;
+  String personaName;
 
-  FortuneTeller(this.userService, this.personaName, this.personaInstructions);
+  FortuneTeller(this.userService, this.personaName);
 
+  void setPersona(String newPersonaName, String newInstructions);
   Stream<String> getFortune(String question);
 }

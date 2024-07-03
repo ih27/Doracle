@@ -1,17 +1,17 @@
 import 'package:dart_openai/dart_openai.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'fortune_teller.dart';
 import '../services/openai_service.dart';
-import '../services/user_service.dart';
 
 class OpenAIFortuneTeller extends FortuneTeller {
-  late OpenAIService _openAIService;
+  final OpenAIService openAIService;
 
   OpenAIFortuneTeller(
-      UserService userService, String personaName, String personaInstructions)
-      : super(userService, personaName, personaInstructions) {
-    _openAIService =
-        OpenAIService(dotenv.env['OPENAI_API_KEY']!, personaInstructions);
+      super.userService, super.personaName, this.openAIService);
+
+  @override
+  void setPersona(String newPersonaName, String newInstructions) {
+    personaName = newPersonaName;
+    openAIService.setInstructions(newInstructions);
   }
 
   @override
@@ -21,7 +21,7 @@ class OpenAIFortuneTeller extends FortuneTeller {
 
     // Get the fortune from OpenAI
     Stream<OpenAIStreamChatCompletionModel> completionStream =
-        _openAIService.getFortune(question);
+        openAIService.getFortune(question);
 
     await for (var event in completionStream) {
       yield event.choices.first.delta.content

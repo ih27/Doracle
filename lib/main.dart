@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'dependency_injection.dart';
 import 'firebase_options.dart';
 import 'auth_wrapper.dart';
+import 'services/firestore_service.dart';
+import 'controllers/purchases.dart';
 
 const int splashDuration = 1;
 
@@ -27,8 +30,7 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-  // Fixed delay :-)
-  await Future.delayed(const Duration(seconds: splashDuration));
+
   // Portrait mode only
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -37,6 +39,11 @@ void main() async {
 
   // Activate App Check
   await FirebaseAppCheck.instance.activate();
+
+  // Set up GetIt dependencies and initialize important components
+  setupDependencies();
+  await getIt<PurchasesController>().initialize();
+  await FirestoreService.initializeQuestionsCache();
 
   runApp(const MyApp());
   FlutterNativeSplash.remove();
