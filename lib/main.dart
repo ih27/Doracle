@@ -9,6 +9,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'dependency_injection.dart';
 import 'firebase_options.dart';
 import 'auth_wrapper.dart';
+import 'theme.dart';
 import 'services/firestore_service.dart';
 import 'controllers/purchases.dart';
 
@@ -54,8 +55,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SafeArea(
+    return MaterialApp(
+      title: 'Doracle',
+      theme: AppTheme.lightTheme,
+      home: const SafeArea(
         child: AuthWrapper(),
       ),
     );

@@ -12,65 +12,79 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-  late List<Widget> _widgetOptions;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _widgetOptions = <Widget>[
-      const HomeScreen(),
-      const FortuneTellScreen(),
-      const ShopScreen(),
-    ];
-  }
-
-  static const List<String> _titles = [
-    'Home',
-    'Doracle',
-    'Shop',
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  void _navigateTo(String route) {
+    _navigatorKey.currentState?.pushReplacementNamed(route);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
+        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => handleSignOut(context),
           ),
+          // Generated code for this IconButton Widget...
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 20, 0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.settings_suggest_rounded,
+                size: 24,
+              ),
+              onPressed: () {
+                print('Settings pressed ...');
+              },
+              iconSize: 50,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 50,
+                minHeight: 50,
+              ),
+              style: IconButton.styleFrom(
+                shape: CircleBorder(
+                  side: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          )
         ],
+        centerTitle: true,
+        toolbarHeight: 50,
+        elevation: 0,
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _widgetOptions,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: _titles[0],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.star),
-            label: _titles[1],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.shopping_cart),
-            label: _titles[2],
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
+      body: Navigator(
+        key: _navigatorKey,
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          WidgetBuilder builder;
+          switch (settings.name) {
+            case '/':
+              builder =
+                  (BuildContext context) => HomeScreen(onNavigate: _navigateTo);
+              break;
+            case '/fortune':
+              builder = (BuildContext context) =>
+                  FortuneTellScreen(onNavigate: _navigateTo);
+              break;
+            case '/shop':
+              builder =
+                  (BuildContext context) => ShopScreen(onNavigate: _navigateTo);
+              break;
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+          return MaterialPageRoute(builder: builder, settings: settings);
+        },
       ),
     );
   }

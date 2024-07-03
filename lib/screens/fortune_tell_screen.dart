@@ -6,7 +6,7 @@ import '../repositories/fortune_content_repository.dart';
 import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
-  const FortuneTellScreen({super.key});
+  const FortuneTellScreen({super.key, required void Function(String route) onNavigate});
 
   @override
   _FortuneTellScreenState createState() => _FortuneTellScreenState();

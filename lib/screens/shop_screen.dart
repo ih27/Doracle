@@ -6,7 +6,7 @@ import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 
 class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key});
+  const ShopScreen({super.key, required void Function(String route) onNavigate});
 
   @override
   _ShopScreenState createState() => _ShopScreenState();
