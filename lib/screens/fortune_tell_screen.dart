@@ -15,7 +15,7 @@ class FortuneTellScreen extends StatefulWidget {
 class _FortuneTellScreenState extends State<FortuneTellScreen> {
   final FortuneContentRepository _fortuneContentRepository =
       getIt<FortuneContentRepository>();
-  late FortuneTeller _fortuneTeller;
+  late Future<void> _initializationFuture;
 
   final TextEditingController _questionController = TextEditingController();
   List<TextSpan> _fortuneSpans = [];
@@ -27,7 +27,14 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchRandomQuestions();
+    _initializationFuture = _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await Future.wait([
+      _initializeFortuneTeller(),
+      _fetchRandomQuestions(),
+    ]);
   }
 
   Future<void> _initializeFortuneTeller() async {
@@ -59,8 +66,9 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     });
 
     try {
-      await _initializeFortuneTeller();
-      _fortuneTeller.getFortune(question).listen(
+      await _initializeFortuneTeller(); // Ensure initialization is complete
+      final fortuneTeller = getIt<FortuneTeller>();
+      fortuneTeller.getFortune(question).listen(
         (fortunePart) {
           setState(() {
             _fortuneSpans = List.from(_fortuneSpans)
@@ -84,8 +92,9 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           });
         },
       );
-        } catch (e) {
+    } catch (e) {
       setState(() {
+        print(e);
         _fortuneSpans = List.from(_fortuneSpans)
           ..add(const TextSpan(text: 'Our puppy is not in the mood...'));
         _isLoading = false;
@@ -100,7 +109,18 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _fortuneSpans.isEmpty ? _buildInitialScreen() : _buildAnswerScreen();
+    return FutureBuilder(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return _fortuneSpans.isEmpty ? _buildInitialScreen() : _buildAnswerScreen();
+        }
+      },
+    );
   }
 
   Widget _buildInitialScreen() {
