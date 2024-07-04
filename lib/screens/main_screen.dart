@@ -84,7 +84,8 @@ class _MainScreenState extends State<MainScreen> {
             default:
               throw Exception('Invalid route: ${settings.name}');
           }
-          return MaterialPageRoute(builder: builder, settings: settings);
+          return MaterialPageRoute(
+              builder: builder, settings: settings, fullscreenDialog: true);
         },
       ),
     );

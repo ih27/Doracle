@@ -100,8 +100,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
         },
         onDone: () {
           setState(() {
-            _fortuneSpans = List.from(_fortuneSpans)
-              ..add(const TextSpan(text: '🔮'));
             _isFortuneCompleted = true;
           });
         },
@@ -175,62 +173,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
         fit: BoxFit.contain,
         onInit: _onRiveInit,
       ),
-    );
-  }
-
-  Widget _buildQuestionSection1() {
-    return Column(
-      children: [
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return ClipRect(
-                child: CarouselSlider.builder(
-                  itemCount: _randomQuestions.length,
-                  itemBuilder: (context, index, _) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            _onQuestionSelected(_randomQuestions[index]),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          foregroundColor: Theme.of(context).primaryColor,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          minimumSize: Size(constraints.maxWidth * 0.8, 40),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                        child: Text(
-                          _randomQuestions[index],
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                    letterSpacing: 0,
-                                  ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    );
-                  },
-                  options: CarouselOptions(
-                    height: constraints.maxHeight,
-                    viewportFraction: 0.2,
-                    enableInfiniteScroll: true,
-                    scrollDirection: Axis.vertical,
-                    enlargeCenterPage: true,
-                    enlargeFactor: 0.25,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        _buildQuestionInput(),
-      ],
     );
   }
 
