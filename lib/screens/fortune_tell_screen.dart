@@ -1,18 +1,22 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/mixins/shake_detector.dart';
+import 'package:rive/rive.dart';
 import '../controllers/fortune_teller.dart';
 import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
-import '../widgets/form_button.dart';
 
 class FortuneTellScreen extends StatefulWidget {
-  const FortuneTellScreen({super.key, required void Function(String route) onNavigate});
+  const FortuneTellScreen(
+      {super.key, required void Function(String route) onNavigate});
 
   @override
   _FortuneTellScreenState createState() => _FortuneTellScreenState();
 }
 
-class _FortuneTellScreenState extends State<FortuneTellScreen> {
+class _FortuneTellScreenState extends State<FortuneTellScreen>
+    with ShakeDetectorMixin {
   final FortuneContentRepository _fortuneContentRepository =
       getIt<FortuneContentRepository>();
   late Future<void> _initializationFuture;
@@ -24,10 +28,24 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
 
+  SMITrigger? _shakeInput;
+
+  void _onRiveInit(Artboard artboard) {
+    final controller =
+        StateMachineController.fromArtboard(artboard, 'State Machine 1');
+    artboard.addController(controller!);
+    _shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
+  }
+
+  void _shake() {
+    _shakeInput?.fire();
+  }
+
   @override
   void initState() {
     super.initState();
     _initializationFuture = _initialize();
+    initShakeDetector(onShake: () => _shake());
   }
 
   Future<void> _initialize() async {
@@ -68,9 +86,14 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
     try {
       await _initializeFortuneTeller(); // Ensure initialization is complete
       final fortuneTeller = getIt<FortuneTeller>();
+      bool isFirstChunk = true;
       fortuneTeller.getFortune(question).listen(
         (fortunePart) {
           setState(() {
+            if (isFirstChunk) {
+              _isLoading = false;
+              isFirstChunk = false;
+            }
             _fortuneSpans = List.from(_fortuneSpans)
               ..add(TextSpan(text: fortunePart));
           });
@@ -79,7 +102,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
           setState(() {
             _fortuneSpans = List.from(_fortuneSpans)
               ..add(const TextSpan(text: '🔮'));
-            _isLoading = false;
             _isFortuneCompleted = true;
           });
         },
@@ -116,91 +138,191 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          return _fortuneSpans.isEmpty ? _buildInitialScreen() : _buildAnswerScreen();
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  _buildRiveAnimation(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: _fortuneSpans.isEmpty
+                          ? _buildQuestionSection()
+                          : _buildAnswerSection(),
+                    ),
+                  ),
+                ],
+              ),
+              if (_isLoading) _buildLoadingOverlay(),
+            ],
+          );
         }
       },
     );
   }
 
-  Widget _buildInitialScreen() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Ask your question and get a fortune reading!',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _questionController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Your Question',
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 24),
-          FormButton(
-            text: 'Get Fortune',
-            onPressed: () => _getFortune(_questionController.text),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _randomQuestions.length,
-              itemBuilder: (context, index) {
-                return Center(
-                  child: IntrinsicWidth(
-                    child: GestureDetector(
-                      onTap: () => _onQuestionSelected(_randomQuestions[index]),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4.0),
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Text(_randomQuestions[index]),
-                      ),
+  Widget _buildRiveAnimation() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.7,
+      height: MediaQuery.of(context).size.width * 0.7,
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
+        shape: BoxShape.circle,
+      ),
+      child: RiveAnimation.asset(
+        'assets/animations/meraki_dog.riv',
+        artboard: 'meraki_dog',
+        fit: BoxFit.contain,
+        onInit: _onRiveInit,
+      ),
+    );
+  }
+
+  Widget _buildQuestionSection() {
+    return Column(
+      children: [
+        Expanded(
+          child: CarouselSlider.builder(
+            itemCount: _randomQuestions.length,
+            itemBuilder: (context, index, _) {
+              return Padding(
+                padding: const EdgeInsets.all(10),
+                child: ElevatedButton(
+                  onPressed: () => _onQuestionSelected(_randomQuestions[index]),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                );
-              },
+                  child: Text(
+                    _randomQuestions[index],
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          letterSpacing: 0,
+                        ),
+                  ),
+                ),
+              );
+            },
+            options: CarouselOptions(
+              viewportFraction: 0.2,
+              enableInfiniteScroll: true,
+              scrollDirection: Axis.vertical,
+              enlargeCenterPage: true,
+              enlargeFactor: 0.25,
             ),
           ),
-          if (_isLoading) const CircularProgressIndicator(),
+        ),
+        _buildQuestionInput(),
+      ],
+    );
+  }
+
+  Widget _buildQuestionInput() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              // Add functionality for the "50" button
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              foregroundColor: Theme.of(context).primaryColor,
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(35, 35),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+                side: BorderSide(color: Theme.of(context).primaryColor),
+              ),
+            ),
+            child: const Text('50',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: TextField(
+              controller: _questionController,
+              decoration: InputDecoration(
+                labelText: 'Ask what you want, passenger?',
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor, width: 2),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor, width: 2),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(width: 5),
+          IconButton(
+            icon:
+                Icon(Icons.send_rounded, color: Theme.of(context).primaryColor),
+            onPressed: () => _getFortune(_questionController.text),
+            style: IconButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(50, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+                side:
+                    BorderSide(color: Theme.of(context).primaryColor, width: 2),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAnswerScreen() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
+  Widget _buildAnswerSection() {
+    return Column(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.topCenter,
             child: SingleChildScrollView(
-              child: RichText(
-                text: TextSpan(
-                  children: _fortuneSpans,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontStyle: FontStyle.normal,
-                    color: Colors.black,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: SelectionArea(
+                    child: RichText(
+                      text: TextSpan(
+                        children: _fortuneSpans,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontFamily: 'Roboto Mono',
+                              fontSize: 15,
+                              letterSpacing: 0,
+                              color: Colors.black,
+                            ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          if (_isFortuneCompleted)
-            FormButton(
-              text: 'Continue',
+        ),
+        if (_isFortuneCompleted)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 22),
+            child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   _questionController.clear();
@@ -209,8 +331,38 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
                   _fetchRandomQuestions();
                 });
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 3,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Continue',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontFamily: 'Roboto',
+                      color: Colors.white,
+                      letterSpacing: 0,
+                    ),
+              ),
             ),
-        ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.5),
+      child: Center(
+        child: CircularProgressIndicator(
+          valueColor:
+              AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+        ),
       ),
     );
   }
