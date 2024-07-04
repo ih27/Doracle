@@ -11,21 +11,22 @@ dependencies:
 
   firebase_core: ^3.1.0
   firebase_auth: ^5.1.0
-  flutter_dotenv: ^5.1.0
-  flutter_native_splash: ^2.4.0
-  cloud_firestore: ^5.0.1
-  google_sign_in: ^6.2.1
-  dart_openai: ^5.1.0
-  google_generative_ai: ^0.4.3
-  rive: ^0.13.8
   firebase_crashlytics: ^4.0.2
   firebase_analytics: ^11.1.0
-  purchases_flutter: ^6.29.4
   firebase_app_check: ^0.3.0+2
+  cloud_firestore: ^5.0.1
+  flutter_dotenv: ^5.1.0
+  flutter_native_splash: ^2.4.0
+  google_sign_in: ^6.2.1
+  google_fonts: ^6.2.1
+  google_generative_ai: ^0.4.3
+  dart_openai: ^5.1.0
+  rive: ^0.13.8
+  purchases_flutter: ^6.29.4  
   get_it: ^7.7.0
   auto_size_text: ^3.0.0
-  google_fonts: ^6.2.1
   carousel_slider: ^4.2.1
+  shake: ^2.2.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0

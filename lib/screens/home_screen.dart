@@ -1,8 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fortuntella/auth_wrapper.dart';
 import 'package:rive/rive.dart';
+import '../mixins/shake_detector.dart';
 import '../repositories/firestore_user_repository.dart';
 import '../services/user_service.dart';
 
@@ -14,29 +13,28 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with ShakeDetectorMixin {
   final UserService userService = UserService(FirestoreUserRepository());
-  User? user = currentUser();
-  Map<String, dynamic>? userData;
   bool isLoading = true;
   String? errorMessage;
 
-//  SMITrigger? _shakeInput;
+  SMITrigger? _shakeInput;
 
   void _onRiveInit(Artboard artboard) {
     final controller =
         StateMachineController.fromArtboard(artboard, 'State Machine 1');
     artboard.addController(controller!);
-    //_shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
+    _shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
   }
 
-  // void _shake() {
-  //   _shakeInput?.fire();
-  // }
+  void _shake() {
+    _shakeInput?.fire();
+  }
 
   @override
   void initState() {
     super.initState();
+    initShakeDetector(onShake: () => _shake());
   }
 
   @override
@@ -76,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: AutoSizeText(
-                      'Hey, stranger!\n\nI\'m Meraki, your AI Oracle. What guidance do you seek?',
+                      'Hey, stranger!\n\nI\'m Doracle, your AI Oracle. What guidance do you seek?',
                       textAlign: TextAlign.start,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
