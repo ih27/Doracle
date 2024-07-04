@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
                 size: 24,
               ),
               onPressed: () {
-                print('Settings pressed ...');
+                // nothing for now
               },
               iconSize: 50,
               padding: EdgeInsets.zero,

@@ -94,7 +94,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen> {
       );
     } catch (e) {
       setState(() {
-        print(e);
         _fortuneSpans = List.from(_fortuneSpans)
           ..add(const TextSpan(text: 'Our puppy is not in the mood...'));
         _isLoading = false;
