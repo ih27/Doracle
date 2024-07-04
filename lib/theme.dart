@@ -8,10 +8,7 @@ class AppTheme {
       colorScheme: ColorScheme.fromSwatch().copyWith(
         secondary: getColorFromHex("4F507583"),
       ),
-      scaffoldBackgroundColor: Colors.white,
-      iconTheme: const IconThemeData(
-        color: Colors.blue,
-      ),
+      scaffoldBackgroundColor: getColorFromHex("#fbf9f5"),
       buttonTheme: ButtonThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         buttonColor: getColorFromHex("#507583"),

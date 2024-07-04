@@ -22,7 +22,7 @@ dependencies:
   google_generative_ai: ^0.4.3
   dart_openai: ^5.1.0
   rive: ^0.13.8
-  purchases_flutter: ^6.29.4  
+  purchases_flutter: ^6.29.4
   get_it: ^7.7.0
   auto_size_text: ^3.0.0
   carousel_slider: ^4.2.1
@@ -31,6 +31,9 @@ dependencies:
 dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.13.1
+
+dependency_overrides:
+  sensors_plus: ^5.0.0
 
 flutter:
   uses-material-design: true
