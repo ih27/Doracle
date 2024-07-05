@@ -177,10 +177,14 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   Widget _buildQuestionSection() {
-    return Column(
-      children: [
-        Expanded(
-          child: NestedScrollView(
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      final mediaQuery = MediaQuery.of(context);
+      final isKeyboardVisible = mediaQuery.viewInsets.bottom > 0;
+
+      return Stack(
+        children: [
+          NestedScrollView(
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[];
@@ -225,8 +229,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
                           );
                         },
                         options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height *
-                              0.6, // Adjust as needed
+                          height: MediaQuery.of(context).size.height * 0.6,
                           viewportFraction: 0.2,
                           enableInfiniteScroll: true,
                           scrollDirection: Axis.vertical,
@@ -240,77 +243,88 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
               },
             ),
           ),
-        ),
-        _buildQuestionInput(),
-      ],
-    );
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+            left: 0,
+            right: 0,
+            bottom: isKeyboardVisible ? mediaQuery.viewInsets.bottom : 0,
+            child: _buildQuestionInput(),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildQuestionInput() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              // Add functionality for the "50" button
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              foregroundColor: Theme.of(context).primaryColor,
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(35, 35),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-                side: BorderSide(color: Theme.of(context).primaryColor),
+    return Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        padding: const EdgeInsets.all(8),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Add functionality for the "50" button
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  foregroundColor: Theme.of(context).primaryColor,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(35, 35),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    side: BorderSide(color: Theme.of(context).primaryColor),
+                  ),
+                ),
+                child: const Text('50',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               ),
-            ),
-            child: const Text('50',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(width: 5),
-          Expanded(
-            child: TextField(
-              controller: _questionController,
-              decoration: InputDecoration(
-                labelText: 'Ask what you want, passenger?',
-                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.secondary,
+              const SizedBox(width: 5),
+              Expanded(
+                child: TextField(
+                  controller: _questionController,
+                  decoration: InputDecoration(
+                    labelText: 'Ask what you want, passenger?',
+                    labelStyle:
+                        Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor, width: 2),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor, width: 2),
-                  borderRadius: BorderRadius.circular(24),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          const SizedBox(width: 5),
-          IconButton(
-            icon:
-                Icon(Icons.send_rounded, color: Theme.of(context).primaryColor),
-            onPressed: () => _getFortune(_questionController.text),
-            style: IconButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(50, 50),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50),
-                side:
-                    BorderSide(color: Theme.of(context).primaryColor, width: 2),
+              const SizedBox(width: 5),
+              IconButton(
+                icon: Icon(Icons.send_rounded,
+                    color: Theme.of(context).primaryColor),
+                onPressed: () => _getFortune(_questionController.text),
+                style: IconButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(50, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                    side: BorderSide(
+                        color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildAnswerSection() {
