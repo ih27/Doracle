@@ -42,6 +42,10 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
     _shakeInput?.fire();
   }
 
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -137,23 +141,26 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          return Stack(
-            children: [
-              Column(
-                children: [
-                  _buildRiveAnimation(),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: _fortuneSpans.isEmpty
-                          ? _buildQuestionSection()
-                          : _buildAnswerSection(),
+          return GestureDetector(
+            onTap: _dismissKeyboard,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    _buildRiveAnimation(),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: _fortuneSpans.isEmpty
+                            ? _buildQuestionSection()
+                            : _buildAnswerSection(),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              if (_isLoading) _buildLoadingOverlay(),
-            ],
+                  ],
+                ),
+                if (_isLoading) _buildLoadingOverlay(),
+              ],
+            ),
           );
         }
       },
@@ -190,7 +197,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           body: Stack(
             children: [
               SizedBox(
-                height: constraints.maxHeight -  _inputFieldFixedHeight,
+                height: constraints.maxHeight - _inputFieldFixedHeight,
                 child: _buildCarousel(),
               ),
               AnimatedPositioned(
@@ -215,13 +222,16 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
-            onPressed: () => _onQuestionSelected(_randomQuestions[index]),
+            onPressed: () {
+              _dismissKeyboard();
+              _onQuestionSelected(_randomQuestions[index]);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondary,
               foregroundColor: Theme.of(context).primaryColor,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              minimumSize: const Size.fromHeight(40),
+              minimumSize: const Size.fromHeight(50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
@@ -259,6 +269,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
             children: [
               ElevatedButton(
                 onPressed: () {
+                  _dismissKeyboard();
                   // Add functionality for the "50" button
                 },
                 style: ElevatedButton.styleFrom(
@@ -303,7 +314,10 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
               IconButton(
                 icon: Icon(Icons.send_rounded,
                     color: Theme.of(context).primaryColor),
-                onPressed: () => _getFortune(_questionController.text),
+                onPressed: () {
+                  _dismissKeyboard();
+                  _getFortune(_questionController.text);
+                },
                 style: IconButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   padding: EdgeInsets.zero,
@@ -389,7 +403,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
 
   Widget _buildLoadingOverlay() {
     return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0.75),
+      color: Theme.of(context).primaryColor.withOpacity(0.25),
       child: Center(
         child: CircularProgressIndicator(
           valueColor:
