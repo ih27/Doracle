@@ -27,6 +27,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
   bool _isFortuneCompleted = false;
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
+  final double _inputFieldFixedHeight = 66;
 
   SMITrigger? _shakeInput;
 
@@ -178,86 +179,78 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
 
   Widget _buildQuestionSection() {
     return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      final mediaQuery = MediaQuery.of(context);
-      final isKeyboardVisible = mediaQuery.viewInsets.bottom > 0;
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final mediaQuery = MediaQuery.of(context);
+        final isKeyboardVisible = mediaQuery.viewInsets.bottom > 0;
 
-      return Stack(
-        children: [
-          NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[];
-            },
-            body: Builder(
-              builder: (BuildContext context) {
-                return CustomScrollView(
-                  slivers: <Widget>[
-                    SliverFillRemaining(
-                      child: CarouselSlider.builder(
-                        itemCount: _randomQuestions.length,
-                        itemBuilder: (context, index, _) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: ElevatedButton(
-                              onPressed: () =>
-                                  _onQuestionSelected(_randomQuestions[index]),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                foregroundColor: Theme.of(context).primaryColor,
-                                elevation: 0,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
-                                minimumSize: const Size.fromHeight(40),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                              ),
-                              child: Text(
-                                _randomQuestions[index],
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(
-                                      color: Theme.of(context).primaryColor,
-                                      letterSpacing: 0,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          );
-                        },
-                        options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height * 0.6,
-                          viewportFraction: 0.2,
-                          enableInfiniteScroll: true,
-                          scrollDirection: Axis.vertical,
-                          enlargeCenterPage: true,
-                          enlargeFactor: 0.25,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
+        return NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[];
+          },
+          body: Stack(
+            children: [
+              SizedBox(
+                height: constraints.maxHeight -  _inputFieldFixedHeight,
+                child: _buildCarousel(),
+              ),
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                left: 0,
+                right: 0,
+                bottom: isKeyboardVisible ? mediaQuery.viewInsets.bottom : 0,
+                child: _buildQuestionInput(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCarousel() {
+    return CarouselSlider.builder(
+      itemCount: _randomQuestions.length,
+      itemBuilder: (context, index, _) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: ElevatedButton(
+            onPressed: () => _onQuestionSelected(_randomQuestions[index]),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              foregroundColor: Theme.of(context).primaryColor,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              minimumSize: const Size.fromHeight(40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            child: Text(
+              _randomQuestions[index],
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    letterSpacing: 0,
+                  ),
+              textAlign: TextAlign.center,
             ),
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-            left: 0,
-            right: 0,
-            bottom: isKeyboardVisible ? mediaQuery.viewInsets.bottom : 0,
-            child: _buildQuestionInput(),
-          ),
-        ],
-      );
-    });
+        );
+      },
+      options: CarouselOptions(
+        height: double.infinity,
+        viewportFraction: 0.2,
+        enableInfiniteScroll: true,
+        scrollDirection: Axis.vertical,
+        enlargeCenterPage: true,
+        enlargeFactor: 0.25,
+      ),
+    );
   }
 
   Widget _buildQuestionInput() {
     return Container(
+        height: _inputFieldFixedHeight, // Fixed height including padding
         color: Theme.of(context).scaffoldBackgroundColor,
         padding: const EdgeInsets.all(8),
         child: SafeArea(
@@ -396,7 +389,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
 
   Widget _buildLoadingOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.5),
+      color: Theme.of(context).primaryColor.withOpacity(0.75),
       child: Center(
         child: CircularProgressIndicator(
           valueColor:
