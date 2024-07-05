@@ -57,9 +57,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Doracle',
       theme: AppTheme.lightTheme,
-      home: const SafeArea(
-        child: AuthWrapper(),
-      ),
+      home: Container(
+          color: AppTheme.getColorFromHex("#fbf9f5"),
+          child: const SafeArea(
+            child: AuthWrapper(),
+          )),
     );
   }
 }
