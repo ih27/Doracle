@@ -27,8 +27,8 @@ class AppTheme {
       ),
       textTheme: TextTheme(
         headlineLarge: GoogleFonts.robotoMono(fontSize: 72.0, fontWeight: FontWeight.bold),
-        headlineMedium: GoogleFonts.robotoMono(fontSize: 36.0, fontStyle: FontStyle.italic),
-        bodyMedium: GoogleFonts.hind(fontSize: 14.0),
+        headlineMedium: GoogleFonts.roboto(fontSize: 36.0),
+        bodyMedium: GoogleFonts.roboto(fontSize: 14.0),
         bodyLarge: GoogleFonts.robotoMono(fontSize: 16.0, letterSpacing: 0),
       ),
     );

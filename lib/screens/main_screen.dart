@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../auth_wrapper.dart';
 import 'home_screen.dart';
 import 'fortune_tell_screen.dart';
+import 'settings_screen.dart';
 import 'shop_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -27,11 +27,6 @@ class _MainScreenState extends State<MainScreen> {
         iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => handleSignOut(context),
-          ),
-          // Generated code for this IconButton Widget...
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 20, 0),
             child: IconButton(
@@ -40,7 +35,11 @@ class _MainScreenState extends State<MainScreen> {
                 size: 24,
               ),
               onPressed: () {
-                // nothing for now
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
+                );
               },
               iconSize: 50,
               padding: EdgeInsets.zero,
