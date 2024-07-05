@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../auth_wrapper.dart';
 import '../theme.dart';
 import '../helpers/show_snackbar.dart';
+import 'purchase_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -52,7 +53,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.diamond_rounded,
               title: 'Feed the Dog',
               onTap: () {
-                // TODO: NAVIGATE TO PURCHASE SCREEN
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FeedTheDogScreen()),
+                );
               },
               color: AppTheme.getColorFromHex("#0d3b66"),
               backgroundColor: AppTheme.getColorFromHex("#f4d35e"),
@@ -88,7 +93,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(38),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
               child: const Text('Log Out'),
             ),
@@ -112,7 +118,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text('Terms and Conditions'),
-                      content: const Text('Our terms and conditions will be displayed here.'),
+                      content: const Text(
+                          'Our terms and conditions will be displayed here.'),
                       actions: <Widget>[
                         TextButton(
                           child: const Text('Close'),
