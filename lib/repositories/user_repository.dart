@@ -3,4 +3,5 @@ abstract class UserRepository {
   Future<Map<String, dynamic>?> getUser(String userId);
   Future<void> updateUserFortuneData(String userId, String question, String persona);
   Future<void> updateUserField<T>(String userId, String field, T value);
+  Future<void> updatePurchaseHistory(String userId, int questionCount);
 }

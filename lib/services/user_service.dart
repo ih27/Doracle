@@ -44,4 +44,15 @@ class UserService {
     }
     return null;
   }
+
+  Future<void> updatePurchaseHistory(int questionCount) async {
+    final user = currentUser();
+    if (user != null) {
+      await _userRepository.updatePurchaseHistory(user.uid, questionCount);
+    }
+  }
+
+  Future<int> getRemainingQuestionsCount() async {
+    return await getUserField<int>('remainingQuestionsCount') ?? 0;
+  }
 }

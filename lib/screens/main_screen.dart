@@ -22,8 +22,16 @@ class _MainScreenState extends State<MainScreen> {
   void _showFeedTheDogScreen() {
     Navigator.push(
       context,
-      SlideRightRoute(page: const FeedTheDogScreen()),
+      SlideRightRoute(
+        page: FeedTheDogScreen(
+          onPurchaseComplete: _onPurchaseComplete,
+        ),
+      ),
     );
+  }
+
+  void _onPurchaseComplete() {
+    _navigatorKey.currentState?.pushReplacementNamed('/fortune');
   }
 
   @override
@@ -45,7 +53,11 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  SlideRightRoute(page: const SettingsScreen()),
+                  SlideRightRoute(
+                    page: SettingsScreen(
+                      onPurchaseComplete: _onPurchaseComplete,
+                    ),
+                  ),
                 );
               },
               iconSize: 50,

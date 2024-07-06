@@ -5,7 +5,9 @@ import '../helpers/show_snackbar.dart';
 import 'purchase_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final VoidCallback onPurchaseComplete;
+
+  const SettingsScreen({super.key, required this.onPurchaseComplete});
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -56,7 +58,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const FeedTheDogScreen()),
+                    builder: (context) => FeedTheDogScreen(
+                      onPurchaseComplete: widget.onPurchaseComplete,
+                    ),
+                  ),
                 );
               },
               color: AppTheme.getColorFromHex("#0d3b66"),

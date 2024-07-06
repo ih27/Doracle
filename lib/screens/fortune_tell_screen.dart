@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/helpers/logger.dart';
 import 'package:fortuntella/mixins/shake_detector.dart';
 import 'package:fortuntella/services/user_service.dart';
 import 'package:rive/rive.dart';
@@ -13,14 +14,17 @@ class FortuneTellScreen extends StatefulWidget {
   final Function(String) onNavigate;
   final VoidCallback onFeedDog;
 
-  const FortuneTellScreen(
-      {super.key, required this.onNavigate, required this.onFeedDog});
+  const FortuneTellScreen({
+    super.key,
+    required this.onNavigate,
+    required this.onFeedDog,
+  });
 
   @override
-  _FortuneTellScreenState createState() => _FortuneTellScreenState();
+  FortuneTellScreenState createState() => FortuneTellScreenState();
 }
 
-class _FortuneTellScreenState extends State<FortuneTellScreen>
+class FortuneTellScreenState extends State<FortuneTellScreen>
     with ShakeDetectorMixin {
   final FortuneContentRepository _fortuneContentRepository =
       getIt<FortuneContentRepository>();
@@ -34,8 +38,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
   final double _inputFieldFixedHeight = 66;
-  late int _startingCount;
-  late int _remainingQuestions;
+  int _remainingQuestionsCount = 0;
 
   SMITrigger? _shakeInput;
 
@@ -65,20 +68,14 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
     await Future.wait([
       _initializeFortuneTeller(),
       _fetchRandomQuestions(),
-      _fetchStartingCount(),
+      _fetchRemainingQuestionsCount(),
     ]);
   }
 
-  Future<void> _fetchStartingCount() async {
-    _startingCount = await _fortuneContentRepository.getStartingCount();
-    await _updateRemainingQuestions();
-  }
-
-  Future<void> _updateRemainingQuestions() async {
-    final questionsAsked =
-        await _userService.getUserField<int>('questionsAsked') ?? 0;
+  Future<void> _fetchRemainingQuestionsCount() async {
+    final count = await _userService.getRemainingQuestionsCount();
     setState(() {
-      _remainingQuestions = _startingCount - questionsAsked;
+      _remainingQuestionsCount = count;
     });
   }
 
@@ -99,6 +96,12 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   void _getFortune(String question) async {
+    if (_remainingQuestionsCount <= 0) {
+      showErrorSnackBar(
+          context, 'No more questions left. Please purchase more.');
+      return;
+    }
+
     if (question.trim().isEmpty) {
       showErrorSnackBar(context, 'Please enter a question.');
       return;
@@ -126,7 +129,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           });
         },
         onDone: () async {
-          await _updateRemainingQuestions();
+          await _fetchRemainingQuestionsCount();
           setState(() {
             _isFortuneCompleted = true;
           });
@@ -250,7 +253,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
-            onPressed: _remainingQuestions > 0
+            onPressed: _remainingQuestionsCount > 0
                 ? () {
                     _dismissKeyboard();
                     _onQuestionSelected(_randomQuestions[index]);
@@ -298,7 +301,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: _remainingQuestions > 0 ? null : widget.onFeedDog,
+              onPressed: _remainingQuestionsCount > 0 ? null : widget.onFeedDog,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accent1,
                 //foregroundColor: Theme.of(context).primaryColor,
@@ -310,11 +313,11 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
                 ),
               ),
               child: Text(
-                '$_remainingQuestions',
+                '$_remainingQuestionsCount',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: _remainingQuestions > 0
+                  color: _remainingQuestionsCount > 0
                       ? Theme.of(context).primaryColor
                       : Theme.of(context).colorScheme.secondary,
                 ),
@@ -324,7 +327,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
             Expanded(
               child: TextField(
                 controller: _questionController,
-                enabled: _remainingQuestions > 0,
+                enabled: _remainingQuestionsCount > 0,
                 decoration: InputDecoration(
                   labelText: 'Ask what you want, passenger?',
                   labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -352,7 +355,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
             IconButton(
               icon: Icon(Icons.send_rounded,
                   color: Theme.of(context).primaryColor),
-              onPressed: _remainingQuestions > 0
+              onPressed: _remainingQuestionsCount > 0
                   ? () {
                       _dismissKeyboard();
                       _getFortune(_questionController.text);

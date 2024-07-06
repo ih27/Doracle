@@ -9,8 +9,9 @@ class FirestoreUserRepository implements UserRepository {
   Future<void> addUser(String userId, Map<String, dynamic> userData) async {
     userData['createdAt'] = Timestamp.now();
     userData['questionHistory'] = [];
-    userData['questionsAsked'] = 0;
+    userData['remainingQuestionsCount'] = 50; // Starting with 50 questions
     userData['totalQuestionsAsked'] = 0;
+    userData['purchaseHistory'] = [];
     await _firestore.collection(_collectionName).doc(userId).set(userData);
   }
 
@@ -39,7 +40,7 @@ class FirestoreUserRepository implements UserRepository {
       final userData = userDoc.data() as Map<String, dynamic>;
       final List<Map<String, dynamic>> questionHistory =
           List<Map<String, dynamic>>.from(userData['questionHistory'] ?? []);
-      final int questionsAsked = (userData['questionsAsked'] ?? 0) + 1;
+      final int remainingQuestionsCount = (userData['remainingQuestionsCount'] ?? 0) - 1;
       final int totalQuestionsAsked =
           (userData['totalQuestionsAsked'] ?? 0) + 1;
 
@@ -51,7 +52,7 @@ class FirestoreUserRepository implements UserRepository {
 
       transaction.update(userRef, {
         'questionHistory': questionHistory,
-        'questionsAsked': questionsAsked,
+        'remainingQuestionsCount': remainingQuestionsCount,
         'totalQuestionsAsked': totalQuestionsAsked,
         'lastQuestionTimestamp': FieldValue.serverTimestamp(),
       });
@@ -64,5 +65,33 @@ class FirestoreUserRepository implements UserRepository {
         .collection(_collectionName)
         .doc(userId)
         .update({field: value});
+  }
+
+  @override
+  Future<void> updatePurchaseHistory(String userId, int questionCount) async {
+    final userRef = _firestore.collection(_collectionName).doc(userId);
+
+    await _firestore.runTransaction((transaction) async {
+      final userDoc = await transaction.get(userRef);
+
+      if (!userDoc.exists) {
+        throw Exception('User does not exist!');
+      }
+
+      final userData = userDoc.data() as Map<String, dynamic>;
+      final List<Map<String, dynamic>> purchaseHistory =
+          List<Map<String, dynamic>>.from(userData['purchaseHistory'] ?? []);
+      final int currentRemainingQuestions = userData['remainingQuestionsCount'] ?? 0;
+
+      purchaseHistory.add({
+        'questionCount': questionCount,
+        'timestamp': Timestamp.now().millisecondsSinceEpoch,
+      });
+
+      transaction.update(userRef, {
+        'purchaseHistory': purchaseHistory,
+        'remainingQuestionsCount': currentRemainingQuestions + questionCount,
+      });
+    });
   }
 }
