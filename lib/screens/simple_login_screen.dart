@@ -175,8 +175,8 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                         : 'Sign in with Google',
                     icon: Image.asset(
                       Platform.isIOS
-                          ? 'assets/apple_logo.png'
-                          : 'assets/google_logo.png',
+                          ? 'assets/images/apple_logo.png'
+                          : 'assets/images/google_logo.png',
                       height: 24,
                       width: 24,
                     ),

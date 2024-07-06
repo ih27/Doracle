@@ -8,15 +8,14 @@ import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../theme.dart';
+import '../widgets/out_of_questions_overlay.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   final Function(String) onNavigate;
-  final VoidCallback onFeedDog;
 
   const FortuneTellScreen({
     super.key,
     required this.onNavigate,
-    required this.onFeedDog,
   });
 
   @override
@@ -94,10 +93,71 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     });
   }
 
+  void _showOutOfQuestionsOverlay() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      pageBuilder: (BuildContext dialogContext, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
+        return SafeArea(
+          child: Center(
+            child: SizedBox(
+              width: MediaQuery.of(dialogContext).size.width * 0.95,
+              height: MediaQuery.of(dialogContext).size.height * 0.8,
+              child: OutOfQuestionsOverlay(
+                onClose: () => Navigator.of(dialogContext).pop(),
+                onPurchase: (int questions) {
+                  print("OutOfQuestionsOverlay onPurchase called");
+                  Navigator.of(dialogContext).pop();
+                  print("Overlay dismissed");
+                  _handlePurchase(questions);
+                },
+              ),
+            ),
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handlePurchase(int questionCount) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Simulate network delay
+      await Future.delayed(const Duration(seconds: 2));
+
+      await _userService.updatePurchaseHistory(questionCount);
+      await _fetchRemainingQuestionsCount();
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        showErrorSnackBar(context, 'Purchase failed. Please try again.');
+      }
+    }
+  }
+
   void _getFortune(String question) async {
     if (_remainingQuestionsCount <= 0) {
-      showErrorSnackBar(
-          context, 'No more questions left. Please purchase more.');
+      _showOutOfQuestionsOverlay();
       return;
     }
 
@@ -252,12 +312,10 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
-            onPressed: _remainingQuestionsCount > 0
-                ? () {
-                    _dismissKeyboard();
-                    _onQuestionSelected(_randomQuestions[index]);
-                  }
-                : null,
+            onPressed: () {
+              _dismissKeyboard();
+              _onQuestionSelected(_randomQuestions[index]);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondary,
               foregroundColor: Theme.of(context).primaryColor,
@@ -300,7 +358,9 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: _remainingQuestionsCount > 0 ? null : widget.onFeedDog,
+              onPressed: _remainingQuestionsCount > 0
+                  ? null
+                  : _showOutOfQuestionsOverlay,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accent1,
                 //foregroundColor: Theme.of(context).primaryColor,
@@ -326,7 +386,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
             Expanded(
               child: TextField(
                 controller: _questionController,
-                enabled: _remainingQuestionsCount > 0,
                 decoration: InputDecoration(
                   labelText: 'Ask what you want, passenger?',
                   labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -354,12 +413,10 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
             IconButton(
               icon: Icon(Icons.send_rounded,
                   color: Theme.of(context).primaryColor),
-              onPressed: _remainingQuestionsCount > 0
-                  ? () {
-                      _dismissKeyboard();
-                      _getFortune(_questionController.text);
-                    }
-                  : null,
+              onPressed: () {
+                _dismissKeyboard();
+                _getFortune(_questionController.text);
+              },
               style: IconButton.styleFrom(
                 backgroundColor: AppTheme.accent1,
                 padding: EdgeInsets.zero,
