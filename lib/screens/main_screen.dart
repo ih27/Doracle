@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onPurchaseComplete() {
-    _navigatorKey.currentState?.pushReplacementNamed('/fortune');
+    _navigateTo('/fortune');
   }
 
   @override

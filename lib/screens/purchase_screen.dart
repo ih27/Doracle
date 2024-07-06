@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-
 import '../dependency_injection.dart';
+import '../helpers/show_snackbar.dart';
 import '../services/user_service.dart';
 import '../theme.dart';
-import 'purchase_success_popup.dart';
+import '../widgets/purchase_success_popup.dart';
 
-class FeedTheDogScreen extends StatelessWidget {
+class FeedTheDogScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;
 
   const FeedTheDogScreen({
@@ -13,72 +13,104 @@ class FeedTheDogScreen extends StatelessWidget {
     required this.onPurchaseComplete,
   });
 
-  Future<void> _handlePurchase(BuildContext context, int questionCount) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const PurchaseConfirmationDialog();
-      },
-    );
+  @override
+  FeedTheDogScreenState createState() => FeedTheDogScreenState();
+}
 
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
+class FeedTheDogScreenState extends State<FeedTheDogScreen> {
+  bool _isLoading = false;
 
-    final userService = getIt<UserService>();
-    await userService.updatePurchaseHistory(questionCount);
+  Future<void> _handlePurchase(int questionCount) async {
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (!context.mounted) return;
-    Navigator.of(context).pop(); // Dismiss the loading dialog
+    try {
+      // Simulate network delay
+      await Future.delayed(const Duration(seconds: 2));
 
-    // Call the callback to notify that a purchase was completed
-    onPurchaseComplete();
+      final userService = getIt<UserService>();
+      await userService.updatePurchaseHistory(questionCount);
 
-    // Navigate back to the fortune tell screen
-    Navigator.of(context).popUntil((route) => route.isFirst);
+      // Call the callback to notify that a purchase was completed
+      widget.onPurchaseComplete();
+
+      // Navigate back to the fortune tell screen
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // After successful purchase:
+      showDialog(
+        context: context,
+        builder: (BuildContext buildContext) {
+          return PurchaseSuccessPopup(
+            questionCount: questionCount,
+            onContinue: () {
+              Navigator.of(buildContext).pop(); // Close the dialog
+            },
+          );
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!mounted) return;
+      showErrorSnackBar(context, 'Purchase failed. Please try again.');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text('Feed the Dog'),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(24, 4, 0, 0),
-            child: Text('Give Doracle treats to get more questions answered.',
-                style: Theme.of(context).textTheme.labelMedium),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildSmallTreatCard(context),
-                  _buildMediumTreatCard(context),
-                  _buildLargeTreatCard(context),
-                ],
-              ),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
             ),
+            title: const Text('Feed the Dog'),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            elevation: 0,
           ),
-        ],
-      ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(24, 4, 0, 0),
+                child: Text(
+                    'Give Doracle treats to get more questions answered.',
+                    style: Theme.of(context).textTheme.labelMedium),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildSmallTreatCard(),
+                      _buildMediumTreatCard(),
+                      _buildLargeTreatCard(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildLoadingOverlay(),
+      ],
     );
   }
 
-  Widget _buildSmallTreatCard(BuildContext context) {
+  Widget _buildSmallTreatCard() {
     return GestureDetector(
-        onTap: () => _handlePurchase(context, 10),
+        onTap: () => _handlePurchase(10),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
           child: Container(
@@ -296,9 +328,9 @@ class FeedTheDogScreen extends StatelessWidget {
         ));
   }
 
-  Widget _buildMediumTreatCard(BuildContext context) {
+  Widget _buildMediumTreatCard() {
     return GestureDetector(
-        onTap: () => _handlePurchase(context, 30),
+        onTap: () => _handlePurchase(30),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
           child: Container(
@@ -569,9 +601,9 @@ class FeedTheDogScreen extends StatelessWidget {
         ));
   }
 
-  Widget _buildLargeTreatCard(BuildContext context) {
+  Widget _buildLargeTreatCard() {
     return GestureDetector(
-        onTap: () => _handlePurchase(context, 50),
+        onTap: () => _handlePurchase(50),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
           child: Container(
@@ -785,5 +817,19 @@ class FeedTheDogScreen extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  Widget _buildLoadingOverlay() {
+    return _isLoading
+        ? Container(
+            color: Theme.of(context).primaryColor.withOpacity(0.25),
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor),
+              ),
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }

@@ -9,6 +9,7 @@ import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../theme.dart';
 import '../widgets/out_of_questions_overlay.dart';
+import '../widgets/purchase_success_popup.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   final Function(String) onNavigate;
@@ -107,9 +108,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
               child: OutOfQuestionsOverlay(
                 onClose: () => Navigator.of(dialogContext).pop(),
                 onPurchase: (int questions) {
-                  print("OutOfQuestionsOverlay onPurchase called");
                   Navigator.of(dialogContext).pop();
-                  print("Overlay dismissed");
                   _handlePurchase(questions);
                 },
               ),
@@ -145,6 +144,20 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
       setState(() {
         _isLoading = false;
       });
+
+      // After successful purchase:
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (BuildContext buildContext) {
+          return PurchaseSuccessPopup(
+            questionCount: questionCount,
+            onContinue: () {
+              Navigator.of(buildContext).pop(); // Close the dialog
+            },
+          );
+        },
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
