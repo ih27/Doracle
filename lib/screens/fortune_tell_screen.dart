@@ -133,7 +133,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return SafeArea(
+        child: FutureBuilder(
       future: _initializationFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -164,7 +165,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           );
         }
       },
-    );
+    ));
   }
 
   Widget _buildRiveAnimation() {
@@ -188,7 +189,9 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final mediaQuery = MediaQuery.of(context);
-        final isKeyboardVisible = mediaQuery.viewInsets.bottom > 0;
+        final bottomPadding = mediaQuery.padding.bottom;
+        final bottomInset = mediaQuery.viewInsets.bottom;
+        final isKeyboardVisible = bottomInset > 0;
 
         return NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -197,7 +200,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           body: Stack(
             children: [
               SizedBox(
-                height: constraints.maxHeight - _inputFieldFixedHeight,
+                height: constraints.maxHeight - _inputFieldFixedHeight - bottomPadding,
                 child: _buildCarousel(),
               ),
               AnimatedPositioned(
@@ -205,7 +208,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
                 curve: Curves.easeOut,
                 left: 0,
                 right: 0,
-                bottom: isKeyboardVisible ? mediaQuery.viewInsets.bottom : 0,
+                bottom: isKeyboardVisible ? bottomInset : bottomPadding,
                 child: _buildQuestionInput(),
               ),
             ],
