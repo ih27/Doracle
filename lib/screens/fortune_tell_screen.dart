@@ -1,11 +1,14 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fortuntella/mixins/shake_detector.dart';
+import 'package:fortuntella/services/user_service.dart';
 import 'package:rive/rive.dart';
 import '../controllers/fortune_teller.dart';
 import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
+import '../theme.dart';
+import 'purchase_screen.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   const FortuneTellScreen(
@@ -19,6 +22,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
     with ShakeDetectorMixin {
   final FortuneContentRepository _fortuneContentRepository =
       getIt<FortuneContentRepository>();
+  final UserService _userService = getIt<UserService>();
   late Future<void> _initializationFuture;
 
   final TextEditingController _questionController = TextEditingController();
@@ -28,6 +32,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
   final double _inputFieldFixedHeight = 66;
+  late int _startingCount;
+  late int _remainingQuestions;
 
   SMITrigger? _shakeInput;
 
@@ -57,7 +63,21 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
     await Future.wait([
       _initializeFortuneTeller(),
       _fetchRandomQuestions(),
+      _fetchStartingCount(),
     ]);
+  }
+
+  Future<void> _fetchStartingCount() async {
+    _startingCount = await _fortuneContentRepository.getStartingCount();
+    await _updateRemainingQuestions();
+  }
+
+  Future<void> _updateRemainingQuestions() async {
+    final questionsAsked =
+        await _userService.getUserField<int>('questionsAsked') ?? 0;
+    setState(() {
+      _remainingQuestions = _startingCount - questionsAsked;
+    });
   }
 
   Future<void> _initializeFortuneTeller() async {
@@ -89,7 +109,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
     });
 
     try {
-      await _initializeFortuneTeller(); // Ensure initialization is complete
+      await _initializeFortuneTeller();
       final fortuneTeller = getIt<FortuneTeller>();
       bool isFirstChunk = true;
       fortuneTeller.getFortune(question).listen(
@@ -103,7 +123,8 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
               ..add(TextSpan(text: fortunePart));
           });
         },
-        onDone: () {
+        onDone: () async {
+          await _updateRemainingQuestions();
           setState(() {
             _isFortuneCompleted = true;
           });
@@ -200,7 +221,9 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           body: Stack(
             children: [
               SizedBox(
-                height: constraints.maxHeight - _inputFieldFixedHeight - bottomPadding,
+                height: constraints.maxHeight -
+                    _inputFieldFixedHeight -
+                    bottomPadding,
                 child: _buildCarousel(),
               ),
               AnimatedPositioned(
@@ -225,10 +248,12 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
-            onPressed: () {
-              _dismissKeyboard();
-              _onQuestionSelected(_randomQuestions[index]);
-            },
+            onPressed: _remainingQuestions > 0
+                ? () {
+                    _dismissKeyboard();
+                    _onQuestionSelected(_randomQuestions[index]);
+                  }
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondary,
               foregroundColor: Theme.of(context).primaryColor,
@@ -263,78 +288,91 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
 
   Widget _buildQuestionInput() {
     return Container(
-        height: _inputFieldFixedHeight, // Fixed height including padding
-        color: Theme.of(context).scaffoldBackgroundColor,
-        padding: const EdgeInsets.all(8),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  _dismissKeyboard();
-                  // Add functionality for the "50" button
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(35, 35),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    side: BorderSide(color: Theme.of(context).primaryColor),
-                  ),
+      height: _inputFieldFixedHeight,
+      color: Theme.of(context).scaffoldBackgroundColor,
+      padding: const EdgeInsets.all(8),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: _remainingQuestions > 0 ? null : _navigateToFeedDog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accent1,
+                //foregroundColor: Theme.of(context).primaryColor,
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(35, 35),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  side: BorderSide(color: Theme.of(context).primaryColor),
                 ),
-                child: const Text('50',
-                    style:
-                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: TextField(
-                  controller: _questionController,
-                  decoration: InputDecoration(
-                    labelText: 'Ask what you want, passenger?',
-                    labelStyle:
-                        Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor, width: 2),
-                      borderRadius: BorderRadius.circular(24),
+              child: Text(
+                '$_remainingQuestions',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: _remainingQuestions > 0
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Expanded(
+              child: TextField(
+                controller: _questionController,
+                enabled: _remainingQuestions > 0,
+                decoration: InputDecoration(
+                  labelText: 'Ask what you want, passenger?',
+                  labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor, width: 2),
-                      borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
                     ),
-                  ),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              const SizedBox(width: 5),
-              IconButton(
-                icon: Icon(Icons.send_rounded,
-                    color: Theme.of(context).primaryColor),
-                onPressed: () {
-                  _dismissKeyboard();
-                  _getFortune(_questionController.text);
-                },
-                style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(50, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    side: BorderSide(
-                        color: Theme.of(context).primaryColor, width: 2),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                 ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ],
-          ),
-        ));
+            ),
+            const SizedBox(width: 5),
+            IconButton(
+              icon: Icon(Icons.send_rounded,
+                  color: Theme.of(context).primaryColor),
+              onPressed: _remainingQuestions > 0
+                  ? () {
+                      _dismissKeyboard();
+                      _getFortune(_questionController.text);
+                    }
+                  : null,
+              style: IconButton.styleFrom(
+                backgroundColor: AppTheme.accent1,
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(50, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                  side: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildAnswerSection() {
@@ -413,6 +451,13 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
               AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
         ),
       ),
+    );
+  }
+
+  void _navigateToFeedDog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FeedTheDogScreen()),
     );
   }
 }

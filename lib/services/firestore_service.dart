@@ -9,6 +9,20 @@ class FirestoreService {
   static String? _lastUsedPersona;
   static const int _maxRetries = 3;
   static const Duration _retryDelay = Duration(seconds: 1);
+  static const int defaultStartingCount = 50;
+
+  static Future<int> getStartingCount() async {
+    try {
+      final statsDoc =
+          await _firestore.collection('questions').doc('stats').get();
+      if (statsDoc.exists) {
+        return statsDoc.data()?['startingCount'] ?? defaultStartingCount;
+      }
+    } catch (e) {
+      return defaultStartingCount;
+    }
+    return defaultStartingCount;
+  }
 
   static Future<void> initializeQuestionsCache() async {
     final categories = ['Love', 'Finance', 'Health', 'Career', 'Mixed'];
