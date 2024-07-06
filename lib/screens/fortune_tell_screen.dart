@@ -8,11 +8,13 @@ import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../theme.dart';
-import 'purchase_screen.dart';
 
 class FortuneTellScreen extends StatefulWidget {
+  final Function(String) onNavigate;
+  final VoidCallback onFeedDog;
+
   const FortuneTellScreen(
-      {super.key, required void Function(String route) onNavigate});
+      {super.key, required this.onNavigate, required this.onFeedDog});
 
   @override
   _FortuneTellScreenState createState() => _FortuneTellScreenState();
@@ -296,7 +298,7 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: _remainingQuestions > 0 ? null : _navigateToFeedDog,
+              onPressed: _remainingQuestions > 0 ? null : widget.onFeedDog,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accent1,
                 //foregroundColor: Theme.of(context).primaryColor,
@@ -451,13 +453,6 @@ class _FortuneTellScreenState extends State<FortuneTellScreen>
               AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
         ),
       ),
-    );
-  }
-
-  void _navigateToFeedDog() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FeedTheDogScreen()),
     );
   }
 }

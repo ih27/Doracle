@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../widgets/slide_right_route.dart';
 import 'home_screen.dart';
 import 'fortune_tell_screen.dart';
 import 'settings_screen.dart';
-import 'shop_screen.dart';
+import 'purchase_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,6 +17,13 @@ class _MainScreenState extends State<MainScreen> {
 
   void _navigateTo(String route) {
     _navigatorKey.currentState?.pushReplacementNamed(route);
+  }
+
+  void _showFeedTheDogScreen() {
+    Navigator.push(
+      context,
+      SlideRightRoute(page: const FeedTheDogScreen()),
+    );
   }
 
   @override
@@ -37,8 +45,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()),
+                  SlideRightRoute(page: const SettingsScreen()),
                 );
               },
               iconSize: 50,
@@ -74,12 +81,10 @@ class _MainScreenState extends State<MainScreen> {
                   (BuildContext context) => HomeScreen(onNavigate: _navigateTo);
               break;
             case '/fortune':
-              builder = (BuildContext context) =>
-                  FortuneTellScreen(onNavigate: _navigateTo);
-              break;
-            case '/shop':
-              builder =
-                  (BuildContext context) => ShopScreen(onNavigate: _navigateTo);
+              builder = (BuildContext context) => FortuneTellScreen(
+                    onNavigate: _navigateTo,
+                    onFeedDog: _showFeedTheDogScreen,
+                  );
               break;
             default:
               throw Exception('Invalid route: ${settings.name}');
