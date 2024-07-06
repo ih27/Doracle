@@ -1,15 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/firestore_service.dart';
 import 'user_repository.dart';
 
 class FirestoreUserRepository implements UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _collectionName = 'users';
+  final startingCount = FirestoreService.getStartingCount();
 
   @override
   Future<void> addUser(String userId, Map<String, dynamic> userData) async {
     userData['createdAt'] = Timestamp.now();
     userData['questionHistory'] = [];
-    userData['remainingQuestionsCount'] = 50; // Starting with 50 questions
+    userData['remainingQuestionsCount'] = startingCount;
     userData['totalQuestionsAsked'] = 0;
     userData['purchaseHistory'] = [];
     await _firestore.collection(_collectionName).doc(userId).set(userData);
@@ -40,7 +42,8 @@ class FirestoreUserRepository implements UserRepository {
       final userData = userDoc.data() as Map<String, dynamic>;
       final List<Map<String, dynamic>> questionHistory =
           List<Map<String, dynamic>>.from(userData['questionHistory'] ?? []);
-      final int remainingQuestionsCount = (userData['remainingQuestionsCount'] ?? 0) - 1;
+      final int remainingQuestionsCount =
+          (userData['remainingQuestionsCount'] ?? 0) - 1;
       final int totalQuestionsAsked =
           (userData['totalQuestionsAsked'] ?? 0) + 1;
 
@@ -81,7 +84,8 @@ class FirestoreUserRepository implements UserRepository {
       final userData = userDoc.data() as Map<String, dynamic>;
       final List<Map<String, dynamic>> purchaseHistory =
           List<Map<String, dynamic>>.from(userData['purchaseHistory'] ?? []);
-      final int currentRemainingQuestions = userData['remainingQuestionsCount'] ?? 0;
+      final int currentRemainingQuestions =
+          userData['remainingQuestionsCount'] ?? 0;
 
       purchaseHistory.add({
         'questionCount': questionCount,
