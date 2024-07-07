@@ -1,4 +1,5 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -9,10 +10,11 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'dependency_injection.dart';
 import 'firebase_options.dart';
 import 'auth_wrapper.dart';
+import 'services/firestore_service.dart';
 import 'theme.dart';
 import 'controllers/purchases.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
@@ -44,9 +46,17 @@ void main() async {
   // Set up GetIt dependencies and initialize important components
   setupDependencies();
   await getIt<PurchasesController>().initialize();
+  await _initializeApp();
 
   runApp(const MyApp());
   FlutterNativeSplash.remove();
+}
+
+Future<void> _initializeApp() async {
+  await FirebaseAuth.instance.authStateChanges().first;
+  if (FirebaseAuth.instance.currentUser != null) {
+    await FirestoreService.initializeQuestionsCache();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -59,7 +69,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       home: Container(
           color: AppTheme.getColorFromHex("#fbf9f5"),
-          child: const SafeArea(
+          child: SafeArea(
             child: AuthWrapper(),
           )),
     );

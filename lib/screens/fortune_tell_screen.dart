@@ -37,7 +37,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   List<String> _randomQuestions = [];
   final int _numberOfQuestionsPerCategory = 2;
   final double _inputFieldFixedHeight = 66;
-  int _remainingQuestionsCount = 0;
 
   SMITrigger? _shakeInput;
 
@@ -67,15 +66,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     await Future.wait([
       _initializeFortuneTeller(),
       _fetchRandomQuestions(),
-      _fetchRemainingQuestionsCount(),
     ]);
-  }
-
-  Future<void> _fetchRemainingQuestionsCount() async {
-    final count = await _userService.getRemainingQuestionsCount();
-    setState(() {
-      _remainingQuestionsCount = count;
-    });
   }
 
   Future<void> _initializeFortuneTeller() async {
@@ -139,7 +130,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
       await Future.delayed(const Duration(seconds: 2));
 
       await _userService.updatePurchaseHistory(questionCount);
-      await _fetchRemainingQuestionsCount();
 
       setState(() {
         _isLoading = false;
@@ -169,7 +159,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   void _getFortune(String question) async {
-    if (_remainingQuestionsCount <= 0) {
+    if (_userService.getRemainingQuestionsCount() <= 0) {
       _showOutOfQuestionsOverlay();
       return;
     }
@@ -201,7 +191,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
           });
         },
         onDone: () async {
-          await _fetchRemainingQuestionsCount();
           setState(() {
             _isFortuneCompleted = true;
           });
@@ -233,37 +222,41 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   Widget build(BuildContext context) {
     return SafeArea(
         child: FutureBuilder(
-      future: _initializationFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          return GestureDetector(
-            onTap: _dismissKeyboard,
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    _buildRiveAnimation(),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: _fortuneSpans.isEmpty
-                            ? _buildQuestionSection()
-                            : _buildAnswerSection(),
-                      ),
-                    ),
-                  ],
-                ),
-                if (_isLoading) _buildLoadingOverlay(),
-              ],
-            ),
-          );
-        }
-      },
-    ));
+            future: _initializationFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                return AnimatedBuilder(
+                    animation: _userService,
+                    builder: (context, child) {
+                      return GestureDetector(
+                        onTap: _dismissKeyboard,
+                        child: Stack(
+                          children: [
+                            Column(
+                              children: [
+                                _buildRiveAnimation(),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    child: _fortuneSpans.isEmpty
+                                        ? _buildQuestionSection()
+                                        : _buildAnswerSection(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (_isLoading) _buildLoadingOverlay(),
+                          ],
+                        ),
+                      );
+                    });
+              }
+            }));
   }
 
   Widget _buildRiveAnimation() {
@@ -371,7 +364,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: _remainingQuestionsCount > 0
+              onPressed: _userService.getRemainingQuestionsCount() > 0
                   ? null
                   : _showOutOfQuestionsOverlay,
               style: ElevatedButton.styleFrom(
@@ -385,11 +378,11 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                 ),
               ),
               child: Text(
-                '$_remainingQuestionsCount',
+                '${_userService.getRemainingQuestionsCount()}',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: _remainingQuestionsCount > 0
+                  color: _userService.getRemainingQuestionsCount() > 0
                       ? Theme.of(context).primaryColor
                       : Theme.of(context).colorScheme.secondary,
                 ),

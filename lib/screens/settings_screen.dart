@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../auth_wrapper.dart';
+import '../dependency_injection.dart';
+import '../services/auth_service.dart';
+import '../services/user_service.dart';
 import '../theme.dart';
 import '../helpers/show_snackbar.dart';
 import 'purchase_screen.dart';
@@ -7,13 +9,18 @@ import 'purchase_screen.dart';
 class SettingsScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;
 
-  const SettingsScreen({super.key, required this.onPurchaseComplete});
+  const SettingsScreen({
+    super.key,
+    required this.onPurchaseComplete,
+  });
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final UserService userService = getIt<UserService>();
+  final AuthService authService = getIt<AuthService>();
   bool _notificationsEnabled = true;
 
   @override
@@ -76,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.star,
               title: 'Rate Us',
               onTap: () {
-                // TODO: Implement rate us functionality
+                // Implement rate us functionality
               },
             ),
             const SizedBox(height: 12),
@@ -89,7 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => handleSignOut(context),
+              onPressed: _handleSignOut,
               style: ElevatedButton.styleFrom(
                 foregroundColor: Theme.of(context).primaryColor,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -219,5 +226,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: Theme.of(context).primaryColor),
       ),
     );
+  }
+
+  Future<void> _handleSignOut() async {
+    try {
+      await authService.signOut();
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(context, 'Error signing out. Please try again.');
+    }
   }
 }

@@ -8,6 +8,7 @@ import 'repositories/firestore_fortune_content_repository.dart';
 import 'repositories/firestore_user_repository.dart';
 import 'repositories/fortune_content_repository.dart';
 import 'repositories/user_repository.dart';
+import 'services/auth_service.dart';
 import 'services/gemini_service.dart';
 import 'services/openai_service.dart';
 import 'services/user_service.dart';
@@ -35,9 +36,13 @@ void setupDependencies() {
   );
 
   // Services
-  getIt.registerLazySingleton<UserService>(
-    () => UserService(getIt<UserRepository>()),
+  getIt.registerLazySingleton<AuthService>(
+    () => AuthService(
+        (userId, userData) => getIt<UserService>().addUser(userId, userData)),
   );
+  // Ensure UserService is a true singleton
+  getIt.registerLazySingleton<UserService>(
+      () => UserService(getIt<UserRepository>()));
   getIt.registerLazySingleton<GeminiService>(
     () => GeminiService(
       dotenv.env['GEMINI_API_KEY']!,

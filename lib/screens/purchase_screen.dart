@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
+import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../widgets/treat_card.dart';
@@ -19,8 +20,34 @@ class FeedTheDogScreen extends StatefulWidget {
 
 class FeedTheDogScreenState extends State<FeedTheDogScreen> {
   bool _isLoading = false;
+  late final UserService _userService;
+
+  @override
+  void initState() {
+    super.initState();
+    _userService = getIt<UserService>();
+    if (_userService.value == null) {
+      debugPrint('UserService value is null, attempting to reload user data');
+      _reloadUserData();
+    }
+  }
+
+  Future<void> _reloadUserData() async {
+    final authService = getIt<AuthService>();
+    final currentUser = authService.currentUser;
+    if (currentUser != null) {
+      await _userService.loadCurrentUser(currentUser.uid);
+      debugPrint('User data reloaded');
+    } else {
+      debugPrint('No current user found');
+    }
+  }
 
   Future<void> _handlePurchase(int questionCount) async {
+    if (_userService.value == null) {
+      await _reloadUserData();
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -28,9 +55,7 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
     try {
       // Simulate network delay
       await Future.delayed(const Duration(seconds: 2));
-
-      final userService = getIt<UserService>();
-      await userService.updatePurchaseHistory(questionCount);
+      await _userService.updatePurchaseHistory(questionCount);
 
       // Call the callback to notify that a purchase was completed
       widget.onPurchaseComplete();
@@ -63,6 +88,7 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
       showErrorSnackBar(context, 'Purchase failed. Please try again.');
     }
   }
+
   Widget _buildLoadingOverlay() {
     return _isLoading
         ? Container(
