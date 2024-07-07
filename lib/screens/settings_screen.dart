@@ -84,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.share,
               title: 'Share with Friends',
               onTap: () {
-                // TODO: Implement share functionality
+                // Implement share functionality
               },
             ),
             const SizedBox(height: 16),
@@ -106,18 +106,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () {
-                // TODO: Implement delete account functionality
-                showErrorSnackBar(context, 'Account deletion not implemented');
+                // Implement delete account functionality
+                showErrorSnackBar(
+                    context, 'Will be changed to Delete My Account');
+                userService.updateUserField('remainingQuestionsCount', 0);
               },
               child: const Text(
-                'Delete My Account',
+                'Reset Question Count',
                 style: TextStyle(color: Colors.red),
               ),
             ),
             const Spacer(), // This will push the Terms and Conditions to the bottom
             TextButton(
               onPressed: () {
-                // TODO: Show terms and conditions
+                // Show terms and conditions
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {

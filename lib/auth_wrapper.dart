@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dependency_injection.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
-import 'repositories/firestore_user_repository.dart';
 import 'screens/main_screen.dart';
 import 'screens/simple_login_screen.dart';
 import 'services/firestore_service.dart';
 import 'services/user_service.dart';
 
-final UserService userService = UserService(FirestoreUserRepository());
+final UserService userService = getIt<UserService>();
 
 User? currentUser() {
   return FirebaseAuth.instance.currentUser;
