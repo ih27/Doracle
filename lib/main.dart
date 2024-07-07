@@ -68,10 +68,9 @@ class MyApp extends StatelessWidget {
       title: 'Doracle',
       theme: AppTheme.lightTheme,
       home: Container(
-          color: AppTheme.getColorFromHex("#fbf9f5"),
-          child: SafeArea(
-            child: AuthWrapper(),
-          )),
+        color: AppTheme.getColorFromHex("#fbf9f5"),
+        child: AuthWrapper(),
+      ),
     );
   }
 }

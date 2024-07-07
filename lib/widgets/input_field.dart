@@ -9,6 +9,7 @@ class InputField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final bool autoFocus;
   final bool obscureText;
+  final Widget? suffixIcon;
 
   const InputField({
     this.labelText,
@@ -19,7 +20,7 @@ class InputField extends StatelessWidget {
     this.textInputAction,
     this.autoFocus = false,
     this.obscureText = false,
-    super.key,
+    super.key, this.suffixIcon,
   });
 
   @override
@@ -38,6 +39,7 @@ class InputField extends StatelessWidget {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+        suffixIcon: suffixIcon,
       ),
     );
   }

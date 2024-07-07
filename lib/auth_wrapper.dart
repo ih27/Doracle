@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fortuntella/helpers/constants.dart';
 import 'dependency_injection.dart';
 import 'helpers/show_snackbar.dart';
 import 'screens/main_screen.dart';
@@ -29,7 +30,7 @@ class AuthWrapper extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 } else {
                   debugPrint('User loaded, navigating to MainScreen');
-                  return const MainScreen();
+                  return const SafeArea(child: MainScreen());
                 }
               });
         } else {
@@ -59,7 +60,7 @@ class AuthWrapper extends StatelessWidget {
       await _authService.signInWithEmailAndPassword(email, password);
     } catch (e) {
       if (context.mounted) {
-        showErrorSnackBar(context, 'Login failed: ${e.toString()}');
+        showErrorSnackBar(context, InfoMessages.loginFailure);
       }
     }
   }
@@ -71,7 +72,7 @@ class AuthWrapper extends StatelessWidget {
       await _authService.createUserWithEmailAndPassword(email, password);
     } catch (e) {
       if (context.mounted) {
-        showErrorSnackBar(context, 'Registration failed: ${e.toString()}');
+        showErrorSnackBar(context, InfoMessages.registerFailure);
       }
     }
   }
@@ -79,18 +80,18 @@ class AuthWrapper extends StatelessWidget {
   Future<void> _handlePasswordRecovery(
       BuildContext context, String? email) async {
     if (email == null || email.trim().isEmpty) {
-      showErrorSnackBar(context, 'Please enter a valid email address');
+      showErrorSnackBar(context, InfoMessages.invalidEmailAddress);
       return;
     }
 
     try {
       await _authService.sendPasswordResetEmail(email.trim());
       if (context.mounted) {
-        showInfoSnackBar(context, 'Password reset email sent');
+        showInfoSnackBar(context, InfoMessages.passwordReset);
       }
     } catch (e) {
       if (context.mounted) {
-        showErrorSnackBar(context, 'Password reset failed: ${e.toString()}');
+        showErrorSnackBar(context, InfoMessages.passwordResetFailure);
       }
     }
   }
@@ -100,7 +101,7 @@ class AuthWrapper extends StatelessWidget {
       await _authService.handlePlatformSignIn();
     } catch (e) {
       if (context.mounted) {
-        showErrorSnackBar(context, 'Sign in failed: ${e.toString()}');
+        showErrorSnackBar(context, InfoMessages.loginFailure);
       }
     }
   }

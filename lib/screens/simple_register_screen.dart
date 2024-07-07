@@ -1,11 +1,15 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fortuntella/theme.dart';
 import '../widgets/form_button.dart';
-import '../widgets/input_field.dart';
 
 class SimpleRegisterScreen extends StatefulWidget {
   final Function(String? email, String? password)? onSubmitted;
+  final Function()? onPlatformSignIn;
 
-  const SimpleRegisterScreen({this.onSubmitted, super.key});
+  const SimpleRegisterScreen(
+      {this.onSubmitted, this.onPlatformSignIn, super.key});
 
   @override
   State<SimpleRegisterScreen> createState() => _SimpleRegisterScreenState();
@@ -14,7 +18,17 @@ class SimpleRegisterScreen extends StatefulWidget {
 class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   late String email, password, confirmPassword;
   String? emailError, passwordError;
-  Function(String? email, String? password)? get onSubmitted => widget.onSubmitted;
+  Function(String? email, String? password)? get onSubmitted =>
+      widget.onSubmitted;
+  Function()? get onPlatformSignIn => widget.onPlatformSignIn;
+
+  bool _passwordVisibility = false;
+  bool _confirmPasswordVisibility = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -22,9 +36,16 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
     email = '';
     password = '';
     confirmPassword = '';
-
     emailError = null;
     passwordError = null;
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   void resetErrorText() {
@@ -36,7 +57,6 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
 
   bool validate() {
     resetErrorText();
-
     RegExp emailExp = RegExp(
         r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
 
@@ -75,90 +95,214 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(flex: 1),
-            const Text(
-              'Create Account',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sign up to get started!',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.black.withOpacity(.6),
-              ),
-            ),
-            const SizedBox(height: 24),
-            InputField(
-              onChanged: (value) {
-                setState(() {
-                  email = value;
-                });
-              },
-              labelText: 'Email',
-              errorText: emailError,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next
-            ),
-            const SizedBox(height: 16),
-            InputField(
-              onChanged: (value) {
-                setState(() {
-                  password = value;
-                });
-              },
-              labelText: 'Password',
-              errorText: passwordError,
-              obscureText: true,
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            InputField(
-              onChanged: (value) {
-                setState(() {
-                  confirmPassword = value;
-                });
-              },
-              onSubmitted: (value) => submit(),
-              labelText: 'Confirm Password',
-              errorText: passwordError,
-              obscureText: true,
-              textInputAction: TextInputAction.done,
-            ),
-            const SizedBox(height: 24),
-            FormButton(
-              text: 'Sign Up',
-              onPressed: submit,
-            ),
-            const Spacer(flex: 2),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: RichText(
-                text: const TextSpan(
-                  text: "I'm already a member, ",
-                  style: TextStyle(color: Colors.black),
-                  children: [
-                    TextSpan(
-                      text: 'Sign In',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+            // Top image section
+            Container(
+              height: 250, // Adjust this value as needed
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(
+                      'assets/images/background.png'), // Replace with your image path
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(height: 30), // Adjust this value to position the button above the bottom of the screen
+            // Form content
+            Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sign Up',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Become part of the Doracle family!',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          letterSpacing: 0,
+                          color: Colors.black54,
+                        ),
+                  ),
+                  const SizedBox(height: 32),
+                  // In the build method, replace the existing input field sections with:
+                  _buildInputField(
+                    controller: _emailController,
+                    label: 'Email',
+                    onChanged: (value) => email = value,
+                    errorText: emailError,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildInputField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    onChanged: (value) => password = value,
+                    errorText: passwordError,
+                    obscureText: !_passwordVisibility,
+                    suffixIcon: _buildVisibilityToggle(_passwordVisibility, () {
+                      setState(
+                          () => _passwordVisibility = !_passwordVisibility);
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildInputField(
+                    controller: _confirmPasswordController,
+                    label: 'Confirm Password',
+                    onChanged: (value) => confirmPassword = value,
+                    errorText: passwordError,
+                    obscureText: !_confirmPasswordVisibility,
+                    suffixIcon:
+                        _buildVisibilityToggle(_confirmPasswordVisibility, () {
+                      setState(() => _confirmPasswordVisibility =
+                          !_confirmPasswordVisibility);
+                    }),
+                  ),
+                  const SizedBox(height: 32),
+                  FormButton(
+                    text: 'Create Account',
+                    onPressed: submit,
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Already have an account? ",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(color: Colors.black54),
+                          children: [
+                            TextSpan(
+                              text: 'Sign In',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      'Or sign up with',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium
+                          ?.copyWith(color: Colors.black54),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildSocialButton(
+                        icon: Platform.isIOS
+                            ? FontAwesomeIcons.apple
+                            : FontAwesomeIcons.google,
+                        onPressed: onPlatformSignIn,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required Function(String) onChanged,
+    String? errorText,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    Widget? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: label,
+        errorText: errorText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              BorderSide(color: Theme.of(context).primaryColor, width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              BorderSide(color: Theme.of(context).primaryColor, width: 2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              BorderSide(color: Theme.of(context).primaryColor, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        suffixIcon: suffixIcon,
+      ),
+      style: Theme.of(context).textTheme.bodyMedium,
+    );
+  }
+
+  Widget _buildVisibilityToggle(bool isVisible, VoidCallback onTap) {
+    return IconButton(
+      icon: Icon(
+        isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+        color: Theme.of(context).primaryColor,
+      ),
+      onPressed: onTap,
+    );
+  }
+
+  Widget _buildSocialButton({
+    required IconData icon,
+    VoidCallback? onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.accent1,
+        shape: BoxShape.circle,
+        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+      ),
+      child: IconButton(
+        icon: Icon(
+          icon,
+          color: Theme.of(context).primaryColor,
+        ),
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          padding: const EdgeInsets.all(12),
         ),
       ),
     );
