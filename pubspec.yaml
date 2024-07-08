@@ -19,16 +19,14 @@ dependencies:
   flutter_native_splash: ^2.4.0
   google_sign_in: ^6.2.1
   google_fonts: ^6.2.1
-  google_generative_ai: ^0.4.3
   dart_openai: ^5.1.0
   purchases_flutter: ^6.29.4
   get_it: ^7.7.0
   auto_size_text: ^3.0.0
   carousel_slider: ^4.2.1
   shake: ^2.2.0
-  flutter_animate: ^4.5.0
-  flutterflow_ui: ^0.3.1
   font_awesome_flutter: ^10.7.0
+  rive: ^0.13.9
 
 dev_dependencies:
   flutter_lints: ^4.0.0
