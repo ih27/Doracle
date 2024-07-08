@@ -5,11 +5,14 @@ import 'package:fortuntella/theme.dart';
 import '../widgets/form_button.dart';
 
 class SimpleRegisterScreen extends StatefulWidget {
-  final Function(String? email, String? password)? onSubmitted;
+  final Function(String?, String?)? onSubmitted;
   final Function()? onPlatformSignIn;
 
-  const SimpleRegisterScreen(
-      {this.onSubmitted, this.onPlatformSignIn, super.key});
+  const SimpleRegisterScreen({
+    this.onSubmitted,
+    this.onPlatformSignIn,
+    super.key,
+  });
 
   @override
   State<SimpleRegisterScreen> createState() => _SimpleRegisterScreenState();
@@ -18,8 +21,7 @@ class SimpleRegisterScreen extends StatefulWidget {
 class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   late String email, password, confirmPassword;
   String? emailError, passwordError;
-  Function(String? email, String? password)? get onSubmitted =>
-      widget.onSubmitted;
+  Function(String?, String?)? get onSubmitted => widget.onSubmitted;
   Function()? get onPlatformSignIn => widget.onPlatformSignIn;
 
   bool _passwordVisibility = false;
@@ -84,10 +86,22 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
     return isValid;
   }
 
-  void submit() {
+  Future<void> submit() async {
     if (validate()) {
       if (onSubmitted != null) {
-        onSubmitted!(email, password);
+        bool success = await onSubmitted!(email, password);
+        if (success && mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    }
+  }
+
+  Future<void> _handlePlatformSignIn() async {
+    if (onPlatformSignIn != null) {
+      bool success = await onPlatformSignIn!();
+      if (success && mounted) {
+        Navigator.of(context).pop();
       }
     }
   }
@@ -96,132 +110,123 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Top image section
-            Container(
-              height: 250, // Adjust this value as needed
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                      'assets/images/background.png'), // Replace with your image path
-                  fit: BoxFit.cover,
-                ),
-              ),
+          child: Column(children: [
+        // Top image section
+        Container(
+          height: 250, // Adjust this value as needed
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                  'assets/images/background.png'), // Replace with your image path
+              fit: BoxFit.cover,
             ),
-            // Form content
-            Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sign Up',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Become part of the Doracle family!',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          letterSpacing: 0,
-                          color: Colors.black54,
-                        ),
-                  ),
-                  const SizedBox(height: 32),
-                  // In the build method, replace the existing input field sections with:
-                  _buildInputField(
-                    controller: _emailController,
-                    label: 'Email',
-                    onChanged: (value) => email = value,
-                    errorText: emailError,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInputField(
-                    controller: _passwordController,
-                    label: 'Password',
-                    onChanged: (value) => password = value,
-                    errorText: passwordError,
-                    obscureText: !_passwordVisibility,
-                    suffixIcon: _buildVisibilityToggle(_passwordVisibility, () {
-                      setState(
-                          () => _passwordVisibility = !_passwordVisibility);
-                    }),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInputField(
-                    controller: _confirmPasswordController,
-                    label: 'Confirm Password',
-                    onChanged: (value) => confirmPassword = value,
-                    errorText: passwordError,
-                    obscureText: !_confirmPasswordVisibility,
-                    suffixIcon:
-                        _buildVisibilityToggle(_confirmPasswordVisibility, () {
-                      setState(() => _confirmPasswordVisibility =
-                          !_confirmPasswordVisibility);
-                    }),
-                  ),
-                  const SizedBox(height: 32),
-                  FormButton(
-                    text: 'Create Account',
-                    onPressed: submit,
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: RichText(
-                        text: TextSpan(
-                          text: "Already have an account? ",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(color: Colors.black54),
-                          children: [
-                            TextSpan(
-                              text: 'Sign In',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
+          ),
+        ),
+        // Form content
+        Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sign Up',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: Text(
-                      'Or sign up with',
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Become part of the Doracle family!',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      letterSpacing: 0,
+                      color: Colors.black54,
+                    ),
+              ),
+              const SizedBox(height: 32),
+              _buildInputField(
+                controller: _emailController,
+                label: 'Email',
+                onChanged: (value) => email = value,
+                errorText: emailError,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _passwordController,
+                label: 'Password',
+                onChanged: (value) => password = value,
+                errorText: passwordError,
+                obscureText: !_passwordVisibility,
+                suffixIcon: _buildVisibilityToggle(_passwordVisibility, () {
+                  setState(() => _passwordVisibility = !_passwordVisibility);
+                }),
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _confirmPasswordController,
+                label: 'Confirm Password',
+                onChanged: (value) => confirmPassword = value,
+                errorText: passwordError,
+                obscureText: !_confirmPasswordVisibility,
+                suffixIcon:
+                    _buildVisibilityToggle(_confirmPasswordVisibility, () {
+                  setState(() =>
+                      _confirmPasswordVisibility = !_confirmPasswordVisibility);
+                }),
+              ),
+              const SizedBox(height: 32),
+              FormButton(
+                text: 'Create Account',
+                onPressed: submit,
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: RichText(
+                    text: TextSpan(
+                      text: "Already have an account? ",
                       style: Theme.of(context)
                           .textTheme
                           .labelMedium
                           ?.copyWith(color: Colors.black54),
+                      children: [
+                        TextSpan(
+                          text: 'Sign In',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildSocialButton(
-                        icon: Platform.isIOS
-                            ? FontAwesomeIcons.apple
-                            : FontAwesomeIcons.google,
-                        onPressed: onPlatformSignIn,
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+              const SizedBox(height: 24),
+              Center(
+                child: Text(
+                  'Or sign up with',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelMedium
+                      ?.copyWith(color: Colors.black54),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                _buildSocialButton(
+                    icon: Platform.isIOS
+                        ? FontAwesomeIcons.apple
+                        : FontAwesomeIcons.google,
+                    onPressed: _handlePlatformSignIn),
+              ]),
+            ],
+          ),
+        )
+      ])),
     );
   }
 

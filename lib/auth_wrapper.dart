@@ -65,15 +65,17 @@ class AuthWrapper extends StatelessWidget {
     }
   }
 
-  Future<void> _handleRegister(
+  Future<bool>  _handleRegister(
       BuildContext context, String? email, String? password) async {
-    if (email == null || password == null) return;
+    if (email == null || password == null) return false;
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
+      return true;
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);
       }
+      return false;
     }
   }
 
@@ -96,13 +98,15 @@ class AuthWrapper extends StatelessWidget {
     }
   }
 
-  Future<void> _handlePlatformSignIn(BuildContext context) async {
+  Future<bool> _handlePlatformSignIn(BuildContext context) async {
     try {
       await _authService.handlePlatformSignIn();
+      return true;
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.loginFailure);
       }
+      return false;
     }
   }
 }

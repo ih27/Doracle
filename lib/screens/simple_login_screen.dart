@@ -6,9 +6,9 @@ import '../theme.dart';
 import 'simple_register_screen.dart';
 
 class SimpleLoginScreen extends StatefulWidget {
-  final Function(String? email, String? password)? onLogin;
-  final Function(String? email, String? password)? onRegister;
-  final Function(String? email)? onPasswordRecovery;
+  final Function(String?, String?)? onLogin;
+  final Function(String?, String?)? onRegister;
+  final Function(String?)? onPasswordRecovery;
   final Function()? onPlatformSignIn;
 
   const SimpleLoginScreen({
@@ -32,9 +32,9 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  Function(String? email, String? password)? get onLogin => widget.onLogin;
-  Function(String? email, String? password)? get onRegister => widget.onRegister;
-  Function(String? email)? get onPasswordRecovery => widget.onPasswordRecovery;
+  Function(String?, String?)? get onLogin => widget.onLogin;
+  Function(String?, String?)? get onRegister => widget.onRegister;
+  Function(String?)? get onPasswordRecovery => widget.onPasswordRecovery;
   Function()? get onPlatformSignIn => widget.onPlatformSignIn;
 
   @override
@@ -151,8 +151,10 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                       onChanged: (value) => password = value,
                       errorText: passwordError,
                       obscureText: !_passwordVisibility,
-                      suffixIcon: _buildVisibilityToggle(_passwordVisibility, () {
-                        setState(() => _passwordVisibility = !_passwordVisibility);
+                      suffixIcon:
+                          _buildVisibilityToggle(_passwordVisibility, () {
+                        setState(
+                            () => _passwordVisibility = !_passwordVisibility);
                       }),
                     ),
                   ],
@@ -165,7 +167,9 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                         });
                       },
                       child: Text(
-                        showPasswordRecovery ? 'Back to Sign In' : 'Forgot Password?',
+                        showPasswordRecovery
+                            ? 'Back to Sign In'
+                            : 'Forgot Password?',
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                         ),
@@ -192,7 +196,10 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                       child: RichText(
                         text: TextSpan(
                           text: "Don't have an account? ",
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.black54),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(color: Colors.black54),
                           children: [
                             TextSpan(
                               text: 'Sign Up',
@@ -210,7 +217,10 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                   Center(
                     child: Text(
                       'Or sign in with',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.black54),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium
+                          ?.copyWith(color: Colors.black54),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -218,11 +228,12 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _buildSocialButton(
-                        icon: Platform.isIOS
-                            ? FontAwesomeIcons.apple
-                            : FontAwesomeIcons.google,
-                        onPressed: onPlatformSignIn,
-                      ),
+                          icon: Platform.isIOS
+                              ? FontAwesomeIcons.apple
+                              : FontAwesomeIcons.google,
+                          onPressed: () async {
+                            await onPlatformSignIn!();
+                          }),
                     ],
                   ),
                 ],
@@ -253,15 +264,18 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
         errorText: errorText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          borderSide:
+              BorderSide(color: Theme.of(context).primaryColor, width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          borderSide:
+              BorderSide(color: Theme.of(context).primaryColor, width: 2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          borderSide:
+              BorderSide(color: Theme.of(context).primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -273,7 +287,8 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
         ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         suffixIcon: suffixIcon,
       ),
       style: Theme.of(context).textTheme.bodyMedium,

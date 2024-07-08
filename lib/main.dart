@@ -55,6 +55,7 @@ Future<void> main() async {
 Future<void> _initializeApp() async {
   await FirebaseAuth.instance.authStateChanges().first;
   if (FirebaseAuth.instance.currentUser != null) {
+    debugPrint('question cache initialized on start');
     await FirestoreService.initializeQuestionsCache();
   }
 }
