@@ -34,14 +34,16 @@ Future<void> main() async {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
   }
 
+  // Activate App Check
+  await FirebaseAppCheck.instance.activate(
+      appleProvider:
+          kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck);
+
   // Portrait mode only
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  // Activate App Check
-  await FirebaseAppCheck.instance.activate();
 
   // Set up GetIt dependencies and initialize important components
   setupDependencies();

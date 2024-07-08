@@ -41,8 +41,6 @@ flutter:
   assets:
     - .env
     - assets/splash/background.png
-    - assets/images/google_logo.png
-    - assets/images/apple_logo.png
     - assets/images/background.png
     - assets/images/paw.png
     - assets/animations/meraki_dog.riv
