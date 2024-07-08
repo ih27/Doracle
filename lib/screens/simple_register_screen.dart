@@ -1,17 +1,19 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:fortuntella/theme.dart';
+import '../theme.dart';
 import '../widgets/form_button.dart';
 
 class SimpleRegisterScreen extends StatefulWidget {
   final Function(String?, String?)? onSubmitted;
   final Function()? onPlatformSignIn;
+  final Function()? onNavigateToLogin;
 
   const SimpleRegisterScreen({
+    super.key,
     this.onSubmitted,
     this.onPlatformSignIn,
-    super.key,
+    this.onNavigateToLogin,
   });
 
   @override
@@ -23,6 +25,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   String? emailError, passwordError;
   Function(String?, String?)? get onSubmitted => widget.onSubmitted;
   Function()? get onPlatformSignIn => widget.onPlatformSignIn;
+  Function()? get onNavigateToLogin => widget.onNavigateToLogin;
 
   bool _passwordVisibility = false;
   bool _confirmPasswordVisibility = false;
@@ -89,20 +92,14 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   Future<void> submit() async {
     if (validate()) {
       if (onSubmitted != null) {
-        bool success = await onSubmitted!(email, password);
-        if (success && mounted) {
-          Navigator.of(context).pop();
-        }
+        await onSubmitted!(email, password);
       }
     }
   }
 
   Future<void> _handlePlatformSignIn() async {
     if (onPlatformSignIn != null) {
-      bool success = await onPlatformSignIn!();
-      if (success && mounted) {
-        Navigator.of(context).pop();
-      }
+      await onPlatformSignIn!();
     }
   }
 
@@ -184,7 +181,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: onNavigateToLogin,
                   child: RichText(
                     text: TextSpan(
                       text: "Already have an account? ",

@@ -1,16 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fortuntella/helpers/constants.dart';
 import 'dependency_injection.dart';
+import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
 import 'screens/main_screen.dart';
 import 'screens/simple_login_screen.dart';
+import 'screens/simple_register_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/auth_service.dart';
 import 'services/user_service.dart';
 
 class AuthWrapper extends StatelessWidget {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   AuthWrapper({super.key});
 
@@ -24,24 +27,45 @@ class AuthWrapper extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           return FutureBuilder(
-              future: _loadUser(snapshot.data!.uid),
-              builder: (context, userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  debugPrint('User loaded, navigating to MainScreen');
-                  return const SafeArea(child: MainScreen());
-                }
-              });
+            future: _loadUser(snapshot.data!.uid),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return const SafeArea(child: MainScreen());
+              }
+            },
+          );
         } else {
-          return SimpleLoginScreen(
-            onLogin: (email, password) =>
-                _handleLogin(context, email, password),
-            onRegister: (email, password) =>
-                _handleRegister(context, email, password),
-            onPasswordRecovery: (email) =>
-                _handlePasswordRecovery(context, email),
-            onPlatformSignIn: () => _handlePlatformSignIn(context),
+          return Navigator(
+            key: navigatorKey,
+            onGenerateRoute: (settings) {
+              Widget page;
+              if (settings.name == '/login') {
+                page = SimpleLoginScreen(
+                  onLogin: _handleLogin,
+                  onRegister: () =>
+                      navigatorKey.currentState!.pushNamed('/register'),
+                  onPasswordRecovery: _handlePasswordRecovery,
+                  onPlatformSignIn: _handlePlatformSignIn,
+                );
+              } else if (settings.name == '/register') {
+                page = SimpleRegisterScreen(
+                  onSubmitted: _handleRegister,
+                  onPlatformSignIn: _handlePlatformSignIn,
+                  onNavigateToLogin: () =>
+                      navigatorKey.currentState!.pushReplacementNamed('/login'),
+                );
+              } else {
+                page = SplashScreen(
+                  onSignIn: () =>
+                      navigatorKey.currentState!.pushNamed('/login'),
+                  onSignUp: () =>
+                      navigatorKey.currentState!.pushNamed('/register'),
+                );
+              }
+              return MaterialPageRoute(builder: (_) => page);
+            },
           );
         }
       },
@@ -53,36 +77,36 @@ class AuthWrapper extends StatelessWidget {
     await _userService.loadCurrentUser(userId);
   }
 
-  Future<void> _handleLogin(
-      BuildContext context, String? email, String? password) async {
+  Future<void> _handleLogin(String? email, String? password) async {
     if (email == null || password == null) return;
     try {
       await _authService.signInWithEmailAndPassword(email, password);
     } catch (e) {
+      BuildContext context = navigatorKey.currentContext!;
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.loginFailure);
       }
     }
   }
 
-  Future<bool>  _handleRegister(
-      BuildContext context, String? email, String? password) async {
-    if (email == null || password == null) return false;
+  Future<void> _handleRegister(String? email, String? password) async {
+    if (email == null || password == null) return;
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
-      return true;
     } catch (e) {
+      BuildContext context = navigatorKey.currentContext!;
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);
       }
-      return false;
     }
   }
 
-  Future<void> _handlePasswordRecovery(
-      BuildContext context, String? email) async {
+  Future<void> _handlePasswordRecovery(String? email) async {
+    BuildContext context = navigatorKey.currentContext!;
     if (email == null || email.trim().isEmpty) {
-      showErrorSnackBar(context, InfoMessages.invalidEmailAddress);
+      if (context.mounted) {
+        showErrorSnackBar(context, InfoMessages.invalidEmailAddress);
+      }
       return;
     }
 
@@ -98,15 +122,14 @@ class AuthWrapper extends StatelessWidget {
     }
   }
 
-  Future<bool> _handlePlatformSignIn(BuildContext context) async {
+  Future<void> _handlePlatformSignIn() async {
+    BuildContext context = navigatorKey.currentContext!;
     try {
       await _authService.handlePlatformSignIn();
-      return true;
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.loginFailure);
       }
-      return false;
     }
   }
 }

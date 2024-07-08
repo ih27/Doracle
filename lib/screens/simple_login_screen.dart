@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/form_button.dart';
 import '../theme.dart';
-import 'simple_register_screen.dart';
 
 class SimpleLoginScreen extends StatefulWidget {
   final Function(String?, String?)? onLogin;
-  final Function(String?, String?)? onRegister;
+  final Function()? onRegister;
   final Function(String?)? onPasswordRecovery;
   final Function()? onPlatformSignIn;
 
@@ -33,7 +32,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   Function(String?, String?)? get onLogin => widget.onLogin;
-  Function(String?, String?)? get onRegister => widget.onRegister;
+  Function()? get onRegister => widget.onRegister;
   Function(String?)? get onPasswordRecovery => widget.onPasswordRecovery;
   Function()? get onPlatformSignIn => widget.onPlatformSignIn;
 
@@ -184,15 +183,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                   const SizedBox(height: 16),
                   Center(
                     child: TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SimpleRegisterScreen(
-                            onSubmitted: onRegister,
-                            onPlatformSignIn: onPlatformSignIn,
-                          ),
-                        ),
-                      ),
+                      onPressed: onRegister,
                       child: RichText(
                         text: TextSpan(
                           text: "Don't have an account? ",
