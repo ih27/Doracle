@@ -12,7 +12,9 @@ platform :ios do
   end
 
   def get_version_name()
-    version_name = lane_context[SharedValues::LATEST_TESTFLIGHT_VERSION] || ""
+    puts "*** Incrementing the version number ***"
+    increment_version_number(bump_type: "patch")
+    version_name = lane_context[SharedValues::VERSION_NUMBER] || ""
   
     if version_name.empty?
       puts "*** Version name is empty, add version 1.0.0 ***"
