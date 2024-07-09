@@ -49,6 +49,6 @@ class HomeScreenTexts {
 }
 
 class SettingsScreenTexts {
-  static const shareText = "check out my website https://dorac.com";
+  static const shareText = "check out my website https://doracle.app";
   static const shareSubject = "Look what I made!";
 }
