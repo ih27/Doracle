@@ -16,7 +16,6 @@ dependencies:
   firebase_app_check: ^0.3.0+2
   cloud_firestore: ^5.0.1
   flutter_dotenv: ^5.1.0
-  flutter_native_splash: ^2.4.0
   google_sign_in: ^6.2.1
   google_fonts: ^6.2.1
   dart_openai: ^5.1.0
@@ -39,7 +38,6 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - assets/splash/background.png
     - assets/images/background.png
     - assets/images/doracle_logo_1@2x.webp
     - assets/images/doracle2.png

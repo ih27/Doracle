@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme.dart';
 
 class SplashScreen extends StatefulWidget {
   final Function()? onSignIn;
@@ -115,11 +116,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         onPressed: onSignIn,
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          backgroundColor: Colors.white,
                           minimumSize: const Size(230, 52),
                           elevation: 0,
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.tertiary,
+                          side: const BorderSide(
+                            color: AppTheme.alternateColor,
                             width: 2,
                           ),
                           shape: RoundedRectangleBorder(

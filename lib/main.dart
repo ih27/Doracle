@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'dependency_injection.dart';
 import 'firebase_options.dart';
 import 'auth_wrapper.dart';
@@ -15,8 +14,7 @@ import 'theme.dart';
 import 'controllers/purchases.dart';
 
 Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -51,7 +49,6 @@ Future<void> main() async {
   await _initializeApp();
 
   runApp(const MyApp());
-  FlutterNativeSplash.remove();
 }
 
 Future<void> _initializeApp() async {
@@ -71,7 +68,7 @@ class MyApp extends StatelessWidget {
       title: 'Doracle',
       theme: AppTheme.lightTheme,
       home: Container(
-        color: AppTheme.getColorFromHex("#fbf9f5"),
+        color: AppTheme.primaryBackground,
         child: AuthWrapper(),
       ),
     );
