@@ -47,3 +47,8 @@ class HomeScreenTexts {
     "🐾 Hey! 🐾\n\nYou've hit rock bottom if you're asking a dog about your future. But let's do it!",
   ];
 }
+
+class SettingsScreenTexts {
+  static const shareText = "check out my website https://dorac.com";
+  static const shareSubject = "Look what I made!";
+}

@@ -1,5 +1,7 @@
+import 'package:doracle/helpers/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:share_plus/share_plus.dart';
 import '../dependency_injection.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
@@ -89,9 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSettingsItem(
               icon: Icons.share,
               title: 'Share with Friends',
-              onTap: () {
-                // Implement share functionality
-              },
+              onTap: _handleShare,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -241,5 +241,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _handleRateUs() {
     final InAppReview inAppReview = InAppReview.instance;
     inAppReview.openStoreListing(appStoreId: '6504555731');
+  }
+
+  void _handleShare() {
+    Share.share(SettingsScreenTexts.shareText, subject: SettingsScreenTexts.shareSubject);
   }
 }
