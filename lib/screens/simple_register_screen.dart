@@ -5,15 +5,15 @@ import '../theme.dart';
 import '../widgets/form_button.dart';
 
 class SimpleRegisterScreen extends StatefulWidget {
-  final Function(String?, String?)? onSubmitted;
-  final Function()? onPlatformSignIn;
-  final Function()? onNavigateToLogin;
+  final Function(String?, String?) onRegister;
+  final Function() onPlatformSignIn;
+  final VoidCallback onNavigateToSignIn;
 
   const SimpleRegisterScreen({
     super.key,
-    this.onSubmitted,
-    this.onPlatformSignIn,
-    this.onNavigateToLogin,
+    required this.onRegister,
+    required this.onPlatformSignIn,
+    required this.onNavigateToSignIn,
   });
 
   @override
@@ -23,9 +23,9 @@ class SimpleRegisterScreen extends StatefulWidget {
 class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
   late String email, password, confirmPassword;
   String? emailError, passwordError;
-  Function(String?, String?)? get onSubmitted => widget.onSubmitted;
+  Function(String?, String?) get onRegister => widget.onRegister;
   Function()? get onPlatformSignIn => widget.onPlatformSignIn;
-  Function()? get onNavigateToLogin => widget.onNavigateToLogin;
+  VoidCallback get onNavigateToSignIn => widget.onNavigateToSignIn;
 
   bool _passwordVisibility = false;
   bool _confirmPasswordVisibility = false;
@@ -91,9 +91,8 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
 
   Future<void> submit() async {
     if (validate()) {
-      if (onSubmitted != null) {
-        await onSubmitted!(email, password);
-      }
+        await onRegister(email, password);
+      
     }
   }
 
@@ -181,7 +180,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: onNavigateToLogin,
+                  onPressed: onNavigateToSignIn,
                   child: RichText(
                     text: TextSpan(
                       text: "Already have an account? ",

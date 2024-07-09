@@ -5,16 +5,16 @@ import '../widgets/form_button.dart';
 import '../theme.dart';
 
 class SimpleLoginScreen extends StatefulWidget {
-  final Function(String?, String?)? onLogin;
-  final Function()? onRegister;
-  final Function(String?)? onPasswordRecovery;
-  final Function()? onPlatformSignIn;
+  final Function(String?, String?) onLogin;
+  final Function(String?) onPasswordRecovery;
+  final VoidCallback onNavigateToSignUp;
+  final Function() onPlatformSignIn;
 
   const SimpleLoginScreen({
-    this.onLogin,
-    this.onRegister,
-    this.onPasswordRecovery,
-    this.onPlatformSignIn,
+    required this.onLogin,
+    required this.onPasswordRecovery,
+    required this.onNavigateToSignUp,
+    required this.onPlatformSignIn,
     super.key,
   });
 
@@ -31,10 +31,10 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  Function(String?, String?)? get onLogin => widget.onLogin;
-  Function()? get onRegister => widget.onRegister;
-  Function(String?)? get onPasswordRecovery => widget.onPasswordRecovery;
-  Function()? get onPlatformSignIn => widget.onPlatformSignIn;
+  Function(String?, String?) get onLogin => widget.onLogin;
+  Function(String?) get onPasswordRecovery => widget.onPasswordRecovery;
+  VoidCallback get onNavigateToSignUp => widget.onNavigateToSignUp;
+  Function() get onPlatformSignIn => widget.onPlatformSignIn;
 
   @override
   void initState() {
@@ -85,13 +85,9 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
   void submit() {
     if (validate()) {
       if (showPasswordRecovery) {
-        if (onPasswordRecovery != null) {
-          onPasswordRecovery!(email);
-        }
+        onPasswordRecovery(email);
       } else {
-        if (onLogin != null) {
-          onLogin!(email, password);
-        }
+        onLogin(email, password);
       }
     }
   }
@@ -183,7 +179,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                   const SizedBox(height: 16),
                   Center(
                     child: TextButton(
-                      onPressed: onRegister,
+                      onPressed: onNavigateToSignUp,
                       child: RichText(
                         text: TextSpan(
                           text: "Don't have an account? ",
@@ -223,7 +219,7 @@ class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
                               ? FontAwesomeIcons.apple
                               : FontAwesomeIcons.google,
                           onPressed: () async {
-                            await onPlatformSignIn!();
+                            await onPlatformSignIn();
                           }),
                     ],
                   ),

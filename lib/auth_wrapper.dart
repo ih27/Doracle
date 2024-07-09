@@ -44,24 +44,20 @@ class AuthWrapper extends StatelessWidget {
               if (settings.name == '/login') {
                 page = SimpleLoginScreen(
                   onLogin: _handleLogin,
-                  onRegister: () =>
-                      navigatorKey.currentState!.pushNamed('/register'),
                   onPasswordRecovery: _handlePasswordRecovery,
                   onPlatformSignIn: _handlePlatformSignIn,
+                  onNavigateToSignUp: _navigateToSignUp,
                 );
               } else if (settings.name == '/register') {
                 page = SimpleRegisterScreen(
-                  onSubmitted: _handleRegister,
+                  onRegister: _handleRegister,
                   onPlatformSignIn: _handlePlatformSignIn,
-                  onNavigateToLogin: () =>
-                      navigatorKey.currentState!.pushReplacementNamed('/login'),
+                  onNavigateToSignIn: _navigateToSignIn,
                 );
               } else {
                 page = SplashScreen(
-                  onSignIn: () =>
-                      navigatorKey.currentState!.pushNamed('/login'),
-                  onSignUp: () =>
-                      navigatorKey.currentState!.pushNamed('/register'),
+                  onSignIn: _navigateToSignIn,
+                  onSignUp: _navigateToSignUp,
                 );
               }
               return MaterialPageRoute(builder: (_) => page);
@@ -71,6 +67,12 @@ class AuthWrapper extends StatelessWidget {
       },
     );
   }
+
+  Future<void> _navigateToSignIn() =>
+      navigatorKey.currentState!.pushNamed('/login');
+
+  Future<void> _navigateToSignUp() =>
+      navigatorKey.currentState!.pushNamed('/register');
 
   Future<void> _loadUser(String userId) async {
     debugPrint('_loadUser called with userId: $userId');

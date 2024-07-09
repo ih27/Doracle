@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 
 class SplashScreen extends StatefulWidget {
-  final Function()? onSignIn;
-  final Function()? onSignUp;
+  final VoidCallback onSignIn;
+  final VoidCallback onSignUp;
 
   const SplashScreen({
     super.key,
-    this.onSignIn,
-    this.onSignUp,
+    required this.onSignIn,
+    required this.onSignUp,
   });
 
   @override
@@ -20,8 +20,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  Function()? get onSignIn => widget.onSignIn;
-  Function()? get onSignUp => widget.onSignUp;
+  VoidCallback get onSignIn => widget.onSignIn;
+  VoidCallback get onSignUp => widget.onSignUp;
 
   @override
   void initState() {
