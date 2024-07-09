@@ -4,13 +4,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/form_button.dart';
 import '../theme.dart';
 
-class SimpleLoginScreen extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
   final Function(String?, String?) onLogin;
   final Function(String?) onPasswordRecovery;
   final VoidCallback onNavigateToSignUp;
   final Function() onPlatformSignIn;
 
-  const SimpleLoginScreen({
+  const LoginScreen({
     required this.onLogin,
     required this.onPasswordRecovery,
     required this.onNavigateToSignUp,
@@ -19,10 +19,10 @@ class SimpleLoginScreen extends StatefulWidget {
   });
 
   @override
-  State<SimpleLoginScreen> createState() => _SimpleLoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SimpleLoginScreenState extends State<SimpleLoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   late String email, password;
   String? emailError, passwordError;
   bool showPasswordRecovery = false;

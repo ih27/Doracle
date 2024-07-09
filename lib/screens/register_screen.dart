@@ -4,12 +4,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme.dart';
 import '../widgets/form_button.dart';
 
-class SimpleRegisterScreen extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
   final Function(String?, String?) onRegister;
   final Function() onPlatformSignIn;
   final VoidCallback onNavigateToSignIn;
 
-  const SimpleRegisterScreen({
+  const RegisterScreen({
     super.key,
     required this.onRegister,
     required this.onPlatformSignIn,
@@ -17,10 +17,10 @@ class SimpleRegisterScreen extends StatefulWidget {
   });
 
   @override
-  State<SimpleRegisterScreen> createState() => _SimpleRegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   late String email, password, confirmPassword;
   String? emailError, passwordError;
   Function(String?, String?) get onRegister => widget.onRegister;
@@ -91,8 +91,7 @@ class _SimpleRegisterScreenState extends State<SimpleRegisterScreen> {
 
   Future<void> submit() async {
     if (validate()) {
-        await onRegister(email, password);
-      
+      await onRegister(email, password);
     }
   }
 

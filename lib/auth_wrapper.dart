@@ -4,8 +4,8 @@ import 'dependency_injection.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
 import 'screens/main_screen.dart';
-import 'screens/simple_login_screen.dart';
-import 'screens/simple_register_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
 import 'services/auth_service.dart';
 import 'services/user_service.dart';
@@ -42,14 +42,14 @@ class AuthWrapper extends StatelessWidget {
             onGenerateRoute: (settings) {
               Widget page;
               if (settings.name == '/login') {
-                page = SimpleLoginScreen(
+                page = LoginScreen(
                   onLogin: _handleLogin,
                   onPasswordRecovery: _handlePasswordRecovery,
                   onPlatformSignIn: _handlePlatformSignIn,
                   onNavigateToSignUp: _navigateToSignUp,
                 );
               } else if (settings.name == '/register') {
-                page = SimpleRegisterScreen(
+                page = RegisterScreen(
                   onRegister: _handleRegister,
                   onPlatformSignIn: _handlePlatformSignIn,
                   onNavigateToSignIn: _navigateToSignIn,
