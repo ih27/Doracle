@@ -26,6 +26,7 @@ dependencies:
   shake: ^2.2.0
   font_awesome_flutter: ^10.7.0
   rive: ^0.13.9
+  in_app_review: ^2.0.9
 
 dev_dependencies:
   flutter_lints: ^4.0.0

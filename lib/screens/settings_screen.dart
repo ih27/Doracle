@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
 import '../dependency_injection.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
@@ -82,9 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSettingsItem(
               icon: Icons.star,
               title: 'Rate Us',
-              onTap: () {
-                // Implement rate us functionality
-              },
+              onTap: _handleRateUs,
             ),
             const SizedBox(height: 12),
             _buildSettingsItem(
@@ -237,5 +236,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!mounted) return;
       showErrorSnackBar(context, 'Error signing out. Please try again.');
     }
+  }
+
+  void _handleRateUs() {
+    final InAppReview inAppReview = InAppReview.instance;
+    inAppReview.openStoreListing(appStoreId: '6504555731');
   }
 }
