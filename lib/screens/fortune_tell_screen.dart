@@ -1,7 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:fortuntella/mixins/shake_detector.dart';
-import 'package:fortuntella/services/user_service.dart';
+import '../mixins/shake_detector.dart';
+import '../services/user_service.dart';
 import 'package:rive/rive.dart';
 import '../controllers/fortune_teller.dart';
 import '../dependency_injection.dart';
