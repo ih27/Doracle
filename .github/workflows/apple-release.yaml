@@ -44,7 +44,7 @@ jobs:
         run: |
           cd ./ios
           bundle exec fastlane release_beta
-      - name: Send an AAB link to Slack
+      - name: Send a TF link to Slack
         id: slack
         uses: slackapi/slack-github-action@v1.26.0
         with:
