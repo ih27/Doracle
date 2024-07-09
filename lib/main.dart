@@ -14,8 +14,11 @@ import 'theme.dart';
 import 'controllers/purchases.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   if (kDebugMode) {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
   }
@@ -41,6 +44,24 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Notifications
+  // NotificationSettings settings =
+  //     await FirebaseMessaging.instance.requestPermission(
+  //   alert: true,
+  //   announcement: false,
+  //   badge: true,
+  //   carPlay: false,
+  //   criticalAlert: false,
+  //   provisional: false,
+  //   sound: true,
+  // );
+  // debugPrint('Notifications permission: ${settings.authorizationStatus}');
+  // // For apple platforms, ensure the APNS token is available before making any FCM plugin API calls
+  // final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+  // if (apnsToken != null) {
+  //   debugPrint("My APN token: $apnsToken");
+  // }
+
   // Set up GetIt dependencies and initialize important components
   setupDependencies();
   await getIt<PurchasesController>().initialize();
@@ -52,8 +73,14 @@ Future<void> main() async {
 Future<void> _initializeApp() async {
   await FirebaseAuth.instance.authStateChanges().first;
   if (FirebaseAuth.instance.currentUser != null) {
-    debugPrint('question cache initialized on start');
-    await FirestoreService.initializeQuestionsCache();
+    debugPrint('question cache initialization started...');
+    debugPrint(FirebaseAuth.instance.currentUser!.uid);    
+    try {
+      await FirestoreService.initializeQuestionsCache();
+      debugPrint('question cache initialization completed.');
+    } catch (e) {
+      debugPrint("Error: $e");
+    }
   }
 }
 
