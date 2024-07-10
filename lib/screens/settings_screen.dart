@@ -1,12 +1,13 @@
-import 'package:doracle/helpers/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import '../dependency_injection.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../theme.dart';
 import '../helpers/show_snackbar.dart';
+import '../helpers/constants.dart';
 import 'purchase_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -21,10 +22,31 @@ class SettingsScreen extends StatefulWidget {
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen>
+    with WidgetsBindingObserver {
   final UserService userService = getIt<UserService>();
   final AuthService authService = getIt<AuthService>();
-  bool _notificationsEnabled = true;
+  bool _notificationsEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkNotificationPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkNotificationPermission();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,12 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         controlAffinity: ListTileControlAffinity.trailing,
         contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 0, 4, 0),
         value: _notificationsEnabled,
-        onChanged: (bool value) {
-          setState(() {
-            _notificationsEnabled = value;
-          });
-          // Implement notification toggle functionality
-        },
+        onChanged: _handleNotifications,
         secondary: Icon(Icons.notifications_sharp,
             color: Theme.of(context).primaryColor),
       ),
@@ -238,12 +255,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _handleRateUs() {
-    final InAppReview inAppReview = InAppReview.instance;
-    inAppReview.openStoreListing(appStoreId: '6504555731');
+  Future<void> _checkNotificationPermission() async {
+    final status = await Permission.notification.status;
+    setState(() {
+      _notificationsEnabled = status.isGranted;
+    });
   }
 
-  void _handleShare() {
-    Share.share(SettingsScreenTexts.shareText, subject: SettingsScreenTexts.shareSubject);
+  Future<void> _handleNotifications(bool value) async {
+    // Attempt to open app settings
+    bool didOpen = await openAppSettings();
+
+    if (!didOpen) {
+      // If we couldn't open settings, revert the toggle and show an error
+      setState(() {
+        _notificationsEnabled = !value;
+      });
+      if (mounted) {
+        showErrorSnackBar(
+            context, 'Unable to open settings. Please try again.');
+      }
+    }
+    // If settings opened successfully, we don't update the state here
+  }
+
+  Future<void> _handleRateUs() async {
+    final InAppReview inAppReview = InAppReview.instance;
+    await inAppReview.openStoreListing(appStoreId: '6504555731');
+  }
+
+  Future<void> _handleShare() async {
+    await Share.share(SettingsScreenTexts.shareText,
+        subject: SettingsScreenTexts.shareSubject);
   }
 }

@@ -16,7 +16,10 @@ class InfoMessages {
 
   static const purchaseSuccess = 'Purchase successful!';
   static const restoreSuccess = 'Purchases restored successfully!';
-  static const restoreFail = 'No purchases to restore';
+  static const restoreFailure = 'No purchases to restore';
+
+  static const openSettingsFailure =
+      'Unable to open settings. Please try again.';
 }
 
 class DefaultPersona {

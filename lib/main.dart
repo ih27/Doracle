@@ -34,9 +34,18 @@ Future<void> main() async {
           kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck);
 
   await _setupNotifications();
-  setupDependencies();  
+  setupDependencies();
   await _initializeApp();
   runApp(const MyApp());
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  //await Firebase.initializeApp();
+
+  debugPrint("Handling a background message: ${message.messageId}");
 }
 
 Future<void> _setupNotifications() async {
@@ -56,13 +65,25 @@ Future<void> _setupNotifications() async {
   if (apnsToken != null) {
     debugPrint("My APN token: $apnsToken");
   }
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    debugPrint('Got a message whilst in the foreground!');
+    debugPrint('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      debugPrint(
+          'Message also contained a notification: ${message.notification}');
+    }
+  });
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
 Future<void> _setupErrorReporting() async {
   if (kDebugMode) {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
   }
-  
+
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
@@ -79,7 +100,7 @@ Future<void> _initializeApp() async {
   await getIt<PurchasesController>().initialize();
   // Random questions cache initialization
   await FirebaseAuth.instance.authStateChanges().first;
-  if (FirebaseAuth.instance.currentUser != null) {  
+  if (FirebaseAuth.instance.currentUser != null) {
     try {
       await getIt<QuestionCacheService>().initializeCache();
     } catch (e) {

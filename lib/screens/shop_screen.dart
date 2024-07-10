@@ -6,7 +6,8 @@ import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 
 class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key, required void Function(String route) onNavigate});
+  const ShopScreen(
+      {super.key, required void Function(String route) onNavigate});
 
   @override
   _ShopScreenState createState() => _ShopScreenState();
@@ -50,7 +51,7 @@ class _ShopScreenState extends State<ShopScreen> {
       // Optionally refresh packages or update UI
     } else {
       if (!mounted) return;
-      showInfoSnackBar(context, InfoMessages.restoreFail);
+      showInfoSnackBar(context, InfoMessages.restoreFailure);
     }
   }
 

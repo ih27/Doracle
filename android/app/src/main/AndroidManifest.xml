@@ -1,4 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+    Internet permissions do not affect the `permission_handler` plugin, but are required if your app needs access to
+    the internet.
+    -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Permissions options for the `access notification policy` group -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <!-- Permissions options for the `notification` group -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    
     <application
         android:label="Doracle"
         android:name="${applicationName}"
