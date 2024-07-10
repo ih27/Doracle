@@ -1,12 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import '../mixins/shake_detector.dart';
+import '../repositories/fortune_content_repository.dart';
+import '../services/question_cache_service.dart';
 import '../services/user_service.dart';
 import 'package:rive/rive.dart';
 import '../controllers/fortune_teller.dart';
 import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
-import '../repositories/fortune_content_repository.dart';
 import '../theme.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
@@ -25,8 +26,8 @@ class FortuneTellScreen extends StatefulWidget {
 
 class FortuneTellScreenState extends State<FortuneTellScreen>
     with ShakeDetectorMixin {
-  final FortuneContentRepository _fortuneContentRepository =
-      getIt<FortuneContentRepository>();
+  final QuestionCacheService _questionCacheService =
+      getIt<QuestionCacheService>();
   final UserService _userService = getIt<UserService>();
   late Future<void> _initializationFuture;
 
@@ -35,7 +36,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   bool _isLoading = false;
   bool _isFortuneCompleted = false;
   List<String> _randomQuestions = [];
-  final int _numberOfQuestionsPerCategory = 2;
   final double _inputFieldFixedHeight = 66;
 
   SMITrigger? _shakeInput;
@@ -62,6 +62,12 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     initShakeDetector(onShake: () => _shake());
   }
 
+  @override
+  void dispose() {
+    _questionController.dispose();
+    super.dispose();
+  }
+
   Future<void> _initialize() async {
     await Future.wait([
       _initializeFortuneTeller(),
@@ -70,7 +76,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   Future<void> _initializeFortuneTeller() async {
-    final personaData = await _fortuneContentRepository.getRandomPersona();
+    final personaData = await getIt<FortuneContentRepository>().getRandomPersona();
     setFortuneTellerPersona(
       personaData['name']!,
       personaData['instructions']!,
@@ -78,8 +84,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   Future<void> _fetchRandomQuestions() async {
-    final randomQuestions = await _fortuneContentRepository
-        .fetchRandomQuestions(_numberOfQuestionsPerCategory);
+    final randomQuestions = await _questionCacheService
+        .getRandomQuestions();
     setState(() {
       _randomQuestions = randomQuestions;
     });

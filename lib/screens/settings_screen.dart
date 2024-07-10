@@ -219,7 +219,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           setState(() {
             _notificationsEnabled = value;
           });
-          // TODO: Implement notification toggle functionality
+          // Implement notification toggle functionality
         },
         secondary: Icon(Icons.notifications_sharp,
             color: Theme.of(context).primaryColor),

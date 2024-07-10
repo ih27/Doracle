@@ -9,12 +9,13 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
 
-  firebase_core: ^3.1.0
-  firebase_auth: ^5.1.0
-  firebase_crashlytics: ^4.0.2
-  firebase_analytics: ^11.1.0
-  firebase_app_check: ^0.3.0+2
-  cloud_firestore: ^5.0.1
+  firebase_core: ^3.2.0
+  firebase_auth: ^5.1.2
+  firebase_messaging: ^15.0.3
+  firebase_crashlytics: ^4.0.3
+  firebase_analytics: ^11.2.0
+  firebase_app_check: ^0.3.0+3
+  cloud_firestore: ^5.1.0
   flutter_dotenv: ^5.1.0
   google_sign_in: ^6.2.1
   google_fonts: ^6.2.1
@@ -28,6 +29,7 @@ dependencies:
   rive: ^0.13.9
   in_app_review: ^2.0.9
   share_plus: ^9.0.0
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_lints: ^4.0.0

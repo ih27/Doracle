@@ -9,6 +9,7 @@ import 'repositories/fortune_content_repository.dart';
 import 'repositories/user_repository.dart';
 import 'services/auth_service.dart';
 import 'services/openai_service.dart';
+import 'services/question_cache_service.dart';
 import 'services/user_service.dart';
 
 final getIt = GetIt.instance;
@@ -38,7 +39,6 @@ void setupDependencies() {
     () => AuthService(
         (userId, userData) => getIt<UserService>().addUser(userId, userData)),
   );
-  // Ensure UserService is a true singleton
   getIt.registerLazySingleton<UserService>(
       () => UserService(getIt<UserRepository>()));
   getIt.registerLazySingleton<OpenAIService>(
@@ -46,6 +46,9 @@ void setupDependencies() {
       dotenv.env['OPENAI_API_KEY']!,
       '', // Empty string as placeholder, will be set when creating an instance
     ),
+  );
+  getIt.registerLazySingleton<QuestionCacheService>(
+    () => QuestionCacheService(getIt<FortuneContentRepository>()),
   );
 }
 
