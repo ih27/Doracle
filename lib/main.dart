@@ -49,8 +49,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _setupNotifications() async {
-  NotificationSettings settings =
-      await FirebaseMessaging.instance.requestPermission(
+  await FirebaseMessaging.instance.requestPermission(
     alert: true,
     announcement: false,
     badge: true,
@@ -59,11 +58,9 @@ Future<void> _setupNotifications() async {
     provisional: false,
     sound: true,
   );
-  debugPrint('Notifications permission: ${settings.authorizationStatus}');
-  // For apple platforms, ensure the APNS token is available before making any FCM plugin API calls
-  final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-  if (apnsToken != null) {
-    debugPrint("My APN token: $apnsToken");
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  if (fcmToken != null) {
+    debugPrint("My FCM token: $fcmToken");
   }
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
