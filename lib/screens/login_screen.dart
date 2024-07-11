@@ -144,6 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onSubmitted: (_) => showPasswordRecovery
                         ? onPasswordRecovery(_emailController.text)
                         : FocusScope.of(context).requestFocus(_passwordFocus),
+                        onChanged: (value) => email = value,
                     errorText: emailError,
                     keyboardType: TextInputType.emailAddress,
                   ),
@@ -155,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Password',
                       obscureText: !_passwordVisibility,
                       onSubmitted: (_) => submit(),
+                      onChanged: (value) => password = value,
                       errorText: passwordError,
                       suffixIcon:
                           _buildVisibilityToggle(_passwordVisibility, () {

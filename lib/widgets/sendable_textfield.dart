@@ -7,6 +7,7 @@ class SendableTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final Function(String) onSubmitted;
+  final Function(String)? onChanged;
   final Widget? suffixIcon;
   final String? errorText;
   final FocusNode? focusNode;
@@ -22,6 +23,7 @@ class SendableTextField extends StatelessWidget {
     this.suffixIcon,
     this.errorText,
     this.focusNode,
+    this.onChanged,
   });
 
   @override
@@ -33,6 +35,7 @@ class SendableTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: TextInputAction.go,
       onSubmitted: onSubmitted,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: useHintText ? labelText : null,

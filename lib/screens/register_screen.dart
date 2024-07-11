@@ -154,6 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 labelText: 'Email',
                 onSubmitted: (_) =>
                     FocusScope.of(context).requestFocus(_passwordFocus),
+                onChanged: (value) => email = value,
                 errorText: emailError,
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -164,6 +165,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 labelText: 'Password',
                 onSubmitted: (_) =>
                     FocusScope.of(context).requestFocus(_confirmPasswordFocus),
+                onChanged: (value) => password = value,
                 errorText: passwordError,
                 obscureText: !_passwordVisibility,
                 suffixIcon: _buildVisibilityToggle(_passwordVisibility, () {
@@ -176,6 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 focusNode: _confirmPasswordFocus,
                 labelText: 'Confirm Password',
                 onSubmitted: (_) => submit(),
+                onChanged: (value) => confirmPassword = value,
                 errorText: passwordError,
                 obscureText: !_confirmPasswordVisibility,
                 suffixIcon:
