@@ -8,6 +8,7 @@ import '../services/auth_service.dart';
 
 class PurchasesController {
   bool _isInitialized = false;
+  late Map<int, Package> packageHash;
 
   Future<void> initialize() async {
     if (_isInitialized) {
@@ -27,14 +28,15 @@ class PurchasesController {
     if (apiKey == null) {
       throw Exception('RevenueCat API key not found in .env file');
     }
-    await Purchases.configure(
-        PurchasesConfiguration(apiKey)..appUserID = getIt<AuthService>().currentUser?.uid);
+    await Purchases.configure(PurchasesConfiguration(apiKey)
+      ..appUserID = getIt<AuthService>().currentUser?.uid);
+
+    packageHash = await _buildPackageMap();
 
     _isInitialized = true;
   }
 
-  Future<List<Package>> fetchPackages() async {
-    await _ensureInitialized();
+  Future<List<Package>> _fetchPackages() async {
     try {
       Offerings offerings = await Purchases.getOfferings();
       if (offerings.current != null) {
@@ -46,12 +48,13 @@ class PurchasesController {
     return [];
   }
 
-  Future<bool> purchasePackage(BuildContext context, Package package) async {
+  Future<bool> purchasePackage(int questionCount) async {
     await _ensureInitialized();
     try {
-      CustomerInfo customerInfo = await Purchases.purchasePackage(package);
-      return customerInfo.entitlements.active.isNotEmpty;
+      await Purchases.purchasePackage(packageHash[questionCount]!);
+      return true;
     } catch (e) {
+      debugPrint("purchase package error: $e");
       return false;
     }
   }
@@ -81,5 +84,44 @@ class PurchasesController {
     if (!_isInitialized) {
       await initialize();
     }
+  }
+
+  Future<Map<String, String>> fetchPrices() async {
+    Map<String, String> prices = {};
+    await _ensureInitialized();
+    try {
+      Offerings offerings = await Purchases.getOfferings();
+      if (offerings.current != null) {
+        for (var package in offerings.current!.availablePackages) {
+          prices[package.storeProduct.identifier] =
+              package.storeProduct.priceString;
+        }
+      }
+    } catch (e) {
+      debugPrint("Fetch prices error: $e");
+    }
+    return prices;
+  }
+
+  Future<Map<int, Package>> _buildPackageMap() async {
+    const mapping = {
+      10: 'small_treat',
+      30: 'medium_treat',
+      50: 'large_treat',
+    };
+
+    final packages = await _fetchPackages();
+    final packageMap = <int, Package>{};
+
+    for (final package in packages) {
+      for (final entry in mapping.entries) {
+        if (package.storeProduct.identifier == entry.value) {
+          packageMap[entry.key] = package;
+          break; // Move to the next package once a match is found
+        }
+      }
+    }
+
+    return packageMap;
   }
 }

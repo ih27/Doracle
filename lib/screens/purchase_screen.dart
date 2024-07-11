@@ -1,7 +1,8 @@
+import '../controllers/purchases.dart';
 import 'package:flutter/material.dart';
 import '../dependency_injection.dart';
+import '../helpers/price_utils.dart';
 import '../helpers/show_snackbar.dart';
-import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../widgets/treat_card.dart';
@@ -19,42 +20,36 @@ class FeedTheDogScreen extends StatefulWidget {
 }
 
 class FeedTheDogScreenState extends State<FeedTheDogScreen> {
+  final PurchasesController _purchasesController = getIt<PurchasesController>();
+  final UserService _userService = getIt<UserService>();
+
   bool _isLoading = false;
-  late final UserService _userService;
+  Map<String, String> _prices = {};
 
   @override
   void initState() {
     super.initState();
-    _userService = getIt<UserService>();
-    if (_userService.value == null) {
-      debugPrint('UserService value is null, attempting to reload user data');
-      _reloadUserData();
-    }
+    _loadPrices();
   }
 
-  Future<void> _reloadUserData() async {
-    final authService = getIt<AuthService>();
-    final currentUser = authService.currentUser;
-    if (currentUser != null) {
-      await _userService.loadCurrentUser(currentUser.uid);
-      debugPrint('User data reloaded');
-    } else {
-      debugPrint('No current user found');
-    }
+  Future<void> _loadPrices() async {
+    setState(() => _isLoading = true);
+    _prices = await _purchasesController.fetchPrices();
+    setState(() => _isLoading = false);
   }
 
   Future<void> _handlePurchase(int questionCount) async {
-    if (_userService.value == null) {
-      await _reloadUserData();
-    }
-
     setState(() {
       _isLoading = true;
     });
 
     try {
       // Simulate network delay
-      await Future.delayed(const Duration(seconds: 2));
+      //await Future.delayed(const Duration(seconds: 2));
+      
+      // initiate the purchase, return if it fails
+      if (!await _purchasesController.purchasePackage(questionCount)) return;
+
       await _userService.updatePurchaseHistory(questionCount);
 
       // Call the callback to notify that a purchase was completed
@@ -133,8 +128,9 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
                     TreatCard(
                       treatSize: 'Small',
                       questionCount: 10,
-                      originalPrice: '\$4.99',
-                      discountedPrice: '\$0.99',
+                      originalPrice:
+                          convertPrice(_prices['small_treat']) ?? '\$4.99',
+                      discountedPrice: _prices['small_treat'] ?? '\$0.99',
                       description:
                           'Just a nibble! Keep the pup happy and keep the questions coming.',
                       onTap: () => _handlePurchase(10),
@@ -142,8 +138,9 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
                     TreatCard(
                       treatSize: 'Medium',
                       questionCount: 30,
-                      originalPrice: '\$9.99',
-                      discountedPrice: '\$1.99',
+                      originalPrice:
+                          convertPrice(_prices['medium_treat']) ?? '\$9.99',
+                      discountedPrice: _prices['medium_treat'] ?? '\$1.99',
                       description:
                           'A tasty snack! Your questions are his favorite treat.',
                       isHighlighted: true,
@@ -152,8 +149,9 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
                     TreatCard(
                       treatSize: 'Large',
                       questionCount: 50,
-                      originalPrice: '\$14.99',
-                      discountedPrice: '\$2.99',
+                      originalPrice:
+                          convertPrice(_prices['large_treat']) ?? '\$14.99',
+                      discountedPrice: _prices['large_treat'] ?? '\$2.99',
                       description:
                           'A full meal! The oracle dog will be full and ready to reveal all!',
                       onTap: () => _handlePurchase(50),
