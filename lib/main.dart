@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dependency_injection.dart';
 import 'firebase_options.dart';
 import 'auth_wrapper.dart';
+import 'services/haptic_service.dart';
 import 'services/question_cache_service.dart';
 import 'theme.dart';
 import 'controllers/purchases.dart';
@@ -104,6 +105,8 @@ Future<void> _initializeApp() async {
       debugPrint("Error: $e");
     }
   }
+  // Initialize canVibrate field
+  await getIt<HapticService>().initialize();
 }
 
 class MyApp extends StatelessWidget {

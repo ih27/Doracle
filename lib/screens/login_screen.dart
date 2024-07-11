@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/form_button.dart';
 import '../theme.dart';
+import '../widgets/sendable_textfield.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(String?, String?) onLogin;
@@ -31,6 +32,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+
   Function(String?, String?) get onLogin => widget.onLogin;
   Function(String?) get onPasswordRecovery => widget.onPasswordRecovery;
   VoidCallback get onNavigateToSignUp => widget.onNavigateToSignUp;
@@ -49,6 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -131,21 +137,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                   ),
                   const SizedBox(height: 32),
-                  _buildInputField(
+                  SendableTextField(
+                    useHintText: true,
                     controller: _emailController,
-                    label: 'Email',
-                    onChanged: (value) => email = value,
+                    focusNode: _emailFocus,
+                    labelText: 'Email',
+                    onSubmitted: (_) => showPasswordRecovery
+                        ? onPasswordRecovery(_emailController.text)
+                        : FocusScope.of(context).requestFocus(_passwordFocus),
                     errorText: emailError,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   if (!showPasswordRecovery) ...[
                     const SizedBox(height: 16),
-                    _buildInputField(
+                    SendableTextField(
                       controller: _passwordController,
-                      label: 'Password',
-                      onChanged: (value) => password = value,
-                      errorText: passwordError,
+                      focusNode: _passwordFocus,
+                      labelText: 'Password',
                       obscureText: !_passwordVisibility,
+                      onSubmitted: (_) => submit(),
+                      errorText: passwordError,
                       suffixIcon:
                           _buildVisibilityToggle(_passwordVisibility, () {
                         setState(
@@ -229,56 +240,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required Function(String) onChanged,
-    String? errorText,
-    bool obscureText = false,
-    TextInputType? keyboardType,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: label,
-        errorText: errorText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        suffixIcon: suffixIcon,
-      ),
-      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 

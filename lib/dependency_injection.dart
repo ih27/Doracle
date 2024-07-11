@@ -8,6 +8,7 @@ import 'repositories/firestore_user_repository.dart';
 import 'repositories/fortune_content_repository.dart';
 import 'repositories/user_repository.dart';
 import 'services/auth_service.dart';
+import 'services/haptic_service.dart';
 import 'services/openai_service.dart';
 import 'services/question_cache_service.dart';
 import 'services/user_service.dart';
@@ -50,6 +51,7 @@ void setupDependencies() {
   getIt.registerLazySingleton<QuestionCacheService>(
     () => QuestionCacheService(getIt<FortuneContentRepository>()),
   );
+  getIt.registerLazySingleton<HapticService>(() => HapticService(getIt<UserService>()));
 }
 
 // Helper function to create FortuneTeller with specific persona

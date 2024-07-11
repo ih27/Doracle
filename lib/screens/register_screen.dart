@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme.dart';
 import '../widgets/form_button.dart';
+import '../widgets/sendable_textfield.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function(String?, String?) onRegister;
@@ -35,6 +36,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+  final FocusNode _confirmPasswordFocus = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +55,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
@@ -140,18 +148,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
               ),
               const SizedBox(height: 32),
-              _buildInputField(
+              SendableTextField(
+                useHintText: true,
                 controller: _emailController,
-                label: 'Email',
-                onChanged: (value) => email = value,
+                focusNode: _emailFocus,
+                labelText: 'Email',
+                onSubmitted: (_) =>
+                    FocusScope.of(context).requestFocus(_passwordFocus),
                 errorText: emailError,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
-              _buildInputField(
+              SendableTextField(
+                useHintText: true,
                 controller: _passwordController,
-                label: 'Password',
-                onChanged: (value) => password = value,
+                focusNode: _passwordFocus,
+                labelText: 'Password',
+                onSubmitted: (_) =>
+                    FocusScope.of(context).requestFocus(_confirmPasswordFocus),
                 errorText: passwordError,
                 obscureText: !_passwordVisibility,
                 suffixIcon: _buildVisibilityToggle(_passwordVisibility, () {
@@ -159,10 +173,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 }),
               ),
               const SizedBox(height: 16),
-              _buildInputField(
+              SendableTextField(
+                useHintText: true,
                 controller: _confirmPasswordController,
-                label: 'Confirm Password',
-                onChanged: (value) => confirmPassword = value,
+                focusNode: _confirmPasswordFocus,
+                labelText: 'Confirm Password',
+                onSubmitted: (_) => submit(),
                 errorText: passwordError,
                 obscureText: !_confirmPasswordVisibility,
                 suffixIcon:
@@ -222,56 +238,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         )
       ])),
-    );
-  }
-
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required Function(String) onChanged,
-    String? errorText,
-    bool obscureText = false,
-    TextInputType? keyboardType,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: label,
-        errorText: errorText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        suffixIcon: suffixIcon,
-      ),
-      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 

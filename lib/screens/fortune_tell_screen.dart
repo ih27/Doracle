@@ -1,16 +1,18 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../mixins/shake_detector.dart';
 import '../repositories/fortune_content_repository.dart';
+import '../services/haptic_service.dart';
 import '../services/question_cache_service.dart';
 import '../services/user_service.dart';
-import 'package:rive/rive.dart';
 import '../controllers/fortune_teller.dart';
 import '../dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../theme.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
+import '../widgets/sendable_textfield.dart';
 
 class FortuneTellScreen extends StatefulWidget {
   final Function(String) onNavigate;
@@ -29,6 +31,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   final QuestionCacheService _questionCacheService =
       getIt<QuestionCacheService>();
   final UserService _userService = getIt<UserService>();
+  final HapticService _hapticService = getIt<HapticService>();
   late Future<void> _initializationFuture;
 
   final TextEditingController _questionController = TextEditingController();
@@ -76,7 +79,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   Future<void> _initializeFortuneTeller() async {
-    final personaData = await getIt<FortuneContentRepository>().getRandomPersona();
+    final personaData =
+        await getIt<FortuneContentRepository>().getRandomPersona();
     setFortuneTellerPersona(
       personaData['name']!,
       personaData['instructions']!,
@@ -84,8 +88,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
   }
 
   Future<void> _fetchRandomQuestions() async {
-    final randomQuestions = await _questionCacheService
-        .getRandomQuestions();
+    final randomQuestions = await _questionCacheService.getRandomQuestions();
     setState(() {
       _randomQuestions = randomQuestions;
     });
@@ -164,16 +167,20 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     }
   }
 
-  void _getFortune(String question) async {
+  Future<void> _getFortune(String question) async {
     if (_userService.getRemainingQuestionsCount() <= 0) {
       _showOutOfQuestionsOverlay();
+      _hapticService.warning();
       return;
     }
 
     if (question.trim().isEmpty) {
       showErrorSnackBar(context, 'Please enter a question.');
+      _hapticService.error();
       return;
     }
+
+    _hapticService.success();
 
     setState(() {
       _isLoading = true;
@@ -220,7 +227,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     }
   }
 
-  void _onQuestionSelected(String question) {
+  void _onQuestionSubmitted(String question) {
+    _dismissKeyboard();
     _getFortune(question);
   }
 
@@ -324,10 +332,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: ElevatedButton(
-            onPressed: () {
-              _dismissKeyboard();
-              _onQuestionSelected(_randomQuestions[index]);
-            },
+            onPressed: () => _onQuestionSubmitted(_randomQuestions[index]),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondary,
               foregroundColor: Theme.of(context).primaryColor,
@@ -375,7 +380,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                   : _showOutOfQuestionsOverlay,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accent1,
-                //foregroundColor: Theme.of(context).primaryColor,
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(35, 35),
                 shape: RoundedRectangleBorder(
@@ -396,29 +400,10 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
             ),
             const SizedBox(width: 5),
             Expanded(
-              child: TextField(
+              child: SendableTextField(
                 controller: _questionController,
-                decoration: InputDecoration(
-                  labelText: 'Ask what you want, passenger?',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                ),
-                style: Theme.of(context).textTheme.bodyMedium,
+                labelText: 'Ask what you want, passenger?',
+                onSubmitted: (String question) => _onQuestionSubmitted(_questionController.text),
               ),
             ),
             const SizedBox(width: 5),
@@ -426,8 +411,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
               icon: Icon(Icons.send_rounded,
                   color: Theme.of(context).primaryColor),
               onPressed: () {
-                _dismissKeyboard();
-                _getFortune(_questionController.text);
+                _onQuestionSubmitted(_questionController.text);
               },
               style: IconButton.styleFrom(
                 backgroundColor: AppTheme.accent1,

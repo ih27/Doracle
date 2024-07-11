@@ -8,6 +8,7 @@ class AppUser extends ChangeNotifier {
   int totalQuestionsAsked;
   List<Map<String, dynamic>> questionHistory;
   List<Map<String, dynamic>> purchaseHistory;
+  bool canVibrate;
   static const _remainingQuestionsCount = 50;
   static const _totalQuestionsAsked = 0;
   dynamic lastQuestionTimestamp;
@@ -16,6 +17,7 @@ class AppUser extends ChangeNotifier {
   AppUser({
     required this.id,
     required this.email,
+    this.canVibrate = false,
     this.remainingQuestionsCount = _remainingQuestionsCount,
     this.totalQuestionsAsked = _totalQuestionsAsked,
     this.questionHistory = const [],
@@ -35,7 +37,9 @@ class AppUser extends ChangeNotifier {
       case 'email':
         email = value as String;
         break;
-      // Add cases for other fields as needed
+      case 'canVibrate':
+        canVibrate = value as bool;
+        break;
     }
     notifyListeners();
   }
@@ -59,6 +63,7 @@ class AppUser extends ChangeNotifier {
     return {
       'id': id,
       'email': email,
+      'canVibrate': canVibrate,
       'remainingQuestionsCount': remainingQuestionsCount,
       'totalQuestionsAsked': totalQuestionsAsked,
       'questionHistory': questionHistory,
@@ -72,6 +77,7 @@ class AppUser extends ChangeNotifier {
     return AppUser(
       id: map['id'] ?? '',
       email: map['email'] ?? '',
+      canVibrate: map['canVibrate'] ?? false,
       remainingQuestionsCount:
           map['remainingQuestionsCount'] ?? _remainingQuestionsCount,
       totalQuestionsAsked: map['totalQuestionsAsked'] ?? _totalQuestionsAsked,
