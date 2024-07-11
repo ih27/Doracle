@@ -1,66 +1,72 @@
 import 'package:haptic_feedback/haptic_feedback.dart';
-import 'user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HapticService {
-  final UserService _userService;
-
-  HapticService(this._userService);
+  static const String _canVibrateKey = 'can_vibrate';
+  bool? _canVibrate;
 
   Future<void> initialize() async {
-    final canVibrate = await Haptics.canVibrate();
-    await _userService.updateUserField('canVibrate', canVibrate);
+    final prefs = await SharedPreferences.getInstance();
+    _canVibrate = await Haptics.canVibrate();
+    await prefs.setBool(_canVibrateKey, _canVibrate ?? false);
   }
 
-  void lightImpact() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<bool> getCanVibrate() async {
+    if (_canVibrate != null) return _canVibrate!;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_canVibrateKey) ?? false;
+  }
+
+  Future<void> lightImpact() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.light);
     }
   }
 
-  void mediumImpact() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> mediumImpact() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.medium);
     }
   }
 
-  void heavyImpact() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> heavyImpact() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.heavy);
     }
   }
 
-  void rigid() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> rigid() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.rigid);
     }
   }
 
-  void soft() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> soft() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.soft);
     }
   }
 
-  void selection() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> selection() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.selection);
     }
   }
 
-  void success() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> success() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.success);
     }
   }
 
-  void warning() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> warning() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.warning);
     }
   }
 
-  void error() {
-    if (_userService.value?.canVibrate ?? false) {
+  Future<void> error() async {
+    if (await getCanVibrate()) {
       Haptics.vibrate(HapticsType.error);
     }
   }

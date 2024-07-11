@@ -94,6 +94,9 @@ Future<void> _setupErrorReporting() async {
 }
 
 Future<void> _initializeApp() async {
+  // Initialize HapticService early
+  await getIt<HapticService>().initialize();
+
   // Purchase related initialization
   await getIt<PurchasesController>().initialize();
   // Random questions cache initialization
@@ -105,8 +108,6 @@ Future<void> _initializeApp() async {
       debugPrint("Error: $e");
     }
   }
-  // Initialize canVibrate field
-  await getIt<HapticService>().initialize();
 }
 
 class MyApp extends StatelessWidget {

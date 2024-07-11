@@ -1,25 +1,45 @@
+import '../dependency_injection.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
 import 'package:flutter/foundation.dart';
 
+import 'haptic_service.dart';
+
 class UserService extends ValueNotifier<AppUser?> {
   final UserRepository _userRepository;
+  final HapticService _hapticService = getIt<HapticService>();
 
   UserService(this._userRepository) : super(null);
 
   Future<void> loadCurrentUser(String userId) async {
     debugPrint('loadCurrentUser called with userId: $userId');
     final userData = await _userRepository.getUser(userId);
+
+    // Get the current device capability
+    bool currentCanVibrate = await _hapticService.getCanVibrate();
+
     if (userData != null) {
       try {
-        value = AppUser.fromMap({...userData, 'id': userId});
+        value = AppUser.fromMap({...userData, 'id': userId, 'canVibrate': currentCanVibrate});
+        
+        // Update Firestore if the canVibrate status has changed
+        if (userData['canVibrate'] != currentCanVibrate) {
+          await updateUserField('canVibrate', currentCanVibrate);
+        }
+
         notifyListeners();
       } catch (e) {
         debugPrint('Error creating AppUser: $e');
-        // Handle the error, maybe set a default user or leave value as null
       }
     } else {
-      debugPrint('No user data found for userId: $userId');
+      // No existing user data, create new user with current canVibrate status
+      value = AppUser(
+        id: userId,
+        email: '', // You might want to get this from Firebase Auth
+        canVibrate: currentCanVibrate,
+      );
+      await _userRepository.addUser(userId, value!.toMap());
+      notifyListeners();
     }
   }
 

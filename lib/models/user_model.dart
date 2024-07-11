@@ -17,7 +17,7 @@ class AppUser extends ChangeNotifier {
   AppUser({
     required this.id,
     required this.email,
-    this.canVibrate = false,
+    required this.canVibrate,
     this.remainingQuestionsCount = _remainingQuestionsCount,
     this.totalQuestionsAsked = _totalQuestionsAsked,
     this.questionHistory = const [],

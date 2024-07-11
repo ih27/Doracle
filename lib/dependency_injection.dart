@@ -51,7 +51,7 @@ void setupDependencies() {
   getIt.registerLazySingleton<QuestionCacheService>(
     () => QuestionCacheService(getIt<FortuneContentRepository>()),
   );
-  getIt.registerLazySingleton<HapticService>(() => HapticService(getIt<UserService>()));
+  getIt.registerLazySingleton<HapticService>(() => HapticService());
 }
 
 // Helper function to create FortuneTeller with specific persona
