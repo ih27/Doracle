@@ -15,10 +15,10 @@ class AppTheme {
   static const Color secondaryBackground = Color(0xFFffffff);
 
   // Accent Colors
-  static Color accent1 = getColorFromHex("4f507583");
-  static Color accent2 = getColorFromHex("4d18aa99");
-  static Color accent3 = getColorFromHex("4d928163");
-  static Color accent4 = getColorFromHex("b2ffffff");
+  static const Color accent1 = Color(0x4f507583);
+  static const Color accent2 = Color(0x4d18aa99);
+  static const Color accent3 = Color(0x4d928163);
+  static const Color accent4 = Color(0xb2ffffff);
 
   // Semantic Colors
   static const Color success = Color(0xFF16857b);
@@ -35,9 +35,9 @@ class AppTheme {
 
   static ThemeData get lightTheme {
     return ThemeData(
-      primaryColor: getColorFromHex("#507583"),
+      primaryColor: const Color(0xFF507583),
       colorScheme: ColorScheme.fromSwatch().copyWith(
-        secondary: getColorFromHex("4F507583"),
+        secondary: const Color(0x4F507583),
       ),
       scaffoldBackgroundColor: getColorFromHex("#fbf9f5"),
       buttonTheme: ButtonThemeData(

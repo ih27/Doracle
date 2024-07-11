@@ -149,7 +149,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 32),
               SendableTextField(
-                useHintText: true,
                 controller: _emailController,
                 focusNode: _emailFocus,
                 labelText: 'Email',
@@ -160,7 +159,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 16),
               SendableTextField(
-                useHintText: true,
                 controller: _passwordController,
                 focusNode: _passwordFocus,
                 labelText: 'Password',
@@ -174,7 +172,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 16),
               SendableTextField(
-                useHintText: true,
                 controller: _confirmPasswordController,
                 focusNode: _confirmPasswordFocus,
                 labelText: 'Confirm Password',

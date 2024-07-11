@@ -138,7 +138,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
                   SendableTextField(
-                    useHintText: true,
                     controller: _emailController,
                     focusNode: _emailFocus,
                     labelText: 'Email',
