@@ -508,7 +508,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
 
   Widget _buildLoadingOverlay() {
     return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0.25),
+      color: Theme.of(context).primaryColor.withOpacity(0),
       child: Center(
         child: CircularProgressIndicator(
           valueColor:
