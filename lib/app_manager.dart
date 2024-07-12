@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dependency_injection.dart';
+import 'config/dependency_injection.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
 import 'screens/main_screen.dart';

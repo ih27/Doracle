@@ -1,17 +1,17 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'controllers/fortune_teller.dart';
-import 'controllers/openai_fortune_teller.dart';
-import 'repositories/firestore_fortune_content_repository.dart';
-import 'repositories/firestore_user_repository.dart';
-import 'repositories/fortune_content_repository.dart';
-import 'repositories/user_repository.dart';
-import 'services/auth_service.dart';
-import 'services/haptic_service.dart';
-import 'services/openai_service.dart';
-import 'services/question_cache_service.dart';
-import 'services/revenuecat_service.dart';
-import 'services/user_service.dart';
+import '../controllers/fortune_teller.dart';
+import '../controllers/openai_fortune_teller.dart';
+import '../repositories/firestore_fortune_content_repository.dart';
+import '../repositories/firestore_user_repository.dart';
+import '../repositories/fortune_content_repository.dart';
+import '../repositories/user_repository.dart';
+import '../services/auth_service.dart';
+import '../services/haptic_service.dart';
+import '../services/openai_service.dart';
+import '../services/question_cache_service.dart';
+import '../services/revenuecat_service.dart';
+import '../services/user_service.dart';
 
 final getIt = GetIt.instance;
 

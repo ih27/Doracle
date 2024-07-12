@@ -1,6 +1,6 @@
 import '../services/revenuecat_service.dart';
 import 'package:flutter/material.dart';
-import '../dependency_injection.dart';
+import '../config/dependency_injection.dart';
 import '../helpers/price_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../services/user_service.dart';

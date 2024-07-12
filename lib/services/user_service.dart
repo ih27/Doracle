@@ -1,4 +1,4 @@
-import '../dependency_injection.dart';
+import '../config/dependency_injection.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
 import 'package:flutter/foundation.dart';

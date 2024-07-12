@@ -1,19 +1,18 @@
-import 'dart:async' show TimeoutException;
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dependency_injection.dart';
-import 'firebase_options.dart';
+import 'config/notifications.dart';
+import 'config/dependency_injection.dart';
+import 'config/firebase_options.dart';
+import 'config/theme.dart';
 import 'app_manager.dart';
 import 'services/haptic_service.dart';
 import 'services/question_cache_service.dart';
-import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,73 +33,10 @@ Future<void> main() async {
       appleProvider:
           kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck);
 
-  await _setupNotifications();
+  await setupNotifications();
   setupDependencies();
   await _initializeApp();
   runApp(const MyApp());
-}
-
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  //await Firebase.initializeApp();
-
-  debugPrint("Handling a background message: ${message.messageId}");
-}
-
-Future<void> _setupNotifications() async {
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-
-  FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
-    debugPrint('FCM token refresh callback called...');
-  }).onError((err) {
-    debugPrint('Error in token refresh: $err');
-  });
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('Got a message whilst in the foreground!');
-    debugPrint('Message data: ${message.data}');
-
-    if (message.notification != null) {
-      debugPrint(
-          'Message also contained a notification: ${message.notification}');
-    }
-  });
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // Start the token retrieval process without blocking
-  _getFCMToken();
-}
-
-Future<void> _getFCMToken() async {
-  try {
-    String? token = await FirebaseMessaging.instance.getToken().timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        throw TimeoutException('FCM token retrieval timed out');
-      },
-    );
-    if (token != null) {
-      debugPrint("My FCM token: $token");
-    }
-  } catch (e) {
-    debugPrint('Error getting FCM token: $e');
-    _scheduleTokenRetry();
-  }
-}
-
-void _scheduleTokenRetry() {
-  Future.delayed(const Duration(minutes: 15), _getFCMToken);
 }
 
 Future<void> _setupErrorReporting() async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+import '../config/theme.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onSignIn;
