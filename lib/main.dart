@@ -1,3 +1,4 @@
+import 'dart:async' show TimeoutException;
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -58,10 +59,12 @@ Future<void> _setupNotifications() async {
     provisional: false,
     sound: true,
   );
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  if (fcmToken != null) {
-    debugPrint("My FCM token: $fcmToken");
-  }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
+    debugPrint('FCM token refresh callback called...');
+  }).onError((err) {
+    debugPrint('Error in token refresh: $err');
+  });
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     debugPrint('Got a message whilst in the foreground!');
@@ -74,6 +77,30 @@ Future<void> _setupNotifications() async {
   });
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Start the token retrieval process without blocking
+  _getFCMToken();
+}
+
+Future<void> _getFCMToken() async {
+  try {
+    String? token = await FirebaseMessaging.instance.getToken().timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        throw TimeoutException('FCM token retrieval timed out');
+      },
+    );
+    if (token != null) {
+      debugPrint("My FCM token: $token");
+    }
+  } catch (e) {
+    debugPrint('Error getting FCM token: $e');
+    _scheduleTokenRetry();
+  }
+}
+
+void _scheduleTokenRetry() {
+  Future.delayed(const Duration(minutes: 15), _getFCMToken);
 }
 
 Future<void> _setupErrorReporting() async {
