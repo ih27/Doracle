@@ -5,6 +5,7 @@ import '../mixins/shake_detector.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../services/haptic_service.dart';
 import '../services/question_cache_service.dart';
+import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../controllers/fortune_teller.dart';
 import '../dependency_injection.dart';
@@ -30,6 +31,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     with ShakeDetectorMixin {
   final QuestionCacheService _questionCacheService =
       getIt<QuestionCacheService>();
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
   final HapticService _hapticService = getIt<HapticService>();
   late Future<void> _initializationFuture;
@@ -104,7 +106,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
           child: Center(
             child: SizedBox(
               width: MediaQuery.of(dialogContext).size.width * 0.95,
-              height: MediaQuery.of(dialogContext).size.height * 0.8,
+              height: MediaQuery.of(dialogContext).size.height * 0.65,
               child: OutOfQuestionsOverlay(
                 onClose: () => Navigator.of(dialogContext).pop(),
                 onPurchase: (int questions) {
@@ -135,16 +137,21 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     });
 
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 2));
+      // Initiate the purchase, return if it fails
+      if (!await _purchaseService.purchaseProduct(questionCount)) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
 
+      // The purchase is successful if we are here :-)
       await _userService.updatePurchaseHistory(questionCount);
 
       setState(() {
         _isLoading = false;
       });
 
-      // After successful purchase:
       if (!mounted) return;
       showDialog(
         context: context,

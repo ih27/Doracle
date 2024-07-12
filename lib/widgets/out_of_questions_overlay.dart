@@ -26,7 +26,7 @@ class OutOfQuestionsOverlay extends StatelessWidget {
       ),
       child: Container(
         width: w * 0.95,
-        height: h * 0.75,
+        //height: h * 0.5,
         decoration: BoxDecoration(
           boxShadow: const [
             BoxShadow(
@@ -77,7 +77,7 @@ class OutOfQuestionsOverlay extends StatelessWidget {
   Widget _buildTopSection(BuildContext context, double w, double h) {
     return Container(
       width: w * 0.95,
-      height: h * 0.28,
+      height: h * 0.23,
       decoration: BoxDecoration(
         image: DecorationImage(
           fit: BoxFit.cover,
@@ -163,7 +163,7 @@ class OutOfQuestionsOverlay extends StatelessWidget {
       bool isMiddle) {
     return Container(
       width: cardWidth,
-      height: h * 0.45,
+      height: h * 0.4,
       decoration: BoxDecoration(
         color: isMiddle ? AppTheme.lemonChiffon : AppTheme.primaryBackground,
         borderRadius: BorderRadius.circular(12),
@@ -182,7 +182,7 @@ class OutOfQuestionsOverlay extends StatelessWidget {
             : [],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(5, 10, 5, 5),
+        padding: const EdgeInsets.fromLTRB(5, 20, 5, 5),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -233,21 +233,20 @@ class OutOfQuestionsOverlay extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-              child: Text(
-                price,
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: AppTheme.success,
-                      letterSpacing: 0,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
+            Text(
+              price,
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    color: AppTheme.success,
+                    letterSpacing: 0,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             ElevatedButton(
               onPressed: () => onPurchase(int.parse(questionCount)),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: isMiddle ? AppTheme.secondaryColor : AppTheme.primaryColor,
+                foregroundColor: Colors.white,
+                backgroundColor:
+                    isMiddle ? AppTheme.secondaryColor : AppTheme.primaryColor,
                 minimumSize: Size(cardWidth * 0.7, h * 0.05),
                 padding: EdgeInsets.zero,
                 elevation: 3,

@@ -2,7 +2,6 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'controllers/fortune_teller.dart';
 import 'controllers/openai_fortune_teller.dart';
-import 'controllers/purchases.dart';
 import 'repositories/firestore_fortune_content_repository.dart';
 import 'repositories/firestore_user_repository.dart';
 import 'repositories/fortune_content_repository.dart';
@@ -11,6 +10,7 @@ import 'services/auth_service.dart';
 import 'services/haptic_service.dart';
 import 'services/openai_service.dart';
 import 'services/question_cache_service.dart';
+import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
 
 final getIt = GetIt.instance;
@@ -31,10 +31,6 @@ void setupDependencies() {
         getIt<OpenAIService>(),
       ));
 
-  getIt.registerLazySingleton<PurchasesController>(
-    () => PurchasesController(),
-  );
-
   // Services
   getIt.registerLazySingleton<AuthService>(
     () => AuthService(
@@ -42,6 +38,7 @@ void setupDependencies() {
   );
   getIt.registerLazySingleton<UserService>(
       () => UserService(getIt<UserRepository>()));
+  getIt.registerLazySingleton<RevenueCatService>(() => RevenueCatService());
   getIt.registerLazySingleton<OpenAIService>(
     () => OpenAIService(
       dotenv.env['OPENAI_API_KEY']!,

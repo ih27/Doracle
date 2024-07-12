@@ -9,11 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dependency_injection.dart';
 import 'firebase_options.dart';
-import 'auth_wrapper.dart';
+import 'app_manager.dart';
 import 'services/haptic_service.dart';
 import 'services/question_cache_service.dart';
 import 'theme.dart';
-import 'controllers/purchases.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,8 +96,6 @@ Future<void> _initializeApp() async {
   // Initialize HapticService early
   await getIt<HapticService>().initialize();
 
-  // Purchase related initialization
-  await getIt<PurchasesController>().initialize();
   // Random questions cache initialization
   await FirebaseAuth.instance.authStateChanges().first;
   if (FirebaseAuth.instance.currentUser != null) {
@@ -120,7 +117,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       home: Container(
         color: AppTheme.primaryBackground,
-        child: AuthWrapper(),
+        child: AppManager(),
       ),
     );
   }

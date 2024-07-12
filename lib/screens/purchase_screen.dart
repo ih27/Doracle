@@ -1,4 +1,4 @@
-import '../controllers/purchases.dart';
+import '../services/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import '../dependency_injection.dart';
 import '../helpers/price_utils.dart';
@@ -20,7 +20,7 @@ class FeedTheDogScreen extends StatefulWidget {
 }
 
 class FeedTheDogScreenState extends State<FeedTheDogScreen> {
-  final PurchasesController _purchasesController = getIt<PurchasesController>();
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
 
   bool _isLoading = false;
@@ -34,7 +34,7 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
 
   Future<void> _loadPrices() async {
     setState(() => _isLoading = true);
-    _prices = await _purchasesController.fetchPrices();
+    _prices = await _purchaseService.fetchPrices();
     setState(() => _isLoading = false);
   }
 
@@ -44,18 +44,21 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
     });
 
     try {
-      // Simulate network delay
-      //await Future.delayed(const Duration(seconds: 2));
-      
-      // initiate the purchase, return if it fails
-      if (!await _purchasesController.purchasePackage(questionCount)) return;
+      // Initiate the purchase, return if it fails
+      if (!await _purchaseService.purchaseProduct(questionCount)) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
 
+      // The purchase is successful if we are here :-)
       await _userService.updatePurchaseHistory(questionCount);
 
       // Call the callback to notify that a purchase was completed
       widget.onPurchaseComplete();
 
-      // Navigate back to the fortune tell screen
+      // Get rid of previous navigator screens
       if (!mounted) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
 

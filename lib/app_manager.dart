@@ -8,14 +8,15 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
 import 'services/auth_service.dart';
+import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
 
-class AuthWrapper extends StatelessWidget {
+class AppManager extends StatelessWidget {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  AuthWrapper({super.key});
+  AppManager({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +78,7 @@ class AuthWrapper extends StatelessWidget {
   Future<void> _loadUser(String userId) async {
     debugPrint('_loadUser called with userId: $userId');
     await _userService.loadCurrentUser(userId);
+    await getIt<RevenueCatService>().initializeAndLogin(userId);
   }
 
   Future<void> _handleLogin(String? email, String? password) async {
