@@ -6,6 +6,7 @@ import '../repositories/firestore_fortune_content_repository.dart';
 import '../repositories/firestore_user_repository.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../repositories/user_repository.dart';
+import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
@@ -32,6 +33,7 @@ void setupDependencies() {
       ));
 
   // Services
+  getIt.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
   getIt.registerLazySingleton<AuthService>(
     () => AuthService(
         (userId, userData) => getIt<UserService>().addUser(userId, userData)),

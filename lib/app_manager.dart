@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'config/dependency_injection.dart';
@@ -7,6 +8,7 @@ import 'screens/main_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
+import 'services/analytics_service.dart';
 import 'services/auth_service.dart';
 import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
@@ -14,6 +16,7 @@ import 'services/user_service.dart';
 class AppManager extends StatelessWidget {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
+  final AnalyticsService _analytics = getIt<AnalyticsService>();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   AppManager({super.key});
@@ -85,6 +88,7 @@ class AppManager extends StatelessWidget {
     if (email == null || password == null) return;
     try {
       await _authService.signInWithEmailAndPassword(email, password);
+      _analytics.logLogin(loginMethod: 'email');
     } catch (e) {
       BuildContext context = navigatorKey.currentContext!;
       if (context.mounted) {
@@ -97,6 +101,7 @@ class AppManager extends StatelessWidget {
     if (email == null || password == null) return;
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
+      _analytics.logSignUp(signUpMethod: 'email');
     } catch (e) {
       BuildContext context = navigatorKey.currentContext!;
       if (context.mounted) {
@@ -129,7 +134,14 @@ class AppManager extends StatelessWidget {
   Future<void> _handlePlatformSignIn() async {
     BuildContext context = navigatorKey.currentContext!;
     try {
-      await _authService.handlePlatformSignIn();
+      UserCredential? userCredential = await _authService.handlePlatformSignIn();
+
+      // Check if the user is new
+      if (userCredential?.additionalUserInfo?.isNewUser ?? false) {
+        _analytics.logSignUp(signUpMethod: Platform.isIOS ? 'apple' : 'google');
+      } else {
+        _analytics.logLogin(loginMethod: Platform.isIOS ? 'apple' : 'google');
+      }
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.loginFailure);

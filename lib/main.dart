@@ -11,6 +11,7 @@ import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
 import 'config/theme.dart';
 import 'app_manager.dart';
+import 'services/analytics_service.dart';
 import 'services/haptic_service.dart';
 import 'services/question_cache_service.dart';
 
@@ -56,6 +57,9 @@ Future<void> _setupErrorReporting() async {
 }
 
 Future<void> _initializeApp() async {
+  // Initialize Analytics service with ATT permission
+  await getIt<AnalyticsService>().initialize();
+
   // Initialize HapticService early
   await getIt<HapticService>().initialize();
 

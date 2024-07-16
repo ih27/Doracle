@@ -59,6 +59,8 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>We use your data to provide personalized fortune readings and improve our mystical services. This helps us offer a better experience tailored to your spiritual journey.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

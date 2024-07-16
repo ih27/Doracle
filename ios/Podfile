@@ -54,7 +54,7 @@ post_install do |installer|
         ## dart: PermissionGroup.notification
         'PERMISSION_NOTIFICATIONS=1',
         ## dart: PermissionGroup.appTrackingTransparency
-        ##'PERMISSION_APP_TRACKING_TRANSPARENCY=1',
+        'PERMISSION_APP_TRACKING_TRANSPARENCY=1',
       ]
     end
   end
