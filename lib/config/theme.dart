@@ -33,6 +33,12 @@ class AppTheme {
   static const Color sandyBrown = Color(0xFFee964b);
   static const Color tomato = Color(0xFFf95738);
 
+  // Dog text style
+  static TextStyle dogTextStyle =
+      GoogleFonts.robotoMono(fontSize: 16.0, color: AppTheme.primaryText);
+  static TextStyle humanTextStyle =
+      GoogleFonts.roboto(fontSize: 14.0, color: AppTheme.primaryText);
+
   static ThemeData get lightTheme {
     return ThemeData(
       primaryColor: const Color(0xFF507583),
@@ -57,18 +63,38 @@ class AppTheme {
         ),
       ),
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.roboto(fontSize: 52.0, fontWeight: FontWeight.w300, color: AppTheme.primaryText),
-        displayMedium: GoogleFonts.roboto(fontSize: 44.0, fontWeight: FontWeight.w500, color: AppTheme.primaryText),
-        displaySmall: GoogleFonts.roboto(fontSize: 36.0, fontWeight: FontWeight.w500, color: AppTheme.primaryText),
-        headlineLarge: GoogleFonts.roboto(fontSize: 32.0, color: AppTheme.primaryText),
-        headlineMedium: GoogleFonts.roboto(fontSize: 28.0, color: AppTheme.primaryText),
-        headlineSmall: GoogleFonts.roboto(fontSize: 24.0, color: AppTheme.primaryText),
-        titleLarge: GoogleFonts.roboto(fontSize: 22.0, fontWeight: FontWeight.w500, color: AppTheme.primaryText),
-        titleMedium: GoogleFonts.roboto(fontSize: 18.0, fontWeight: FontWeight.w500, color: AppTheme.info),
-        titleSmall: GoogleFonts.roboto(fontSize: 16.0, fontWeight: FontWeight.w500, color: AppTheme.info),
-        bodyLarge: GoogleFonts.roboto(fontSize: 16.0, color: AppTheme.primaryText),
-        bodyMedium: GoogleFonts.roboto(fontSize: 14.0, color: AppTheme.primaryText),
-        bodySmall: GoogleFonts.roboto(fontSize: 12.0, color: AppTheme.primaryText),
+        displayLarge: GoogleFonts.roboto(
+            fontSize: 52.0,
+            fontWeight: FontWeight.w300,
+            color: AppTheme.primaryText),
+        displayMedium: GoogleFonts.roboto(
+            fontSize: 44.0,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.primaryText),
+        displaySmall: GoogleFonts.roboto(
+            fontSize: 36.0,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.primaryText),
+        headlineLarge:
+            GoogleFonts.roboto(fontSize: 32.0, color: AppTheme.primaryText),
+        headlineMedium:
+            GoogleFonts.roboto(fontSize: 28.0, color: AppTheme.primaryText),
+        headlineSmall:
+            GoogleFonts.roboto(fontSize: 24.0, color: AppTheme.primaryText),
+        titleLarge: GoogleFonts.roboto(
+            fontSize: 22.0,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.primaryText),
+        titleMedium: GoogleFonts.roboto(
+            fontSize: 18.0, fontWeight: FontWeight.w500, color: AppTheme.info),
+        titleSmall: GoogleFonts.roboto(
+            fontSize: 16.0, fontWeight: FontWeight.w500, color: AppTheme.info),
+        bodyLarge:
+            GoogleFonts.roboto(fontSize: 16.0, color: AppTheme.primaryText),
+        bodyMedium:
+            GoogleFonts.roboto(fontSize: 14.0, color: AppTheme.primaryText),
+        bodySmall:
+            GoogleFonts.roboto(fontSize: 12.0, color: AppTheme.primaryText),
         labelMedium: GoogleFonts.roboto(
             fontWeight: FontWeight.w500,
             color: AppTheme.secondaryText,

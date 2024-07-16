@@ -1,3 +1,4 @@
+import 'package:doracle/config/theme.dart';
 import 'package:flutter/material.dart';
 
 class SendableTextField extends StatelessWidget {
@@ -36,6 +37,7 @@ class SendableTextField extends StatelessWidget {
       textInputAction: TextInputAction.go,
       onSubmitted: onSubmitted,
       onChanged: onChanged,
+      style: AppTheme.humanTextStyle,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: useHintText ? labelText : null,

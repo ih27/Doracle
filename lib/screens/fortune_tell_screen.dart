@@ -456,12 +456,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                     child: RichText(
                       text: TextSpan(
                         children: _fortuneSpans,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontFamily: 'Roboto Mono',
-                              fontSize: 15,
-                              letterSpacing: 0,
-                              color: Colors.black,
-                            ),
+                        style: AppTheme.dogTextStyle,
                       ),
                     ),
                   ),
@@ -495,7 +490,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
               child: Text(
                 'Continue',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontFamily: 'Roboto',
                       color: Colors.white,
                       letterSpacing: 0,
                     ),

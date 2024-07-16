@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import '../helpers/constants.dart';
 import 'package:rive/rive.dart';
 import '../mixins/shake_detector.dart';
@@ -86,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with ShakeDetectorMixin {
                     child: AutoSizeText(
                       greeting,
                       textAlign: TextAlign.start,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: AppTheme.dogTextStyle,
                     ),
                   ),
                 ),
@@ -122,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen> with ShakeDetectorMixin {
                     child: Text(
                       'Continue',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontFamily: 'Roboto',
                             color: Colors.white,
                             letterSpacing: 0,
                           ),
