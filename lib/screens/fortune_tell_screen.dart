@@ -385,27 +385,27 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: _userService.getRemainingQuestionsCount() > 0
-                  ? null
-                  : _showOutOfQuestionsOverlay,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accent1,
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(35, 35),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  side: BorderSide(color: Theme.of(context).primaryColor),
+            GestureDetector(
+              onTap: _userService.getRemainingQuestionsCount() == 0
+                  ? _showOutOfQuestionsOverlay
+                  : null,
+              child: Container(
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: AppTheme.accent1,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Theme.of(context).primaryColor),
                 ),
-              ),
-              child: Text(
-                '${_userService.getRemainingQuestionsCount()}',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: _userService.getRemainingQuestionsCount() > 0
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).colorScheme.secondary,
+                child: Center(
+                  child: Text(
+                    '${_userService.getRemainingQuestionsCount()}',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
                 ),
               ),
             ),
