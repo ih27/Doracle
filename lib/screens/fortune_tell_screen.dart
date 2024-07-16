@@ -11,6 +11,7 @@ import '../controllers/fortune_teller.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/show_snackbar.dart';
 import '../config/theme.dart';
+import '../widgets/conditional_blur.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../widgets/sendable_textfield.dart';
@@ -350,13 +351,16 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            child: Text(
-              _randomQuestions[index],
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    letterSpacing: 0,
-                  ),
-              textAlign: TextAlign.center,
+            child: ConditionalBlur(
+              blur: MediaQuery.of(context).viewInsets.bottom > 0,
+              child: Text(
+                _randomQuestions[index],
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      letterSpacing: 0,
+                    ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         );

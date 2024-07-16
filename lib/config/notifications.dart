@@ -66,7 +66,7 @@ Future<void> _getFCMToken({int retryCount = 0}) async {
       },
     );
     if (token != null) {
-      debugPrint("My FCM token: $token");
+      // debugPrint("My FCM token: $token");
       // Here you would typically send this token to your server
     }
   } catch (e) {
@@ -89,7 +89,7 @@ Future<void> _getAPNSToken({int retryCount = 0}) async {
       },
     );
     if (token != null) {
-      debugPrint("My APNS token: $token");
+      // debugPrint("My APNS token: $token");
       // Here you would typically send this token to your server
     }
   } catch (e) {
