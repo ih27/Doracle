@@ -318,7 +318,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                 child: _buildCarousel(),
               ),
               AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 0),
                 curve: Curves.easeOut,
                 left: 0,
                 right: 0,
@@ -410,7 +410,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
               child: SendableTextField(
                 controller: _questionController,
                 labelText: 'Ask what you want, passenger?',
-                onSubmitted: (String question) => _onQuestionSubmitted(_questionController.text),
+                onSubmitted: (String question) =>
+                    _onQuestionSubmitted(_questionController.text),
               ),
             ),
             const SizedBox(width: 5),
