@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             Container(
-              height: 250,
+              height: 300,
               width: double.infinity,
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.black54,
                         ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   SendableTextField(
                     controller: _emailController,
                     focusNode: _emailFocus,
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   FormButton(
                     text: showPasswordRecovery ? 'Recover' : 'Log In',
                     onPressed: submit,
@@ -212,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   Center(
                     child: Text(
                       'Or sign in with',

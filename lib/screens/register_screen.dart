@@ -116,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(children: [
         // Top image section
         Container(
-          height: 250, // Adjust this value as needed
+          height: 300, // Adjust this value as needed
           width: double.infinity,
           decoration: const BoxDecoration(
             image: DecorationImage(
@@ -147,7 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Colors.black54,
                     ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
               SendableTextField(
                 controller: _emailController,
                 focusNode: _emailFocus,
@@ -187,7 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _confirmPasswordVisibility = !_confirmPasswordVisibility);
                 }),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
               FormButton(
                 text: 'Create Account',
                 onPressed: submit,
@@ -206,17 +206,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         TextSpan(
                           text: 'Sign In',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Center(
                 child: Text(
                   'Or sign up with',
