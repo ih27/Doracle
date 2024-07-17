@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/slide_right_route.dart';
-import 'home_screen.dart';
-import 'fortune_tell_screen.dart';
+import 'unified_fortune_screen.dart';
 import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -77,11 +76,8 @@ class _MainScreenState extends State<MainScreen> {
           WidgetBuilder builder;
           switch (settings.name) {
             case '/':
-              builder =
-                  (BuildContext context) => HomeScreen(onNavigate: _navigateTo);
-              break;
             case '/fortune':
-              builder = (BuildContext context) => FortuneTellScreen(
+              builder = (BuildContext context) => UnifiedFortuneScreen(
                     onNavigate: _navigateTo,
                   );
               break;

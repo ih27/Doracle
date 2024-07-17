@@ -1,71 +1,77 @@
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:math' show Random;
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
-import '../mixins/shake_detector.dart';
-import '../repositories/fortune_content_repository.dart';
-import '../services/haptic_service.dart';
-import '../services/question_cache_service.dart';
-import '../services/revenuecat_service.dart';
-import '../services/user_service.dart';
-import '../controllers/fortune_teller.dart';
-import '../config/dependency_injection.dart';
-import '../helpers/show_snackbar.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../config/theme.dart';
+import '../mixins/shake_detector.dart';
+import '../helpers/constants.dart';
+import '../config/dependency_injection.dart';
+import '../services/question_cache_service.dart';
+import '../services/user_service.dart';
+import '../services/haptic_service.dart';
+import '../services/revenuecat_service.dart';
+import '../services/analytics_service.dart';
+import '../widgets/sendable_textfield.dart';
 import '../widgets/conditional_blur.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
-import '../widgets/sendable_textfield.dart';
+import '../controllers/fortune_teller.dart';
+import '../helpers/show_snackbar.dart';
+import '../repositories/fortune_content_repository.dart';
 
-class FortuneTellScreen extends StatefulWidget {
+class UnifiedFortuneScreen extends StatefulWidget {
   final Function(String) onNavigate;
 
-  const FortuneTellScreen({
-    super.key,
+  const UnifiedFortuneScreen({
+    Key? key,
     required this.onNavigate,
-  });
+  }) : super(key: key);
 
   @override
-  FortuneTellScreenState createState() => FortuneTellScreenState();
+  _UnifiedFortuneScreenState createState() => _UnifiedFortuneScreenState();
 }
 
-class FortuneTellScreenState extends State<FortuneTellScreen>
+class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     with ShakeDetectorMixin {
   final QuestionCacheService _questionCacheService =
       getIt<QuestionCacheService>();
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
   final HapticService _hapticService = getIt<HapticService>();
-  late Future<void> _initializationFuture;
-
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  final AnalyticsService _analytics = getIt<AnalyticsService>();
+  final FortuneTeller _fortuneTeller = getIt<FortuneTeller>();
   final TextEditingController _questionController = TextEditingController();
+
+  late Future<void> _initializationFuture;
+  bool isHome = true;
+
+  final String animationAsset = 'assets/animations/meraki_dog_rev3.riv';
+  final String animationArtboard = 'meraki_dog';
+  final String animationStateMachine = 'State Machine 1';
+
+  SMITrigger? _shakeInput;
+  SMIBool? _processingInput;
+
+  late String _welcomeMessage;
+  List<String> _randomQuestions = [];
   List<TextSpan> _fortuneSpans = [];
   bool _isLoading = false;
   bool _isFortuneCompleted = false;
-  List<String> _randomQuestions = [];
   final double _inputFieldFixedHeight = 66;
-
-  SMITrigger? _shakeInput;
-
-  void _onRiveInit(Artboard artboard) {
-    final controller =
-        StateMachineController.fromArtboard(artboard, 'State Machine 1');
-    artboard.addController(controller!);
-    _shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
-  }
-
-  void _shake() {
-    _shakeInput?.fire();
-  }
-
-  void _dismissKeyboard() {
-    FocusScope.of(context).unfocus();
-  }
 
   @override
   void initState() {
     super.initState();
+    initShakeDetector(onShake: _animateShake);
     _initializationFuture = _initialize();
-    initShakeDetector(onShake: () => _shake());
+  }
+
+  Future<void> _initialize() async {
+    await Future.wait([
+      _initializeFortuneTeller(),
+      _fetchRandomQuestions(),
+    ]);
+    _welcomeMessage = _getRandomWelcomeMessage();
   }
 
   @override
@@ -74,11 +80,43 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     super.dispose();
   }
 
-  Future<void> _initialize() async {
-    await Future.wait([
-      _initializeFortuneTeller(),
-      _fetchRandomQuestions(),
-    ]);
+  String _getRandomWelcomeMessage() {
+    final random = Random();
+    return HomeScreenTexts
+        .greetings[random.nextInt(HomeScreenTexts.greetings.length)];
+  }
+
+  Future<void> _fetchRandomQuestions() async {
+    _randomQuestions = await _questionCacheService.getRandomQuestions();
+  }
+
+  void _onRiveInit(Artboard artboard) {
+    final controller =
+        StateMachineController.fromArtboard(artboard, animationStateMachine);
+    artboard.addController(controller!);
+    _shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
+    _processingInput = controller.findInput<bool>('Processing') as SMIBool;
+  }
+
+  void _animateShake() {
+    _shakeInput?.fire();
+  }
+
+  void _animateProcessingStart() {
+    _processingInput?.change(true);
+  }
+
+  void _animateProcessingDone() {
+    _processingInput?.change(false);
+  }
+
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
+  void _onQuestionSubmitted(String question) {
+    _dismissKeyboard();
+    _getFortune(question);
   }
 
   Future<void> _initializeFortuneTeller() async {
@@ -88,13 +126,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
       personaData['name']!,
       personaData['instructions']!,
     );
-  }
-
-  Future<void> _fetchRandomQuestions() async {
-    final randomQuestions = await _questionCacheService.getRandomQuestions();
-    setState(() {
-      _randomQuestions = randomQuestions;
-    });
   }
 
   void _showOutOfQuestionsOverlay() {
@@ -138,7 +169,6 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     });
 
     try {
-      // Initiate the purchase, return if it fails
       if (!await _purchaseService.purchaseProduct(questionCount)) {
         setState(() {
           _isLoading = false;
@@ -146,8 +176,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
         return;
       }
 
-      // The purchase is successful if we are here :-)
       await _userService.updatePurchaseHistory(questionCount);
+      _analytics.logPurchase(value: questionCount.toDouble());
 
       setState(() {
         _isLoading = false;
@@ -160,7 +190,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
           return PurchaseSuccessPopup(
             questionCount: questionCount,
             onContinue: () {
-              Navigator.of(buildContext).pop(); // Close the dialog
+              Navigator.of(buildContext).pop();
             },
           );
         },
@@ -198,9 +228,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
 
     try {
       await _initializeFortuneTeller();
-      final fortuneTeller = getIt<FortuneTeller>();
       bool isFirstChunk = true;
-      fortuneTeller.getFortune(question).listen(
+      _fortuneTeller.getFortune(question).listen(
         (fortunePart) {
           setState(() {
             if (isFirstChunk) {
@@ -235,53 +264,99 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
     }
   }
 
-  void _onQuestionSubmitted(String question) {
-    _dismissKeyboard();
-    _getFortune(question);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: FutureBuilder(
-            future: _initializationFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                return AnimatedBuilder(
-                    animation: _userService,
-                    builder: (context, child) {
-                      return GestureDetector(
-                        onTap: _dismissKeyboard,
-                        child: Stack(
-                          children: [
-                            Column(
-                              children: [
-                                _buildRiveAnimation(),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 5),
-                                    child: _fortuneSpans.isEmpty
-                                        ? _buildQuestionSection()
-                                        : _buildAnswerSection(),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (_isLoading) _buildLoadingOverlay(),
-                          ],
-                        ),
-                      );
-                    });
-              }
-            }));
+    return FutureBuilder(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return GestureDetector(
+            onTap: _dismissKeyboard,
+            child: Column(
+              children: [
+                _buildAnimationContainer(),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _buildContent(),
+                      if (_isLoading) _buildLoadingOverlay(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+    );
   }
 
-  Widget _buildRiveAnimation() {
+  Widget _buildContent() {
+    if (isHome) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text(
+                _welcomeMessage,
+                textAlign: TextAlign.start,
+                style: AppTheme.dogTextStyle,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(22),
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() => isHome = false);
+                _analytics.logEvent(name: 'fortune_session_started');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                minimumSize: const Size(0, 40),
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Continue',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white,
+                      letterSpacing: 0,
+                    ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: _fortuneSpans.isEmpty
+            ? _buildQuestionSection()
+            : _buildAnswerSection(),
+      );
+    }
+  }
+
+  Widget _buildAnimationContainer() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.7,
       height: MediaQuery.of(context).size.width * 0.7,
@@ -290,8 +365,8 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
         shape: BoxShape.circle,
       ),
       child: RiveAnimation.asset(
-        'assets/animations/meraki_dog.riv',
-        artboard: 'meraki_dog',
+        animationAsset,
+        artboard: animationArtboard,
         fit: BoxFit.contain,
         onInit: _onRiveInit,
       ),
@@ -414,17 +489,14 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
               child: SendableTextField(
                 controller: _questionController,
                 labelText: 'Ask what you want, passenger?',
-                onSubmitted: (String question) =>
-                    _onQuestionSubmitted(_questionController.text),
+                onSubmitted: _onQuestionSubmitted,
               ),
             ),
             const SizedBox(width: 5),
             IconButton(
               icon: Icon(Icons.send_rounded,
                   color: Theme.of(context).primaryColor),
-              onPressed: () {
-                _onQuestionSubmitted(_questionController.text);
-              },
+              onPressed: () => _onQuestionSubmitted(_questionController.text),
               style: IconButton.styleFrom(
                 backgroundColor: AppTheme.accent1,
                 padding: EdgeInsets.zero,
@@ -481,6 +553,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                   _isFortuneCompleted = false;
                   _fetchRandomQuestions();
                 });
+                _analytics.logEvent(name: 'new_fortune_requested');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
@@ -493,7 +566,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
                 ),
               ),
               child: Text(
-                'Continue',
+                'Ask Another Question',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Colors.white,
                       letterSpacing: 0,
@@ -507,7 +580,7 @@ class FortuneTellScreenState extends State<FortuneTellScreen>
 
   Widget _buildLoadingOverlay() {
     return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0),
+      color: Theme.of(context).primaryColor.withOpacity(0.25),
       child: Center(
         child: CircularProgressIndicator(
           valueColor:

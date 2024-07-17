@@ -49,7 +49,9 @@ flutter:
     - assets/images/doracle_logo_1@2x.webp
     - assets/images/doracle2.png
     - assets/images/paw.png
-    - assets/animations/meraki_dog.riv
+    # - assets/animations/meraki_dog.riv
+    # - assets/animations/meraki_dog_rev2.riv
+    - assets/animations/meraki_dog_rev3.riv
 
 flutter_launcher_icons:
   android: true
