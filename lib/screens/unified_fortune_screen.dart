@@ -42,6 +42,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   late Future<void> _initializationFuture;
   bool isHome = true;
+  bool _showBottomUI = true;
 
   final String animationAsset = 'assets/animations/meraki_dog_rev3.riv';
   final String animationArtboard = 'meraki_dog';
@@ -193,6 +194,12 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     }
   }
 
+  void _hideBottomUI() {
+    setState(() {
+      _showBottomUI = false;
+    });
+  }
+
   Future<void> _getFortune(String question) async {
     if (_userService.getRemainingQuestionsCount() <= 0) {
       _showOutOfQuestionsOverlay();
@@ -207,6 +214,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     }
 
     _hapticService.success();
+    _hideBottomUI();
 
     setState(() {
       _isFortuneCompleted = false;
@@ -333,7 +341,9 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),
         child: _fortuneSpans.isEmpty
-            ? _buildQuestionSection()
+            ? _showBottomUI
+                ? _buildQuestionSection()
+                : const SizedBox.shrink()
             : _buildAnswerSection(),
       );
     }
@@ -527,13 +537,14 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         ),
         if (_isFortuneCompleted)
           Padding(
-            padding: const EdgeInsets.only(bottom: 22),
+            padding: const EdgeInsets.only(top: 16, bottom: 22),
             child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   _questionController.clear();
                   _fortuneSpans = [];
                   _isFortuneCompleted = false;
+                  _showBottomUI = true;
                   _fetchRandomQuestions();
                 });
               },
