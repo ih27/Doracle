@@ -79,7 +79,6 @@ class AppManager extends StatelessWidget {
       navigatorKey.currentState!.pushNamed('/register');
 
   Future<void> _loadUser(String userId) async {
-    debugPrint('_loadUser called with userId: $userId');
     await _userService.loadCurrentUser(userId);
     await getIt<RevenueCatService>().initializeAndLogin(userId);
   }
