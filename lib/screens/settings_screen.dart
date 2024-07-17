@@ -78,6 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         ],
         centerTitle: false,
         elevation: 0,
+        forceMaterialTransparency: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

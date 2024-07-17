@@ -114,6 +114,7 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
             title: const Text('Feed the Dog'),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
+            forceMaterialTransparency: true,
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

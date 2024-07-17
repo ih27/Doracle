@@ -68,6 +68,7 @@ class _MainScreenState extends State<MainScreen> {
         centerTitle: true,
         toolbarHeight: 60,
         elevation: 0,
+        forceMaterialTransparency: true,
       ),
       body: Navigator(
         key: _navigatorKey,

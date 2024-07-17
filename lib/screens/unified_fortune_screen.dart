@@ -10,7 +10,6 @@ import '../services/question_cache_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
-import '../services/analytics_service.dart';
 import '../widgets/sendable_textfield.dart';
 import '../widgets/conditional_blur.dart';
 import '../widgets/out_of_questions_overlay.dart';
@@ -23,9 +22,9 @@ class UnifiedFortuneScreen extends StatefulWidget {
   final Function(String) onNavigate;
 
   const UnifiedFortuneScreen({
-    Key? key,
+    super.key,
     required this.onNavigate,
-  }) : super(key: key);
+  });
 
   @override
   _UnifiedFortuneScreenState createState() => _UnifiedFortuneScreenState();
@@ -38,7 +37,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   final UserService _userService = getIt<UserService>();
   final HapticService _hapticService = getIt<HapticService>();
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
-  final AnalyticsService _analytics = getIt<AnalyticsService>();
   final FortuneTeller _fortuneTeller = getIt<FortuneTeller>();
   final TextEditingController _questionController = TextEditingController();
 
@@ -55,7 +53,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   late String _welcomeMessage;
   List<String> _randomQuestions = [];
   List<TextSpan> _fortuneSpans = [];
-  bool _isLoading = false;
   bool _isFortuneCompleted = false;
   final double _inputFieldFixedHeight = 66;
 
@@ -164,24 +161,17 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Future<void> _handlePurchase(int questionCount) async {
-    setState(() {
-      _isLoading = true;
-    });
+    _animateProcessingStart();
 
     try {
       if (!await _purchaseService.purchaseProduct(questionCount)) {
-        setState(() {
-          _isLoading = false;
-        });
+        _animateProcessingDone();
         return;
       }
 
       await _userService.updatePurchaseHistory(questionCount);
-      _analytics.logPurchase(value: questionCount.toDouble());
 
-      setState(() {
-        _isLoading = false;
-      });
+      _animateProcessingDone();
 
       if (!mounted) return;
       showDialog(
@@ -196,9 +186,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         },
       );
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      _animateProcessingDone();
       if (mounted) {
         showErrorSnackBar(context, 'Purchase failed. Please try again.');
       }
@@ -221,10 +209,11 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _hapticService.success();
 
     setState(() {
-      _isLoading = true;
       _isFortuneCompleted = false;
       _fortuneSpans = [];
     });
+
+    _animateProcessingStart();
 
     try {
       await _initializeFortuneTeller();
@@ -233,7 +222,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         (fortunePart) {
           setState(() {
             if (isFirstChunk) {
-              _isLoading = false;
               isFirstChunk = false;
             }
             _fortuneSpans = List.from(_fortuneSpans)
@@ -244,23 +232,24 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
           setState(() {
             _isFortuneCompleted = true;
           });
+          _animateProcessingDone();
         },
         onError: (error) {
           setState(() {
             _fortuneSpans = List.from(_fortuneSpans)
               ..add(const TextSpan(text: 'Unexpected error occurred'));
-            _isLoading = false;
             _isFortuneCompleted = true;
           });
+          _animateProcessingDone();
         },
       );
     } catch (e) {
       setState(() {
         _fortuneSpans = List.from(_fortuneSpans)
           ..add(const TextSpan(text: 'Our puppy is not in the mood...'));
-        _isLoading = false;
         _isFortuneCompleted = true;
       });
+      _animateProcessingDone();
     }
   }
 
@@ -280,12 +269,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
               children: [
                 _buildAnimationContainer(),
                 Expanded(
-                  child: Stack(
-                    children: [
-                      _buildContent(),
-                      if (_isLoading) _buildLoadingOverlay(),
-                    ],
-                  ),
+                  child: _buildContent(),
                 ),
               ],
             ),
@@ -322,7 +306,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
             child: ElevatedButton(
               onPressed: () {
                 setState(() => isHome = false);
-                _analytics.logEvent(name: 'fortune_session_started');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
@@ -553,7 +536,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                   _isFortuneCompleted = false;
                   _fetchRandomQuestions();
                 });
-                _analytics.logEvent(name: 'new_fortune_requested');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
@@ -575,18 +557,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildLoadingOverlay() {
-    return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0.25),
-      child: Center(
-        child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-        ),
-      ),
     );
   }
 }
