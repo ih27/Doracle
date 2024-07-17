@@ -38,6 +38,7 @@ Future<void> main() async {
   setupDependencies();
   await _initializeApp();
   runApp(const MyApp());
+  cleanUpNotifications();
 }
 
 Future<void> _setupErrorReporting() async {

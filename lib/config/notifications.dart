@@ -1,5 +1,6 @@
 import 'dart:async' show TimeoutException;
 import 'dart:io' show Platform;
+import 'package:eraser/eraser.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
@@ -50,6 +51,11 @@ Future<void> setupNotifications() async {
   } else {
     _getFCMToken();
   }
+}
+
+void cleanUpNotifications() {  
+  Eraser.clearAllAppNotifications();
+  Eraser.resetBadgeCountAndRemoveNotificationsFromCenter();
 }
 
 Future<void> _getFCMToken({int retryCount = 0}) async {

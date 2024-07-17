@@ -153,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.0"
+  eraser:
+    dependency: "direct main"
+    description:
+      name: eraser
+      sha256: "89bbfceda3c0979710c4849f1735b0c33af7fea4504042692285b6c530ac4f28"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   fake_async:
     dependency: transitive
     description:

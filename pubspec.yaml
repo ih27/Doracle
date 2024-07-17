@@ -32,6 +32,7 @@ dependencies:
   shared_preferences: ^2.2.3
   permission_handler: ^11.3.1
   haptic_feedback: ^0.5.1+1
+  eraser: ^2.0.2
 
 dev_dependencies:
   flutter_lints: ^4.0.0
