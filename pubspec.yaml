@@ -33,6 +33,7 @@ dependencies:
   permission_handler: ^11.3.1
   haptic_feedback: ^0.5.1+1
   eraser: ^2.0.2
+  typewritertext: ^3.0.8
 
 dev_dependencies:
   flutter_lints: ^4.0.0
@@ -49,9 +50,7 @@ flutter:
     - assets/images/doracle_logo_1@2x.webp
     - assets/images/doracle2.png
     - assets/images/paw.png
-    # - assets/animations/meraki_dog.riv
-    # - assets/animations/meraki_dog_rev2.riv
-    - assets/animations/meraki_dog_rev3.riv
+    - assets/animations/meraki_dog_rev5.riv
 
 flutter_launcher_icons:
   android: true

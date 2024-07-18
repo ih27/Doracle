@@ -45,7 +45,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   bool _showBottomUI = true;
   bool _isKeyboardVisible = false;
 
-  final String animationAsset = 'assets/animations/meraki_dog_rev3.riv';
+  final String animationAsset = 'assets/animations/meraki_dog_rev5.riv';
   final String animationArtboard = 'meraki_dog';
   final String animationStateMachine = 'State Machine 1';
 
@@ -375,21 +375,17 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Widget _buildAnimationContainer() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.7,
-      height: MediaQuery.of(context).size.width * 0.7,
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-        shape: BoxShape.circle,
-      ),
-      child: RiveAnimation.asset(
-        animationAsset,
-        artboard: animationArtboard,
-        fit: BoxFit.contain,
-        onInit: _onRiveInit,
-      ),
-    );
-  }
+  final screenWidth = MediaQuery.of(context).size.width;
+  return SizedBox(
+    height: screenWidth * 0.75,
+    child: RiveAnimation.asset(
+      animationAsset,
+      artboard: animationArtboard,
+      fit: BoxFit.contain,
+      onInit: _onRiveInit,
+    ),
+  );
+}
 
   Widget _buildQuestionSection() {
     return LayoutBuilder(
