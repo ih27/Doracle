@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 
@@ -31,7 +32,9 @@ class TreatCard extends StatelessWidget {
           width: double.infinity,
           height: 200,
           decoration: BoxDecoration(
-            color: isHighlighted ? AppTheme.lemonChiffon : AppTheme.primaryBackground,
+            color: isHighlighted
+                ? AppTheme.lemonChiffon
+                : AppTheme.primaryBackground,
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(100),
@@ -70,22 +73,36 @@ class TreatCard extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text(
+                                  AutoSizeText(
                                     originalPrice,
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      color: AppTheme.error,
-                                      decoration: TextDecoration.lineThrough,
-                                      decorationColor: AppTheme.error,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          color: AppTheme.error,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          decorationColor: AppTheme.error,
+                                        ),
+                                    maxLines: 1,
+                                    minFontSize: 16,
+                                    maxFontSize: 22,
                                   ),
-                                  Text(
+                                  AutoSizeText(
                                     discountedPrice,
-                                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                      color: AppTheme.success,
-                                      fontWeight: FontWeight.w900,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall
+                                        ?.copyWith(
+                                          color: AppTheme.success,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                    maxLines: 1,
+                                    minFontSize: 24,
+                                    maxFontSize: 36,
                                   ),
-                                  if (isHighlighted) _buildBestValueLabel(context),
+                                  if (isHighlighted)
+                                    _buildBestValueLabel(context),
                                 ],
                               ),
                             ),
@@ -118,15 +135,19 @@ class TreatCard extends StatelessWidget {
           Text(
             '$questionCount',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              color: isHighlighted ? AppTheme.primaryBackground : AppTheme.yaleBlue,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: isHighlighted
+                      ? AppTheme.primaryBackground
+                      : AppTheme.yaleBlue,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           Text(
             'questions',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isHighlighted ? AppTheme.alternateColor : AppTheme.primaryColor,
-            ),
+                  color: isHighlighted
+                      ? AppTheme.alternateColor
+                      : AppTheme.primaryColor,
+                ),
           ),
         ],
       ),
@@ -149,9 +170,9 @@ class TreatCard extends StatelessWidget {
       child: Text(
         'Best Value',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppTheme.primaryBackground,
-          fontWeight: FontWeight.w800,
-        ),
+              color: AppTheme.primaryBackground,
+              fontWeight: FontWeight.w800,
+            ),
       ),
     );
   }
@@ -173,15 +194,15 @@ class TreatCard extends StatelessWidget {
           Text(
             'BUY',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppTheme.yaleBlue,
-              fontWeight: FontWeight.w900,
-            ),
+                  color: AppTheme.yaleBlue,
+                  fontWeight: FontWeight.w900,
+                ),
           ),
           Text(
             '$treatSize Treat',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppTheme.yaleBlue,
-            ),
+                  color: AppTheme.yaleBlue,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
