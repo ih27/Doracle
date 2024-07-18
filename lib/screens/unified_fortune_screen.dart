@@ -19,10 +19,12 @@ import '../repositories/fortune_content_repository.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
   final Function(String) onNavigate;
+  final bool fromPurchase;
 
   const UnifiedFortuneScreen({
     super.key,
     required this.onNavigate,
+    this.fromPurchase = false,
   });
 
   @override
@@ -59,15 +61,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   bool _isFortuneCompleted = false;
   final double _inputFieldFixedHeight = 66;
 
-  @override
-  void initState() {
-    super.initState();
-    initShakeDetector(onShake: _animateShake);
-    _initializationFuture = _initialize();
-    WidgetsBinding.instance.addObserver(this);
-    _questionFocusNode.addListener(_handleFocusChange);
-  }
-
   Future<void> _initialize() async {
     await Future.wait([
       _initializeFortuneTeller(),
@@ -76,8 +69,29 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _welcomeMessage = _getRandomWelcomeMessage();
   }
 
+  void _onUserServiceUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initShakeDetector(onShake: _animateShake);
+    _initializationFuture = _initialize();
+    WidgetsBinding.instance.addObserver(this);
+    _questionFocusNode.addListener(_handleFocusChange);
+    _userService.addListener(_onUserServiceUpdate);
+    // Set isHome to false if coming from a purchase
+    if (widget.fromPurchase) {
+      isHome = false;
+    }
+  }
+
   @override
   void dispose() {
+    _userService.removeListener(_onUserServiceUpdate);
     WidgetsBinding.instance.removeObserver(this);
     _questionController.dispose();
     _questionFocusNode.removeListener(_handleFocusChange);
@@ -375,17 +389,17 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Widget _buildAnimationContainer() {
-  final screenWidth = MediaQuery.of(context).size.width;
-  return SizedBox(
-    height: screenWidth * 0.75,
-    child: RiveAnimation.asset(
-      animationAsset,
-      artboard: animationArtboard,
-      fit: BoxFit.contain,
-      onInit: _onRiveInit,
-    ),
-  );
-}
+    final screenWidth = MediaQuery.of(context).size.width;
+    return SizedBox(
+      height: screenWidth * 0.75,
+      child: RiveAnimation.asset(
+        animationAsset,
+        artboard: animationArtboard,
+        fit: BoxFit.contain,
+        onInit: _onRiveInit,
+      ),
+    );
+  }
 
   Widget _buildQuestionSection() {
     return LayoutBuilder(

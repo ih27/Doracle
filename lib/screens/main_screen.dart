@@ -12,12 +12,16 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  bool _fromPurchase = false;
 
   void _navigateTo(String route) {
     _navigatorKey.currentState?.pushReplacementNamed(route);
   }
 
   void _onPurchaseComplete() {
+    setState(() {
+      _fromPurchase = true;
+    });
     _navigateTo('/fortune');
   }
 
@@ -80,6 +84,7 @@ class _MainScreenState extends State<MainScreen> {
             case '/fortune':
               builder = (BuildContext context) => UnifiedFortuneScreen(
                     onNavigate: _navigateTo,
+                    fromPurchase: _fromPurchase,
                   );
               break;
             default:
