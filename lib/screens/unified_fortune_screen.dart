@@ -38,6 +38,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final FortuneTeller _fortuneTeller = getIt<FortuneTeller>();
   final TextEditingController _questionController = TextEditingController();
+  final FocusNode _questionFocusNode = FocusNode();
 
   late Future<void> _initializationFuture;
   bool isHome = true;
@@ -50,6 +51,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   SMITrigger? _shakeInput;
   SMIBool? _processingInput;
+  SMIBool? _listeningInput;
 
   late String _welcomeMessage;
   List<String> _randomQuestions = [];
@@ -63,6 +65,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     initShakeDetector(onShake: _animateShake);
     _initializationFuture = _initialize();
     WidgetsBinding.instance.addObserver(this);
+    _questionFocusNode.addListener(_handleFocusChange);
   }
 
   Future<void> _initialize() async {
@@ -77,6 +80,8 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _questionController.dispose();
+    _questionFocusNode.removeListener(_handleFocusChange);
+    _questionFocusNode.dispose();
     super.dispose();
   }
 
@@ -123,6 +128,15 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     artboard.addController(controller!);
     _shakeInput = controller.findInput<bool>('Shake') as SMITrigger;
     _processingInput = controller.findInput<bool>('Processing') as SMIBool;
+    _listeningInput = controller.findInput<bool>('Listening') as SMIBool;
+  }
+
+  void _handleFocusChange() {
+    if (_questionFocusNode.hasFocus) {
+      _animateListeningStart();
+    } else {
+      _animateListeningDone();
+    }
   }
 
   void _animateShake() {
@@ -137,8 +151,16 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _processingInput?.change(false);
   }
 
+  void _animateListeningStart() {
+    _listeningInput?.change(true);
+  }
+
+  void _animateListeningDone() {
+    _listeningInput?.change(false);
+  }
+
   void _dismissKeyboard() {
-    FocusScope.of(context).unfocus();
+    _questionFocusNode.unfocus();
   }
 
   void _onQuestionSubmitted(String question) {
@@ -481,6 +503,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
             Expanded(
               child: SendableTextField(
                 controller: _questionController,
+                focusNode: _questionFocusNode,
                 labelText: 'Ask what you want, passenger?',
                 onSubmitted: _onQuestionSubmitted,
               ),
