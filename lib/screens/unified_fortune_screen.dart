@@ -11,7 +11,6 @@ import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
 import '../widgets/sendable_textfield.dart';
-import '../widgets/conditional_blur.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../controllers/fortune_teller.dart';
@@ -31,7 +30,7 @@ class UnifiedFortuneScreen extends StatefulWidget {
 }
 
 class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
-    with ShakeDetectorMixin {
+    with ShakeDetectorMixin, WidgetsBindingObserver {
   final QuestionCacheService _questionCacheService =
       getIt<QuestionCacheService>();
   final UserService _userService = getIt<UserService>();
@@ -43,6 +42,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   late Future<void> _initializationFuture;
   bool isHome = true;
   bool _showBottomUI = true;
+  bool _isKeyboardVisible = false;
 
   final String animationAsset = 'assets/animations/meraki_dog_rev3.riv';
   final String animationArtboard = 'meraki_dog';
@@ -62,6 +62,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     super.initState();
     initShakeDetector(onShake: _animateShake);
     _initializationFuture = _initialize();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> _initialize() async {
@@ -74,8 +75,36 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _questionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkKeyboardVisibility();
+  }
+
+  @override
+  void didChangeMetrics() {
+    // Schedule a check for the next frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _checkKeyboardVisibility();
+      }
+    });
+  }
+
+  void _checkKeyboardVisibility() {
+    if (!mounted) return;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final newIsKeyboardVisible = bottomInset > 0;
+    if (newIsKeyboardVisible != _isKeyboardVisible) {
+      setState(() {
+        _isKeyboardVisible = newIsKeyboardVisible;
+      });
+    }
   }
 
   String _getRandomWelcomeMessage() {
@@ -261,32 +290,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _initializationFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          return GestureDetector(
-            onTap: _dismissKeyboard,
-            child: Column(
-              children: [
-                _buildAnimationContainer(),
-                Expanded(
-                  child: _buildContent(),
-                ),
-              ],
-            ),
-          );
-        }
-      },
-    );
-  }
-
   Widget _buildContent() {
     if (isHome) {
       return Column(
@@ -372,30 +375,30 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         final mediaQuery = MediaQuery.of(context);
         final bottomPadding = mediaQuery.padding.bottom;
         final bottomInset = mediaQuery.viewInsets.bottom;
-        final isKeyboardVisible = bottomInset > 0;
 
-        return NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[];
-          },
-          body: Stack(
-            children: [
-              SizedBox(
-                height: constraints.maxHeight -
-                    _inputFieldFixedHeight -
-                    bottomPadding,
-                child: _buildCarousel(),
+        return Stack(
+          children: [
+            SizedBox(
+              height: constraints.maxHeight -
+                  _inputFieldFixedHeight -
+                  bottomPadding,
+              child: AnimatedOpacity(
+                opacity: _isKeyboardVisible ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: IgnorePointer(
+                  ignoring: _isKeyboardVisible,
+                  child: _buildCarousel(),
+                ),
               ),
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 0),
-                curve: Curves.easeOut,
-                left: 0,
-                right: 0,
-                bottom: isKeyboardVisible ? bottomInset : bottomPadding,
-                child: _buildQuestionInput(),
-              ),
-            ],
-          ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: _isKeyboardVisible ? bottomInset : bottomPadding,
+              child: _buildQuestionInput(),
+            ),
+          ],
         );
       },
     );
@@ -419,16 +422,13 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            child: ConditionalBlur(
-              blur: MediaQuery.of(context).viewInsets.bottom > 0,
-              child: Text(
-                _randomQuestions[index],
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      letterSpacing: 0,
-                    ),
-                textAlign: TextAlign.center,
-              ),
+            child: Text(
+              _randomQuestions[index],
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    letterSpacing: 0,
+                  ),
+              textAlign: TextAlign.center,
             ),
           ),
         );
@@ -568,6 +568,32 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
             ),
           ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return GestureDetector(
+            onTap: _dismissKeyboard,
+            child: Column(
+              children: [
+                _buildAnimationContainer(),
+                Expanded(
+                  child: _buildContent(),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 }
