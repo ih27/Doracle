@@ -153,9 +153,17 @@ class _SettingsScreenState extends State<SettingsScreen>
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Terms and Conditions'),
-                      content: const Text(
-                          'Our terms and conditions will be displayed here.'),
+                      title: const Text(TermsAndConditionsTexts.title),
+                      backgroundColor: AppTheme.primaryBackground,
+                      content: SizedBox(
+                        width: double.maxFinite,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            TermsAndConditionsTexts.content,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ),
                       actions: <Widget>[
                         TextButton(
                           child: const Text('Close'),
@@ -169,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 );
               },
               child: Text(
-                'Terms and Conditions',
+                TermsAndConditionsTexts.title,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).primaryColor,
