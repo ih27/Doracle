@@ -3,7 +3,7 @@ import 'package:dart_openai/dart_openai.dart';
 class OpenAIService {
   final String apiKey;
   String instructions;
-  final String model = 'gpt-3.5-turbo';
+  final String model = 'gpt-4o-mini';
   late OpenAIChatCompletionChoiceMessageModel systemMessage;
 
   OpenAIService(this.apiKey, this.instructions) {
