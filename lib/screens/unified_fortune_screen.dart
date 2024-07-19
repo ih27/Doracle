@@ -63,6 +63,8 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   bool _isFortuneInProgress = false;
   final double _inputFieldFixedHeight = 66;
 
+  Map<String, String> _cachedPrices = {};
+
   Future<void> _initialize() async {
     await Future.wait([
       _initializeFortuneTeller(),
@@ -73,6 +75,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   void _onUserServiceUpdate() {
     if (mounted) {
+      _fetchPricesIfNeeded();
       setState(() {});
     }
   }
@@ -91,6 +94,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     }
     // Initialize the controller with an empty stream
     _fortuneController = TypeWriterController.fromStream(const Stream.empty());
+    _fetchPricesIfNeeded();
   }
 
   @override
@@ -147,6 +151,11 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _randomQuestions = await _fortuneContentRepository.fetchRandomQuestions();
   }
 
+  Future<void> _fetchPricesIfNeeded() async {
+    if (_userService.hasRunOutOfQuestions() && _cachedPrices.isEmpty) {
+      _cachedPrices = await _purchaseService.fetchPrices();
+    }
+  }
 
   void _onRiveInit(Artboard artboard) {
     final controller =
@@ -220,6 +229,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                   Navigator.of(dialogContext).pop();
                   _handlePurchase(questions);
                 },
+                prices: _cachedPrices,
               ),
             ),
           ),
@@ -248,6 +258,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
       }
 
       await _userService.updatePurchaseHistory(questionCount);
+      _cachedPrices.clear();
 
       _animateProcessingDone();
 

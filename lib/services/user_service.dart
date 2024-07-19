@@ -83,4 +83,8 @@ class UserService extends ValueNotifier<AppUser?> {
   int getRemainingQuestionsCount() {
     return value?.remainingQuestionsCount ?? 0;
   }
+
+  bool hasRunOutOfQuestions() {
+    return value?.remainingQuestionsCount == 0;
+  }
 }

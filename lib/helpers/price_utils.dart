@@ -1,22 +1,33 @@
 String? convertPrice(String? originalPrice) {
   if (originalPrice != null) {
-    // Remove the currency symbol and parse the number
-    double price =
-        double.parse(originalPrice.replaceAll(RegExp(r'[^\d.]'), ''));
+    // Extract the currency symbol and the numeric value
+    RegExp regExp = RegExp(r'^([^\d]+)?([\d.,]+)');
+    Match? match = regExp.firstMatch(originalPrice);
 
-    // Multiply by 5
-    double convertedPrice = price * 5;
+    if (match != null) {
+      String currencySymbol = match.group(1) ?? '\$';
+      String numericPart = match.group(2) ?? '';
 
-    // Round down to the nearest 0.X9
-    int dollars = convertedPrice.floor();
-    int cents = ((convertedPrice - dollars) * 100).round();
-    cents = (cents ~/ 10) * 10 + 9;
+      // Remove thousands separators and replace comma with dot for decimal
+      numericPart = numericPart.replaceAll(RegExp(r'[^\d.]'), '');
 
-    // Format the price to always end in .X9
-    String formattedPrice = '$dollars.${cents.toString().padLeft(2, '0')}';
+      double price = double.parse(numericPart);
 
-    // Add the currency symbol back
-    return '\$$formattedPrice';
+      // Multiply by 5
+      double convertedPrice = price * 5;
+
+      // Round down to the nearest 0.X9
+      int wholeUnits = convertedPrice.floor();
+      int fractionalUnits = ((convertedPrice - wholeUnits) * 100).round();
+      fractionalUnits = (fractionalUnits ~/ 10) * 10 + 9;
+
+      // Format the price to always end in .X9
+      String formattedPrice =
+          '$wholeUnits.${fractionalUnits.toString().padLeft(2, '0')}';
+
+      // Add the original currency symbol back
+      return '$currencySymbol$formattedPrice';
+    }
   }
   return null;
 }

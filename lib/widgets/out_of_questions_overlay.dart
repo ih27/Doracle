@@ -4,11 +4,13 @@ import '../config/theme.dart';
 class OutOfQuestionsOverlay extends StatelessWidget {
   final VoidCallback onClose;
   final Function(int) onPurchase;
+  final Map<String, String> prices;
 
   const OutOfQuestionsOverlay({
     super.key,
     required this.onClose,
     required this.onPurchase,
+    required this.prices,
   });
 
   @override
@@ -57,11 +59,11 @@ class OutOfQuestionsOverlay extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildTreatCard(context, w, h, treatCardWidth, 'Small',
-                          '10', '\$0.99', false),
+                          '10', prices['small_treat'] ?? '\$0.99', false),
                       _buildTreatCard(context, w, h, treatCardWidth, 'Medium',
-                          '30', '\$1.99', true),
+                          '30', prices['medium_treat'] ?? '\$1.99', true),
                       _buildTreatCard(context, w, h, treatCardWidth, 'Large',
-                          '50', '\$2.99', false),
+                          '50', prices['large_treat'] ?? '\$2.99', false),
                     ],
                   ),
                 ),
