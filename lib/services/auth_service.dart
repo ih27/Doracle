@@ -73,6 +73,77 @@ class AuthService {
     await _auth.signOut();
   }
 
+  Future<void> deleteUser() async {
+    try {
+      await currentUser!.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == "requires-recent-login") {
+        final provider = currentUser?.providerData.first.providerId;
+        throw NeedsReauthenticationException(provider ?? 'unknown');
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> reauthenticateAndDelete(String provider) async {
+    try {
+      AuthCredential? credential;
+      switch (provider) {
+        case 'password':
+          throw NeedsPasswordReauthenticationException();
+        case 'google.com':
+          credential = await _getGoogleCredential();
+          break;
+        case 'apple.com':
+          credential = await _getAppleCredential();
+          break;
+        default:
+          throw Exception('Unsupported provider: $provider');
+      }
+
+      if (credential != null) {
+        await currentUser!.reauthenticateWithCredential(credential);
+        await currentUser!.delete();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> reauthenticateWithPassword(String password) async {
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: currentUser!.email!,
+        password: password,
+      );
+      await currentUser!.reauthenticateWithCredential(credential);
+      await currentUser!.delete();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<AuthCredential?> _getGoogleCredential() async {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      return GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+    }
+    return null;
+  }
+
+  Future<AuthCredential?> _getAppleCredential() async {
+    final appleProvider = AppleAuthProvider()
+      ..addScope('email')
+      ..addScope('name');
+    final result = await _auth.signInWithProvider(appleProvider);
+    return result.credential;
+  }
+
   Future<void> _associateEmailWith(UserCredential userCredential) async {
     if (userCredential.additionalUserInfo?.isNewUser ?? false) {
       await _createUserCallback(userCredential.user!.uid, {
@@ -81,3 +152,11 @@ class AuthService {
     }
   }
 }
+
+// CUSTOM AUTH RELATED EXCEPTION
+class NeedsReauthenticationException implements Exception {
+  final String provider;
+  NeedsReauthenticationException(this.provider);
+}
+
+class NeedsPasswordReauthenticationException implements Exception {}

@@ -134,18 +134,13 @@ class _SettingsScreenState extends State<SettingsScreen>
             ),
             const SizedBox(height: 12),
             TextButton(
-              onPressed: () {
-                // Implement delete account functionality
-                showErrorSnackBar(
-                    context, 'Will be changed to Delete My Account');
-                userService.updateUserField('remainingQuestionsCount', 0);
-              },
+              onPressed: _showDeleteAccountConfirmation,
               child: const Text(
-                'Reset Question Count',
+                'Delete My Account',
                 style: TextStyle(color: Colors.red),
               ),
             ),
-            const Spacer(), // This will push the Terms and Conditions to the bottom
+            const Spacer(),
             TextButton(
               onPressed: () {
                 // Show terms and conditions
@@ -187,6 +182,32 @@ class _SettingsScreenState extends State<SettingsScreen>
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteAccountConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete your Account?'),
+          content: const Text(
+              'This action cannot be undone. All your data will be permanently deleted.'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _handleAccountDelete();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -262,6 +283,71 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (!mounted) return;
       showErrorSnackBar(context, 'Error signing out. Please try again.');
     }
+  }
+
+  Future<void> _handleAccountDelete() async {
+    try {
+      await authService.deleteUser();
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } on NeedsReauthenticationException catch (e) {
+      await _handleReauthentication(e.provider);
+    } catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(context, 'Error deleting account: $e');
+    }
+  }
+
+  Future<void> _handleReauthentication(String provider) async {
+    try {
+      if (provider == 'password') {
+        String? password = await _promptForPassword();
+        if (password != null) {
+          await authService.reauthenticateWithPassword(password);
+        }
+      } else {
+        await authService.reauthenticateAndDelete(provider);
+      }
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } on NeedsPasswordReauthenticationException {
+      String? password = await _promptForPassword();
+      if (password != null) {
+        await authService.reauthenticateWithPassword(password);
+      }
+    } catch (e) {
+      showErrorSnackBar(context, 'Error during re-authentication: $e');
+    }
+  }
+
+  Future<String?> _promptForPassword() async {
+    String? password;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Re-enter Password'),
+          content: TextField(
+            obscureText: true,
+            decoration: const InputDecoration(hintText: "Enter your password"),
+            onChanged: (value) {
+              password = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: const Text('Confirm'),
+              onPressed: () => Navigator.pop(context, password),
+            ),
+          ],
+        );
+      },
+    );
+    return password;
   }
 
   Future<void> _checkNotificationPermission() async {
