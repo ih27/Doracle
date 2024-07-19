@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 
@@ -235,13 +236,16 @@ class OutOfQuestionsOverlay extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
+            AutoSizeText(
               price,
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     color: AppTheme.success,
                     letterSpacing: 0,
                     fontWeight: FontWeight.bold,
                   ),
+              maxLines: 1,
+              minFontSize: 16,
+              maxFontSize: 32,
             ),
             ElevatedButton(
               onPressed: () => onPurchase(int.parse(questionCount)),
