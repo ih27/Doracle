@@ -12,8 +12,8 @@ import 'config/firebase_options.dart';
 import 'config/theme.dart';
 import 'app_manager.dart';
 import 'services/analytics_service.dart';
+import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
-import 'services/question_cache_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +68,7 @@ Future<void> _initializeApp() async {
   await FirebaseAuth.instance.authStateChanges().first;
   if (FirebaseAuth.instance.currentUser != null) {
     try {
-      await getIt<QuestionCacheService>().initializeCache();
+      await FirestoreService.initializeQuestionsCache();
     } catch (e) {
       debugPrint("Error: $e");
     }

@@ -10,7 +10,6 @@ import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
-import '../services/question_cache_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 
@@ -46,9 +45,6 @@ void setupDependencies() {
       dotenv.env['OPENAI_API_KEY']!,
       '', // Empty string as placeholder, will be set when creating an instance
     ),
-  );
-  getIt.registerLazySingleton<QuestionCacheService>(
-    () => QuestionCacheService(getIt<FortuneContentRepository>()),
   );
   getIt.registerLazySingleton<HapticService>(() => HapticService());
 }

@@ -1,5 +1,7 @@
-import 'dart:math';
+import 'dart:convert';
+import 'dart:math' show Random;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/constants.dart';
 
 class FirestoreService {
@@ -10,11 +12,14 @@ class FirestoreService {
   static const int _maxRetries = 3;
   static const Duration _retryDelay = Duration(seconds: 1);
   static const int defaultStartingCount = 50;
+  
+  static const String _questionsKey = 'cached_questions';
+  static const String _lastFetchTimeKey = 'last_fetch_time';
+  static const Duration _cacheDuration = Duration(days: 30);
 
   static Future<int> getStartingCount() async {
     try {
-      final statsDoc =
-          await _firestore.collection('questions').doc('stats').get();
+      final statsDoc = await _firestore.collection('questions').doc('stats').get();
       if (statsDoc.exists) {
         return statsDoc.data()?['startingCount'] ?? defaultStartingCount;
       }
@@ -25,7 +30,29 @@ class FirestoreService {
   }
 
   static Future<void> initializeQuestionsCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final lastFetchTime = DateTime.fromMillisecondsSinceEpoch(
+        prefs.getInt(_lastFetchTimeKey) ?? 0);
+
+    if (now.difference(lastFetchTime) > _cacheDuration) {
+      await _fetchAndCacheQuestions();
+      await prefs.setInt(_lastFetchTimeKey, now.millisecondsSinceEpoch);
+    } else {
+      _questionsCache.clear();
+      final cachedQuestions = prefs.getString(_questionsKey);
+      if (cachedQuestions != null) {
+        final decodedQuestions = json.decode(cachedQuestions) as Map<String, dynamic>;
+        decodedQuestions.forEach((key, value) {
+          _questionsCache[key] = List<String>.from(value);
+        });
+      }
+    }
+  }
+
+  static Future<void> _fetchAndCacheQuestions() async {
     final categories = ['Love', 'Finance', 'Health', 'Career', 'Mixed'];
+    _questionsCache.clear();
 
     for (String category in categories) {
       final snapshot = await _firestore
@@ -34,14 +61,15 @@ class FirestoreService {
           .limit(500)
           .get();
 
-      final categoryQuestions =
-          snapshot.docs.map((doc) => doc['question'] as String).toList();
+      final categoryQuestions = snapshot.docs.map((doc) => doc['question'] as String).toList();
       _questionsCache[category] = categoryQuestions;
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_questionsKey, json.encode(_questionsCache));
   }
 
-  static List<String> _getRandomQuestionsFromCache(
-      int numberOfQuestionsPerCategory) {
+  static List<String> _getRandomQuestionsFromCache(int numberOfQuestionsPerCategory) {
     final List<String> randomQuestions = [];
 
     _questionsCache.forEach((category, questions) {
@@ -50,12 +78,11 @@ class FirestoreService {
           shuffledQuestions.take(numberOfQuestionsPerCategory).toList());
     });
 
-    randomQuestions.shuffle(); // Shuffle the combined list
+    randomQuestions.shuffle();
     return randomQuestions;
   }
 
-  static Future<List<String>> fetchRandomQuestions(
-      int numberOfQuestionsPerCategory) async {
+  static Future<List<String>> fetchRandomQuestions(int numberOfQuestionsPerCategory) async {
     if (_questionsCache.isEmpty) {
       await initializeQuestionsCache();
     }
@@ -76,17 +103,15 @@ class FirestoreService {
         if (_personasCache.isNotEmpty) {
           return _personasCache;
         }
-        // If we get here, the collection was empty
         throw Exception('Personas collection is empty');
       } catch (e) {
         if (attempt == _maxRetries - 1) {
-          // On last attempt, fall back to default personas
           return _getDefaultPersonas();
         }
         await Future.delayed(_retryDelay);
       }
     }
-    return _personasCache; // This line should never be reached due to the fallback, but Dart requires it
+    return _personasCache;
   }
 
   static Future<Map<String, String>> getRandomPersona() async {
@@ -94,7 +119,6 @@ class FirestoreService {
       await fetchPersonas();
     }
     if (_personasCache.isEmpty) {
-      // This should never happen due to the fallback in fetchPersonas, but just in case:
       return {'name': 'Default', 'instructions': DefaultPersona.instructions};
     }
 
@@ -118,5 +142,12 @@ class FirestoreService {
     return {
       'Default': DefaultPersona.instructions,
     };
+  }
+
+  static Future<void> clearCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_questionsKey);
+    await prefs.remove(_lastFetchTimeKey);
+    _questionsCache.clear();
   }
 }

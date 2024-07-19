@@ -8,7 +8,6 @@ import '../config/theme.dart';
 import '../mixins/shake_detector.dart';
 import '../helpers/constants.dart';
 import '../config/dependency_injection.dart';
-import '../services/question_cache_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
@@ -35,8 +34,8 @@ class UnifiedFortuneScreen extends StatefulWidget {
 
 class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     with ShakeDetectorMixin, WidgetsBindingObserver {
-  final QuestionCacheService _questionCacheService =
-      getIt<QuestionCacheService>();
+  final FortuneContentRepository _fortuneContentRepository =
+      getIt<FortuneContentRepository>();
   final UserService _userService = getIt<UserService>();
   final HapticService _hapticService = getIt<HapticService>();
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
@@ -145,8 +144,9 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Future<void> _fetchRandomQuestions() async {
-    _randomQuestions = await _questionCacheService.getRandomQuestions();
+    _randomQuestions = await _fortuneContentRepository.fetchRandomQuestions();
   }
+
 
   void _onRiveInit(Artboard artboard) {
     final controller =
@@ -196,8 +196,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Future<void> _initializeFortuneTeller() async {
-    final personaData =
-        await getIt<FortuneContentRepository>().getRandomPersona();
+    final personaData = await _fortuneContentRepository.getRandomPersona();
     setFortuneTellerPersona(
       personaData['name']!,
       personaData['instructions']!,
