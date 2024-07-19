@@ -9,13 +9,13 @@ import '../config/theme.dart';
 import '../mixins/shake_detector.dart';
 import '../helpers/constants.dart';
 import '../config/dependency_injection.dart';
+import '../services/fortune_teller_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
 import '../widgets/sendable_textfield.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
-import '../controllers/fortune_teller.dart';
 import '../helpers/show_snackbar.dart';
 import '../repositories/fortune_content_repository.dart';
 
