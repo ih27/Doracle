@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:typewritertext/typewritertext.dart';
+import '../config/carousel_options.dart';
 import '../config/theme.dart';
 import '../mixins/shake_detector.dart';
 import '../helpers/constants.dart';
@@ -575,14 +576,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
               ),
             ));
       },
-      options: CarouselOptions(
-        height: double.infinity,
-        viewportFraction: 0.2,
-        enableInfiniteScroll: true,
-        scrollDirection: Axis.vertical,
-        enlargeCenterPage: true,
-        enlargeFactor: 0.25,
-      ),
+      options: QuestionsSliderOptions(),
     );
   }
 
