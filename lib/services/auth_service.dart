@@ -87,30 +87,38 @@ class AuthService {
 
   Future<void> reauthenticateAndDelete(String provider) async {
     try {
-      AuthCredential? credential;
       switch (provider) {
         case 'password':
           throw NeedsPasswordReauthenticationException();
         case 'google.com':
-          credential = await _getGoogleCredential();
+          final credential = await _getGoogleCredential();
+          if (credential != null) {
+            await currentUser!.reauthenticateWithCredential(credential);
+          } else {
+            throw Exception('Failed to obtain Google credential');
+          }
           break;
         case 'apple.com':
-          credential = await _getAppleCredential();
+          await _reauthenticateWithApple();
           break;
         default:
           throw Exception('Unsupported provider: $provider');
       }
 
-      if (credential != null) {
-        await currentUser!.reauthenticateWithCredential(credential);
-        await currentUser!.delete();
-      }
+      await currentUser!.delete();
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> reauthenticateWithPassword(String password) async {
+  Future<void> _reauthenticateWithApple() async {
+    final appleProvider = AppleAuthProvider()
+      ..addScope('email')
+      ..addScope('name');
+    await currentUser!.reauthenticateWithProvider(appleProvider);
+  }
+
+  Future<void> reauthenticateWithPasswordAndDelete(String password) async {
     try {
       final credential = EmailAuthProvider.credential(
         email: currentUser!.email!,
@@ -134,14 +142,6 @@ class AuthService {
       );
     }
     return null;
-  }
-
-  Future<AuthCredential?> _getAppleCredential() async {
-    final appleProvider = AppleAuthProvider()
-      ..addScope('email')
-      ..addScope('name');
-    final result = await _auth.signInWithProvider(appleProvider);
-    return result.credential;
   }
 
   Future<void> _associateEmailWith(UserCredential userCredential) async {

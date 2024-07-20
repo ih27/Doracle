@@ -57,7 +57,6 @@ class _SettingsScreenState extends State<SettingsScreen>
         title: Text(
           'Settings',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontFamily: 'Roboto',
                 letterSpacing: 0,
               ),
         ),
@@ -191,6 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete your Account?'),
+          backgroundColor: AppTheme.primaryBackground,
           content: const Text(
               'This action cannot be undone. All your data will be permanently deleted.'),
           actions: [
@@ -202,13 +202,40 @@ class _SettingsScreenState extends State<SettingsScreen>
               child: const Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.of(context).pop();
-                _handleAccountDelete();
+                _handleAccountDeletion();
               },
             ),
           ],
         );
       },
     );
+  }
+
+  Future<String?> _promptForPassword() async {
+    String? password;
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Re-enter Password'),
+        backgroundColor: AppTheme.primaryBackground,
+        content: TextField(
+          obscureText: true,
+          onChanged: (value) => password = value,
+          decoration: const InputDecoration(hintText: "Enter your password"),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: const Text('Confirm'),
+            onPressed: () => Navigator.of(context).pop(password),
+          ),
+        ],
+      ),
+    );
+    return password;
   }
 
   Widget _buildSettingsItem({
@@ -285,69 +312,32 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
-  Future<void> _handleAccountDelete() async {
+  Future<void> _handleAccountDeletion() async {
     try {
       await authService.deleteUser();
       if (!mounted) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
+      showInfoSnackBar(context, 'Your account has been deleted successfully.');
     } on NeedsReauthenticationException catch (e) {
-      await _handleReauthentication(e.provider);
-    } catch (e) {
-      if (!mounted) return;
-      showErrorSnackBar(context, 'Error deleting account: $e');
-    }
-  }
-
-  Future<void> _handleReauthentication(String provider) async {
-    try {
-      if (provider == 'password') {
+      if (e.provider == 'password') {
         String? password = await _promptForPassword();
         if (password != null) {
-          await authService.reauthenticateWithPassword(password);
+          await authService.reauthenticateWithPasswordAndDelete(password);
+        } else {
+          if (!mounted) return;
+          showErrorSnackBar(
+              context, 'Password is required for account deletion.');
+          return;
         }
       } else {
-        await authService.reauthenticateAndDelete(provider);
+        await authService.reauthenticateAndDelete(e.provider);
       }
       if (!mounted) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } on NeedsPasswordReauthenticationException {
-      String? password = await _promptForPassword();
-      if (password != null) {
-        await authService.reauthenticateWithPassword(password);
-      }
+      showInfoSnackBar(context, 'Your account has been deleted successfully.');
     } catch (e) {
-      showErrorSnackBar(context, 'Error during re-authentication: $e');
+      showErrorSnackBar(context, 'Error deleting account.');
     }
-  }
-
-  Future<String?> _promptForPassword() async {
-    String? password;
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Re-enter Password'),
-          content: TextField(
-            obscureText: true,
-            decoration: const InputDecoration(hintText: "Enter your password"),
-            onChanged: (value) {
-              password = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.pop(context),
-            ),
-            TextButton(
-              child: const Text('Confirm'),
-              onPressed: () => Navigator.pop(context, password),
-            ),
-          ],
-        );
-      },
-    );
-    return password;
   }
 
   Future<void> _checkNotificationPermission() async {
