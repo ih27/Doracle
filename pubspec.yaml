@@ -35,6 +35,7 @@ dependencies:
   eraser: ^2.0.2
   typewritertext: ^3.0.8
   characters: ^1.3.0
+  scrollable: ^1.0.5
 
 dev_dependencies:
   flutter_lints: ^4.0.0

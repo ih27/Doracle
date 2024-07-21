@@ -3,6 +3,7 @@ import 'dart:math' show Random;
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:scrollable/exports.dart';
 import 'package:typewritertext/typewritertext.dart';
 import '../config/carousel_options.dart';
 import '../config/theme.dart';
@@ -546,38 +547,44 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Widget _buildCarousel() {
-    return CarouselSlider.builder(
-      itemCount: _randomQuestions.length,
-      itemBuilder: (context, index, _) {
-        return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            child: IgnorePointer(
-              ignoring: _isKeyboardVisible,
-              child: ElevatedButton(
-                onPressed: () => _onQuestionSubmitted(_randomQuestions[index]),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                ),
-                child: Text(
-                  _randomQuestions[index],
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        letterSpacing: 0,
+    const double carouselItemHeight = 50;
+    return ScrollHaptics(
+        hapticEffectDuringScroll: HapticType.light,
+        distancebetweenHapticEffectsDuringScroll: carouselItemHeight,
+        child: CarouselSlider.builder(
+          itemCount: _randomQuestions.length,
+          itemBuilder: (context, index, _) {
+            return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                child: IgnorePointer(
+                  ignoring: _isKeyboardVisible,
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        _onQuestionSubmitted(_randomQuestions[index]),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Theme.of(context).primaryColor,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      minimumSize: const Size.fromHeight(carouselItemHeight),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ));
-      },
-      options: QuestionsSliderOptions(),
-    );
+                    ),
+                    child: Text(
+                      _randomQuestions[index],
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            letterSpacing: 0,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ));
+          },
+          options: QuestionsSliderOptions(),
+        ));
   }
 
   Widget _buildQuestionInput() {
