@@ -32,7 +32,4 @@ class QuestionsSliderOptions extends CarouselOptions {
 
   @override
   ScrollPhysics? get scrollPhysics => CustomScrollPhysics();
-
-  @override
-  Clip get clipBehavior => Clip.antiAlias;
 }

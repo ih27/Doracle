@@ -471,7 +471,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                   setState(() {
                     _questionController.clear();
                     _fortuneController =
-                        TypeWriterController.fromStream(Stream.empty());
+                        TypeWriterController.fromStream(const Stream.empty());
                     _isFortuneCompleted = false;
                     _isFortuneInProgress = false;
                     _fetchRandomQuestions();
@@ -547,6 +547,15 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Widget _buildCarousel() {
+    if (_randomQuestions.isEmpty) {
+      return Center(
+        child: Text(
+          'Type your question below...',
+          style: Theme.of(context).textTheme.bodyLarge,
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
     const double carouselItemHeight = 50;
     return ScrollHaptics(
         hapticEffectDuringScroll: HapticType.light,
