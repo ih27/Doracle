@@ -1,33 +1,30 @@
 String? convertPrice(String? originalPrice) {
-  if (originalPrice != null) {
-    // Extract the currency symbol and the numeric value
-    RegExp regExp = RegExp(r'^([^\d]+)?([\d.,]+)');
-    Match? match = regExp.firstMatch(originalPrice);
+  if (originalPrice == null) return null;
 
-    if (match != null) {
-      String currencySymbol = match.group(1) ?? '\$';
-      String numericPart = match.group(2) ?? '';
+  RegExp regExp = RegExp(r'^([^\d]+)?([\d.,]+)');
+  Match? match = regExp.firstMatch(originalPrice);
 
-      // Remove thousands separators and replace comma with dot for decimal
-      numericPart = numericPart.replaceAll(RegExp(r'[^\d.]'), '');
+  if (match != null) {
+    String currencySymbol = match.group(1) ?? '';
+    String numericPart = match.group(2) ?? '';
 
-      double price = double.parse(numericPart);
+    // Determine the decimal separator used in the original price
+    String decimalSeparator = numericPart.contains(',') ? ',' : '.';
 
-      // Multiply by 5
-      double convertedPrice = price * 5;
+    // Replace the decimal separator with a dot for parsing
+    numericPart = numericPart.replaceAll(',', '.');
 
-      // Round down to the nearest 0.X9
-      int wholeUnits = convertedPrice.floor();
-      int fractionalUnits = ((convertedPrice - wholeUnits) * 100).round();
-      fractionalUnits = (fractionalUnits ~/ 10) * 10 + 9;
+    double price = double.parse(numericPart);
+    double convertedPrice = price * 5;
 
-      // Format the price to always end in .X9
-      String formattedPrice =
-          '$wholeUnits.${fractionalUnits.toString().padLeft(2, '0')}';
+    int wholeUnits = (convertedPrice ~/ 10) * 10; // Round down to nearest 10
+    int fractionalUnits = 99; // Always .99
 
-      // Add the original currency symbol back
-      return '$currencySymbol$formattedPrice';
-    }
+    // Format the price using the original decimal separator
+    String formattedPrice =
+        '$wholeUnits$decimalSeparator${fractionalUnits.toString().padLeft(2, '0')}';
+
+    return '$currencySymbol$formattedPrice';
   }
   return null;
 }

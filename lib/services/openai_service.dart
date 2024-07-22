@@ -8,7 +8,7 @@ class OpenAIService {
 
   OpenAIService(this.apiKey, this.instructions) {
     OpenAI.apiKey = apiKey;
-    OpenAI.requestsTimeOut = const Duration(seconds: 60);
+    OpenAI.requestsTimeOut = const Duration(seconds: 20);
     _initializeSystemMessage();
   }
 
@@ -31,10 +31,9 @@ class OpenAIService {
     return OpenAI.instance.chat.createStream(
       model: model,
       messages: [systemMessage, userMessage],
-      seed: 423,
       n: 1,
-      maxTokens: 100,
-      temperature: 0.5,
+      maxTokens: 80,
+      temperature: 0.75,
     );
   }
 }
