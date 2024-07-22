@@ -531,7 +531,15 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                 opacity: _isKeyboardVisible ? 0.0 : 1.0,
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeInOut,
-                child: _buildCarousel(),
+                child: _randomQuestions.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Type your question below',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : _buildCarousel(),
               ),
             ),
             Positioned(
@@ -547,15 +555,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Widget _buildCarousel() {
-    if (_randomQuestions.isEmpty) {
-      return Center(
-        child: Text(
-          'Type your question below...',
-          style: Theme.of(context).textTheme.bodyLarge,
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
     const double carouselItemHeight = 50;
     return ScrollHaptics(
         hapticEffectDuringScroll: HapticType.light,
