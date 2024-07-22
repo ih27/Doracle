@@ -12,8 +12,10 @@ class RevenueCatService {
     50: 'large_treat'
   };
   bool _isConfigured = false;
+  bool _isInitialized = false;
   List<StoreProduct>? _cachedProducts;
   List<String> get _products => _productsHash.values.toList();
+  bool get isInitialized => _isInitialized;
 
   Future<bool> purchaseProduct(int questionCount) async {
     try {
@@ -43,6 +45,7 @@ class RevenueCatService {
       } else {
         await _loginIfNeeded(userId);
       }
+      _isInitialized = true;
     } catch (e) {
       debugPrint("Error in initializeAndLogin: $e");
     }

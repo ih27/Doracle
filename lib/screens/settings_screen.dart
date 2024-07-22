@@ -8,7 +8,7 @@ import '../services/user_service.dart';
 import '../config/theme.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
-import 'purchase_screen.dart';
+import 'feedthedog_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;

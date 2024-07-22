@@ -34,8 +34,20 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
 
   Future<void> _loadPrices() async {
     setState(() => _isLoading = true);
-    _prices = await _purchaseService.fetchPrices();
-    setState(() => _isLoading = false);
+    try {
+      if (!_purchaseService.isInitialized) {
+        // Wait for initialization or show an error
+        await Future.delayed(const Duration(seconds: 5));
+        if (!_purchaseService.isInitialized) {
+          throw Exception('RevenueCat SDK is not initialized');
+        }
+      }
+      _prices = await _purchaseService.fetchPrices();
+    } catch (e) {
+      debugPrint('Error loading prices: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _handlePurchase(int questionCount) async {
