@@ -529,7 +529,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                   bottomPadding,
               child: AnimatedOpacity(
                 opacity: _isKeyboardVisible ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 150),
                 curve: Curves.easeInOut,
                 child: _buildCarousel(),
               ),

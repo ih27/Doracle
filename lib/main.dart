@@ -67,11 +67,7 @@ Future<void> _initializeApp() async {
   // Random questions cache initialization
   await FirebaseAuth.instance.authStateChanges().first;
   if (FirebaseAuth.instance.currentUser != null) {
-    try {
-      await FirestoreService.initializeQuestionsCache();
-    } catch (e) {
-      debugPrint("Error: $e");
-    }
+    await FirestoreService.initializeQuestionsCache();
   }
 }
 

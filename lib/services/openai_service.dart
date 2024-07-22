@@ -32,7 +32,7 @@ class OpenAIService {
       model: model,
       messages: [systemMessage, userMessage],
       n: 1,
-      maxTokens: 80,
+      maxTokens: 120,
       temperature: 0.75,
     );
   }
