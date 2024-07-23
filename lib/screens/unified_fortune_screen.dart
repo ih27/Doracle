@@ -155,7 +155,14 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   Future<void> _fetchPricesIfNeeded() async {
     if (_userService.hasRunOutOfQuestions() && _cachedPrices.isEmpty) {
-      _cachedPrices = await _purchaseService.fetchPrices();
+      try {
+        await _purchaseService.ensureInitialized();
+        _cachedPrices = await _purchaseService.fetchPrices();
+      } catch (e) {
+        debugPrint('Error loading prices: $e');
+        // Optionally, you could set a flag here to indicate that price fetching failed
+        // This could be used to show a retry button or message in the UI if needed
+      }
     }
   }
 
@@ -254,17 +261,18 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _animateProcessingStart();
 
     try {
+      await _purchaseService.ensureInitialized();
+
       if (!await _purchaseService.purchaseProduct(questionCount)) {
-        _animateProcessingDone();
-        return;
+        throw Exception('Purchase failed');
       }
 
       await _userService.updatePurchaseHistory(questionCount);
       _cachedPrices.clear();
 
-      _animateProcessingDone();
-
       if (!mounted) return;
+      Navigator.of(context).pop(); // Close the OutOfQuestionsOverlay
+
       showDialog(
         context: context,
         builder: (BuildContext buildContext) {
@@ -277,10 +285,12 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         },
       );
     } catch (e) {
-      _animateProcessingDone();
+      debugPrint('Purchase error: $e');
       if (mounted) {
         showErrorSnackBar(context, 'Purchase failed. Please try again.');
       }
+    } finally {
+      _animateProcessingDone();
     }
   }
 

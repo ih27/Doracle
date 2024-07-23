@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class AppManager extends StatelessWidget {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
   final AnalyticsService _analytics = getIt<AnalyticsService>();
+  final RevenueCatService _revenueCatService = getIt<RevenueCatService>();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   AppManager({super.key});
@@ -80,7 +82,30 @@ class AppManager extends StatelessWidget {
 
   Future<void> _loadUser(String userId) async {
     await _userService.loadCurrentUser(userId);
-    await getIt<RevenueCatService>().initializeAndLogin(userId);
+    _initializeRevenueCat(userId);
+  }
+
+  void _initializeRevenueCat(String userId) {
+    const int maxRetries = 3;
+    const Duration retryDelay = Duration(minutes: 1);
+    int retryCount = 0;
+
+    Future<void> attemptInitialization() async {
+      try {
+        await _revenueCatService.initializeAndLogin(userId);
+      } catch (e) {
+        debugPrint('RevenueCat initialization error: $e');
+        if (retryCount < maxRetries) {
+          retryCount++;
+          Timer(retryDelay, attemptInitialization);
+        } else {
+          _analytics.logEvent(
+              name: 'revenuecat_init_failed', parameters: {'userId': userId});
+        }
+      }
+    }
+
+    attemptInitialization();
   }
 
   Future<void> _handleLogin(String? email, String? password) async {
@@ -133,7 +158,8 @@ class AppManager extends StatelessWidget {
   Future<void> _handlePlatformSignIn() async {
     BuildContext context = navigatorKey.currentContext!;
     try {
-      UserCredential? userCredential = await _authService.handlePlatformSignIn();
+      UserCredential? userCredential =
+          await _authService.handlePlatformSignIn();
 
       // Check if the user is new
       if (userCredential?.additionalUserInfo?.isNewUser ?? false) {

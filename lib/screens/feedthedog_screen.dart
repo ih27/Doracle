@@ -35,67 +35,51 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
   Future<void> _loadPrices() async {
     setState(() => _isLoading = true);
     try {
-      if (!_purchaseService.isInitialized) {
-        // Wait for initialization or show an error
-        await Future.delayed(const Duration(seconds: 5));
-        if (!_purchaseService.isInitialized) {
-          throw Exception('RevenueCat SDK is not initialized');
-        }
-      }
+      await _purchaseService.ensureInitialized();
       _prices = await _purchaseService.fetchPrices();
     } catch (e) {
       debugPrint('Error loading prices: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   Future<void> _handlePurchase(int questionCount) async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      // Initiate the purchase, return if it fails
+      await _purchaseService.ensureInitialized();
+
       if (!await _purchaseService.purchaseProduct(questionCount)) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
+        throw Exception('Purchase failed');
       }
 
-      // The purchase is successful if we are here :-)
       await _userService.updatePurchaseHistory(questionCount);
-
-      // Call the callback to notify that a purchase was completed
       widget.onPurchaseComplete();
 
-      // Get rid of previous navigator screens
       if (!mounted) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      // After successful purchase:
       showDialog(
         context: context,
         builder: (BuildContext buildContext) {
           return PurchaseSuccessPopup(
             questionCount: questionCount,
-            onContinue: () {
-              Navigator.of(buildContext).pop(); // Close the dialog
-            },
+            onContinue: () => Navigator.of(buildContext).pop(),
           );
         },
       );
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (!mounted) return;
-      showErrorSnackBar(context, 'Purchase failed. Please try again.');
+      debugPrint('Purchase error: $e');
+      if (mounted) {
+        showErrorSnackBar(context, 'Purchase failed. Please try again.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

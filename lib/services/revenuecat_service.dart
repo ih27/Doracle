@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -11,17 +12,28 @@ class RevenueCatService {
     30: 'medium_treat',
     50: 'large_treat'
   };
+  String? _lastInitializedUserId;
   bool _isConfigured = false;
-  bool _isInitialized = false;
   List<StoreProduct>? _cachedProducts;
   List<String> get _products => _productsHash.values.toList();
-  bool get isInitialized => _isInitialized;
+  Completer<void>? _initializationCompleter;
 
   Future<bool> purchaseProduct(int questionCount) async {
     try {
-      final StoreProduct? product =
-          await _getProduct(_productsHash[questionCount]!);
-      await Purchases.purchaseStoreProduct(product!);
+      await ensureInitialized();
+      final String? productIdentifier = _productsHash[questionCount];
+      if (productIdentifier == null) {
+        debugPrint("Invalid question count: $questionCount");
+        return false;
+      }
+
+      final StoreProduct? product = await _getProduct(productIdentifier);
+      if (product == null) {
+        debugPrint("Product not found for identifier: $productIdentifier");
+        return false;
+      }
+
+      await Purchases.purchaseStoreProduct(product);
       return true;
     } catch (e) {
       debugPrint("Purchase product error: $e");
@@ -30,8 +42,14 @@ class RevenueCatService {
   }
 
   Future<Map<String, String>> fetchPrices() async {
-    final products = await _getProducts();
-    return {for (var p in products) p.identifier: p.priceString};
+    try {
+      await ensureInitialized();
+      final products = await _getProducts();
+      return {for (var p in products) p.identifier: p.priceString};
+    } catch (e) {
+      debugPrint("Error fetching prices: $e");
+      return {};
+    }
   }
 
   void clearProductCache() {
@@ -39,26 +57,68 @@ class RevenueCatService {
   }
 
   Future<void> initializeAndLogin(String userId) async {
+    // If already initializing or initialized for this user, just wait for completion
+    if (_initializationCompleter != null && _lastInitializedUserId == userId) {
+      return _initializationCompleter!.future;
+    }
+
+    // If initializing for a different user, reset the completer
+    if (_lastInitializedUserId != userId) {
+      _initializationCompleter = null;
+    }
+
+    _initializationCompleter = Completer<void>();
+    _lastInitializedUserId = userId;
+
     try {
       if (!_isConfigured) {
         await _configureSDK(userId);
       } else {
         await _loginIfNeeded(userId);
       }
-      _isInitialized = true;
+      _initializationCompleter!.complete();
     } catch (e) {
       debugPrint("Error in initializeAndLogin: $e");
+      _initializationCompleter!.completeError(e);
+      // Reset the completer and last user ID on error
+      _initializationCompleter = null;
+      _lastInitializedUserId = null;
     }
+
+    return _initializationCompleter!.future;
+  }
+
+  Future<void> ensureInitialized() async {
+    if (_initializationCompleter == null) {
+      // If not initialized, attempt to initialize with the last known user ID
+      String? userId = await _getLastLoggedInUserId();
+      if (userId == null) {
+        throw StateError(
+            'RevenueCatService cannot auto-initialize without a user ID. Call initializeAndLogin first.');
+      }
+      return initializeAndLogin(userId);
+    }
+    return _initializationCompleter!.future;
   }
 
   Future<List<StoreProduct>> _getProducts() async {
-    _cachedProducts ??= await Purchases.getProducts(_products);
-    return _cachedProducts!;
+    try {
+      _cachedProducts ??= await Purchases.getProducts(_products);
+      return _cachedProducts!;
+    } catch (e) {
+      debugPrint("Error getting products: $e");
+      return [];
+    }
   }
 
   Future<StoreProduct?> _getProduct(String identifier) async {
-    final products = await Purchases.getProducts([identifier]);
-    return products.isNotEmpty ? products.first : null;
+    try {
+      final products = await Purchases.getProducts([identifier]);
+      return products.isNotEmpty ? products.first : null;
+    } catch (e) {
+      debugPrint("Error getting product: $e");
+      return null;
+    }
   }
 
   Future<void> _configureSDK(String userId) async {
@@ -93,12 +153,21 @@ class RevenueCatService {
   }
 
   Future<String?> _getLastLoggedInUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_lastUserIdKey);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_lastUserIdKey);
+    } catch (e) {
+      debugPrint("Error getting last logged in user ID: $e");
+      return null;
+    }
   }
 
   Future<void> _setLastLoggedInUserId(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastUserIdKey, userId);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_lastUserIdKey, userId);
+    } catch (e) {
+      debugPrint("Error setting last logged in user ID: $e");
+    }
   }
 }
