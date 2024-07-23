@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' show Random;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/constants.dart';
 
@@ -15,7 +16,10 @@ class FirestoreService {
 
   static const String _questionsKey = 'cached_questions';
   static const String _lastFetchTimeKey = 'last_fetch_time';
+  static const String _lastSuccessfulFetchTimeKey =
+      'last_successful_fetch_time';
   static const Duration _cacheDuration = Duration(days: 30);
+  static const Duration _retryAfterErrorDuration = Duration(hours: 24);
 
   static Future<int> getStartingCount() async {
     try {
@@ -25,6 +29,7 @@ class FirestoreService {
         return statsDoc.data()?['startingCount'] ?? defaultStartingCount;
       }
     } catch (e) {
+      debugPrint('Error fetching starting count: $e');
       return defaultStartingCount;
     }
     return defaultStartingCount;
@@ -36,29 +41,41 @@ class FirestoreService {
       final now = DateTime.now();
       final lastFetchTime = DateTime.fromMillisecondsSinceEpoch(
           prefs.getInt(_lastFetchTimeKey) ?? 0);
+      final lastSuccessfulFetchTime = DateTime.fromMillisecondsSinceEpoch(
+          prefs.getInt(_lastSuccessfulFetchTimeKey) ?? 0);
 
-      if (now.difference(lastFetchTime) > _cacheDuration) {
+      bool shouldFetch =
+          now.difference(lastFetchTime) > _retryAfterErrorDuration ||
+              now.difference(lastSuccessfulFetchTime) > _cacheDuration;
+
+      if (shouldFetch) {
         await _fetchAndCacheQuestions();
         await prefs.setInt(_lastFetchTimeKey, now.millisecondsSinceEpoch);
       } else {
-        _questionsCache.clear();
-        final cachedQuestions = prefs.getString(_questionsKey);
-        if (cachedQuestions != null) {
-          final decodedQuestions =
-              json.decode(cachedQuestions) as Map<String, dynamic>;
-          decodedQuestions.forEach((key, value) {
-            _questionsCache[key] = List<String>.from(value);
-          });
-        }
+        _loadCachedQuestions(prefs);
       }
     } catch (e) {
+      debugPrint('Error initializing questions cache: $e');
       _questionsCache.clear();
+    }
+  }
+
+  static void _loadCachedQuestions(SharedPreferences prefs) {
+    _questionsCache.clear();
+    final cachedQuestions = prefs.getString(_questionsKey);
+    if (cachedQuestions != null) {
+      final decodedQuestions =
+          json.decode(cachedQuestions) as Map<String, dynamic>;
+      decodedQuestions.forEach((key, value) {
+        _questionsCache[key] = List<String>.from(value);
+      });
     }
   }
 
   static Future<void> _fetchAndCacheQuestions() async {
     final categories = ['Love', 'Finance', 'Health', 'Career', 'Mixed'];
     _questionsCache.clear();
+    bool fetchSuccessful = true;
 
     for (String category in categories) {
       try {
@@ -72,16 +89,35 @@ class FirestoreService {
             snapshot.docs.map((doc) => doc['question'] as String).toList();
         _questionsCache[category] = categoryQuestions;
       } catch (e) {
-        // If fetching fails for a category, add an empty list
-        _questionsCache[category] = [];
+        debugPrint('Error fetching questions for category $category: $e');
+        fetchSuccessful = false;
+        // If fetching fails for a category, add previously cached questions if available
+        final prefs = await SharedPreferences.getInstance();
+        final cachedQuestions = prefs.getString(_questionsKey);
+        if (cachedQuestions != null) {
+          final decodedQuestions =
+              json.decode(cachedQuestions) as Map<String, dynamic>;
+          if (decodedQuestions.containsKey(category)) {
+            _questionsCache[category] =
+                List<String>.from(decodedQuestions[category]);
+          } else {
+            _questionsCache[category] = [];
+          }
+        } else {
+          _questionsCache[category] = [];
+        }
       }
     }
 
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_questionsKey, json.encode(_questionsCache));
+      if (fetchSuccessful) {
+        await prefs.setInt(
+            _lastSuccessfulFetchTimeKey, DateTime.now().millisecondsSinceEpoch);
+      }
     } catch (e) {
-      // The questions are still in memory, so the app can continue to function
+      debugPrint('Error saving questions cache: $e');
     }
   }
 
@@ -90,9 +126,11 @@ class FirestoreService {
     final List<String> randomQuestions = [];
 
     _questionsCache.forEach((category, questions) {
-      final shuffledQuestions = List<String>.from(questions)..shuffle();
-      randomQuestions.addAll(
-          shuffledQuestions.take(numberOfQuestionsPerCategory).toList());
+      if (questions.isNotEmpty) {
+        final shuffledQuestions = List<String>.from(questions)..shuffle();
+        randomQuestions.addAll(
+            shuffledQuestions.take(numberOfQuestionsPerCategory).toList());
+      }
     });
 
     randomQuestions.shuffle();
@@ -107,6 +145,7 @@ class FirestoreService {
       }
       return _getRandomQuestionsFromCache(numberOfQuestionsPerCategory);
     } catch (e) {
+      debugPrint('Error fetching random questions: $e');
       return [];
     }
   }
