@@ -40,7 +40,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _viewModel = getIt<FortuneViewModel>();
     _viewModel.addListener(_onViewModelChanged);
     initShakeDetector(onShake: animateShake);
-    _viewModel.initialize();
     WidgetsBinding.instance.addObserver(this);
     _questionFocusNode.addListener(_handleFocusChange);
     if (widget.fromPurchase) {
