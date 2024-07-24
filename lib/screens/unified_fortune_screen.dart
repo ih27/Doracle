@@ -1,16 +1,9 @@
-import 'dart:async';
-import 'dart:math' show Random;
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
-import 'package:typewritertext/typewritertext.dart';
+import '../viewmodels/fortune_view_model.dart';
 import '../mixins/fortune_animation_mixin.dart';
 import '../mixins/shake_detector_mixin.dart';
 import '../helpers/constants.dart';
-import '../config/dependency_injection.dart';
-import '../services/fortune_teller_service.dart';
-import '../services/user_service.dart';
-import '../services/haptic_service.dart';
-import '../services/revenuecat_service.dart';
 import '../widgets/fortune_animation.dart';
 import '../widgets/fortune_content.dart';
 import '../widgets/home_content.dart';
@@ -19,7 +12,7 @@ import '../widgets/question_input.dart';
 import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../helpers/show_snackbar.dart';
-import '../repositories/fortune_content_repository.dart';
+import '../config/dependency_injection.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
   final Function(String) onNavigate;
@@ -36,168 +29,39 @@ class UnifiedFortuneScreen extends StatefulWidget {
 }
 
 class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
-    with ShakeDetectorMixin, FortuneAnimationMixin, WidgetsBindingObserver {
-  final FortuneContentRepository _fortuneContentRepository =
-      getIt<FortuneContentRepository>();
-  final UserService _userService = getIt<UserService>();
-  final HapticService _hapticService = getIt<HapticService>();
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
-  final FortuneTeller _fortuneTeller = getIt<FortuneTeller>();
+    with ShakeDetectorMixin, WidgetsBindingObserver, FortuneAnimationMixin {
+  late FortuneViewModel _viewModel;
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocusNode = FocusNode();
 
-  late Future<void> _initializationFuture;
-  bool isHome = true;
-  bool _isKeyboardVisible = false;
-
-  late String _welcomeMessage;
-  List<String> _randomQuestions = [];
-  late TypeWriterController _fortuneController;
-  bool _isFortuneCompleted = false;
-  bool _isFortuneInProgress = false;
-
-  Map<String, String> _cachedPrices = {};
-
-  void _initializeRiveController(Artboard artboard) {
-    initializeRiveController(artboard, FortuneConstants.animationStateMachine);
-  }
-
-  Future<void> _initializeApp() async {
-    await Future.wait([
-      _initializeFortuneTeller(),
-      _fetchRandomQuestions(),
-    ]);
-    _welcomeMessage = _getRandomWelcomeMessage();
-  }
-
-  Future<void> _handleQuestionSubmission(String question) async {
-    if (_userService.getRemainingQuestionsCount() <= 0) {
-      _showOutOfQuestionsOverlay();
-      _hapticService.warning();
-      return;
-    }
-
-    if (question.trim().isEmpty) {
-      showErrorSnackBar(context, 'Please enter a question.');
-      _hapticService.error();
-      return;
-    }
-
-    _hapticService.success();
-    await _getFortune(question);
-  }
-
-  Future<void> _getFortune(String question) async {
-    setState(() {
-      _isFortuneInProgress = true;
-      _isFortuneCompleted = false;
-    });
-
-    animateProcessingStart();
-
-    try {
-      await _initializeFortuneTeller();
-      await _fetchAndDisplayFortune(question);
-    } catch (e) {
-      _handleFortuneError();
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = getIt<FortuneViewModel>();
+    _viewModel.addListener(_onViewModelChanged);
+    initShakeDetector(onShake: animateShake);
+    _viewModel.initialize();
+    WidgetsBinding.instance.addObserver(this);
+    _questionFocusNode.addListener(_handleFocusChange);
+    if (widget.fromPurchase) {
+      _viewModel.leaveHome();
     }
   }
 
-  Future<void> _fetchAndDisplayFortune(String question) async {
-    final fortuneStreamController = StreamController<String>();
-    _fortuneController =
-        TypeWriterController.fromStream(fortuneStreamController.stream);
-
-    String buffer = '';
-    bool isTyping = false;
-
-    void typeBuffer() async {
-      isTyping = true;
-      while (buffer.isNotEmpty) {
-        if (!fortuneStreamController.isClosed) {
-          String char = buffer.characters.first;
-          fortuneStreamController.add(char);
-          buffer = buffer.characters.skip(1).string;
-          await Future.delayed(FortuneConstants.charDelay);
-        } else {
-          break;
-        }
-      }
-      isTyping = false;
-    }
-
-    _fortuneTeller.getFortune(question).listen(
-          (fortunePart) =>
-              _handleFortunePart(fortunePart, buffer, isTyping, typeBuffer),
-          onDone: () => _handleFortuneDone(buffer, fortuneStreamController),
-          onError: (error) => _handleFortuneError(),
-        );
-  }
-
-  void _handleFortunePart(
-      String fortunePart, String buffer, bool isTyping, Function typeBuffer) {
-    buffer += fortunePart.characters.string;
-    if (!isTyping) {
-      typeBuffer();
-    }
-  }
-
-  Future<void> _handleFortuneDone(
-      String buffer, StreamController<String> fortuneStreamController) async {
-    while (buffer.isNotEmpty) {
-      await Future.delayed(FortuneConstants.charDelay);
-    }
-    setState(() {
-      _isFortuneCompleted = true;
-      _isFortuneInProgress = false;
-    });
-    animateProcessingDone();
-    await fortuneStreamController.close();
-  }
-
-  void _handleFortuneError() {
-    _fortuneController = TypeWriterController.fromStream(
-        Stream.value('Our puppy is not in the mood...'));
-    setState(() {
-      _isFortuneCompleted = true;
-      _isFortuneInProgress = false;
-    });
-    animateProcessingDone();
-  }
-
-  void _onUserServiceUpdate() {
+  void _onViewModelChanged() {
     if (mounted) {
-      _fetchPricesIfNeeded();
       setState(() {});
     }
   }
 
   @override
-  void initState() {
-    super.initState();
-    initShakeDetector(onShake: animateShake);
-    _initializationFuture = _initializeApp();
-    WidgetsBinding.instance.addObserver(this);
-    _questionFocusNode.addListener(_handleFocusChange);
-    _userService.addListener(_onUserServiceUpdate);
-    // Set isHome to false if coming from a purchase
-    if (widget.fromPurchase) {
-      isHome = false;
-    }
-    // Initialize the controller with an empty stream
-    _fortuneController = TypeWriterController.fromStream(const Stream.empty());
-    _fetchPricesIfNeeded();
-  }
-
-  @override
   void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
     disposeRiveController();
-    _userService.removeListener(_onUserServiceUpdate);
     WidgetsBinding.instance.removeObserver(this);
     _questionController.dispose();
     _questionFocusNode.removeListener(_handleFocusChange);
     _questionFocusNode.dispose();
-    _fortuneController.dispose();
     super.dispose();
   }
 
@@ -209,7 +73,6 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   @override
   void didChangeMetrics() {
-    // Schedule a check for the next frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _checkKeyboardVisibility();
@@ -221,32 +84,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     if (!mounted) return;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final newIsKeyboardVisible = bottomInset > 0;
-    if (newIsKeyboardVisible != _isKeyboardVisible) {
-      setState(() {
-        _isKeyboardVisible = newIsKeyboardVisible;
-      });
-    }
-  }
-
-  String _getRandomWelcomeMessage() {
-    final random = Random();
-    return HomeScreenTexts
-        .greetings[random.nextInt(HomeScreenTexts.greetings.length)];
-  }
-
-  Future<void> _fetchRandomQuestions() async {
-    _randomQuestions = await _fortuneContentRepository.fetchRandomQuestions();
-  }
-
-  Future<void> _fetchPricesIfNeeded() async {
-    if (_userService.hasRunOutOfQuestions() && _cachedPrices.isEmpty) {
-      try {
-        await _purchaseService.ensureInitialized();
-        _cachedPrices = await _purchaseService.fetchPrices();
-      } catch (e) {
-        debugPrint('Error loading prices: $e');
-      }
-    }
+    _viewModel.setKeyboardVisibility(newIsKeyboardVisible);
   }
 
   void _handleFocusChange() {
@@ -266,12 +104,20 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _handleQuestionSubmission(question);
   }
 
-  Future<void> _initializeFortuneTeller() async {
-    final personaData = await _fortuneContentRepository.getRandomPersona();
-    setFortuneTellerPersona(
-      personaData['name']!,
-      personaData['instructions']!,
-    );
+  Future<void> _handleQuestionSubmission(String question) async {
+    if (_viewModel.getRemainingQuestionsCount() <= 0) {
+      _showOutOfQuestionsOverlay();
+      return;
+    }
+
+    if (question.trim().isEmpty) {
+      showErrorSnackBar(context, 'Please enter a question.');
+      return;
+    }
+
+    animateProcessingStart();
+    await _viewModel.getFortune(question);
+    animateProcessingDone();
   }
 
   void _showOutOfQuestionsOverlay() {
@@ -291,7 +137,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                   Navigator.of(dialogContext).pop();
                   _handlePurchase(questions);
                 },
-                prices: _cachedPrices,
+                prices: _viewModel.cachedPrices,
               ),
             ),
           ),
@@ -313,62 +159,40 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   Future<void> _handlePurchase(int questionCount) async {
     animateProcessingStart();
 
-    try {
-      await _purchaseService.ensureInitialized();
-
-      if (!await _purchaseService.purchaseProduct(questionCount)) {
-        throw Exception('Purchase failed');
-      }
-
-      await _userService.updatePurchaseHistory(questionCount);
-      _cachedPrices.clear();
-
-      if (!mounted) return;
-      Navigator.of(context).pop(); // Close the OutOfQuestionsOverlay
-
-      showDialog(
-        context: context,
-        builder: (BuildContext buildContext) {
-          return PurchaseSuccessPopup(
-            questionCount: questionCount,
-            onContinue: () {
-              Navigator.of(buildContext).pop();
-            },
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('Purchase error: $e');
-      if (mounted) {
+    bool success = await _viewModel.handlePurchase(questionCount);
+    if (mounted) {
+      if (success) {
+        showDialog(
+          context: context,
+          builder: (BuildContext buildContext) {
+            return PurchaseSuccessPopup(
+              questionCount: questionCount,
+              onContinue: () {
+                Navigator.of(buildContext).pop();
+              },
+            );
+          },
+        );
+      } else {
         showErrorSnackBar(context, 'Purchase failed. Please try again.');
       }
-    } finally {
-      animateProcessingDone();
     }
-  }
 
-  void _resetFortuneState() {
-    setState(() {
-      _questionController.clear();
-      _fortuneController =
-          TypeWriterController.fromStream(const Stream.empty());
-      _isFortuneCompleted = false;
-      _isFortuneInProgress = false;
-      _fetchRandomQuestions();
-    });
+    animateProcessingDone();
   }
 
   Widget _buildContent() {
-    if (isHome) {
+    if (_viewModel.isHome) {
       return HomeContent(
-        welcomeMessage: _welcomeMessage,
-        onContinue: () => setState(() => isHome = false),
+        welcomeMessage: _viewModel.welcomeMessage,
+        onContinue: _viewModel.leaveHome,
       );
-    } else if (_isFortuneInProgress || _isFortuneCompleted) {
+    } else if (_viewModel.isFortuneInProgress ||
+        _viewModel.isFortuneCompleted) {
       return FortuneContent(
-        fortuneController: _fortuneController,
-        isFortuneCompleted: _isFortuneCompleted,
-        onAskAnother: _resetFortuneState,
+        fortuneController: _viewModel.fortuneController,
+        isFortuneCompleted: _viewModel.isFortuneCompleted,
+        onAskAnother: _viewModel.resetFortuneState,
       );
     } else {
       return _buildQuestionSection();
@@ -389,10 +213,10 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                   FortuneConstants.inputFieldFixedHeight -
                   bottomPadding,
               child: AnimatedOpacity(
-                opacity: _isKeyboardVisible ? 0.0 : 1.0,
+                opacity: _viewModel.isKeyboardVisible ? 0.0 : 1.0,
                 duration: FortuneConstants.carouselFadeoutDelay,
                 curve: Curves.easeInOut,
-                child: _randomQuestions.isEmpty
+                child: _viewModel.randomQuestions.isEmpty
                     ? Center(
                         child: Text(
                           'Type your question below',
@@ -401,7 +225,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                         ),
                       )
                     : QuestionCarousel(
-                        questions: _randomQuestions,
+                        questions: _viewModel.randomQuestions,
                         onQuestionSelected: _onQuestionSubmitted,
                       ),
               ),
@@ -409,12 +233,13 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
             Positioned(
               left: 0,
               right: 0,
-              bottom: _isKeyboardVisible ? bottomInset : bottomPadding,
+              bottom:
+                  _viewModel.isKeyboardVisible ? bottomInset : bottomPadding,
               child: QuestionInput(
                 controller: _questionController,
                 focusNode: _questionFocusNode,
                 onSubmitted: _onQuestionSubmitted,
-                remainingQuestions: _userService.getRemainingQuestionsCount(),
+                remainingQuestions: _viewModel.getRemainingQuestionsCount(),
                 onShowOutOfQuestions: _showOutOfQuestionsOverlay,
               ),
             ),
@@ -427,7 +252,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _initializationFuture,
+      future: _viewModel.initialize(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -448,5 +273,9 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         }
       },
     );
+  }
+
+  void _initializeRiveController(Artboard artboard) {
+    initializeRiveController(artboard, FortuneConstants.animationStateMachine);
   }
 }

@@ -11,10 +11,19 @@ import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../services/fortune_teller_service.dart';
+import '../viewmodels/fortune_view_model.dart';
 
 final getIt = GetIt.instance;
 
 void setupDependencies() {
+  getIt.registerFactory<FortuneViewModel>(() => FortuneViewModel(
+        getIt<FortuneContentRepository>(),
+        getIt<UserService>(),
+        getIt<HapticService>(),
+        getIt<RevenueCatService>(),
+        getIt<FortuneTeller>(),
+      ));
+
   // Repositories
   getIt.registerLazySingleton<FortuneContentRepository>(
     () => FirestoreFortuneContentRepository(),
