@@ -51,6 +51,18 @@ class HomeScreenTexts {
   ];
 }
 
+class FortuneConstants {
+  static const String animationAsset = 'assets/animations/meraki_dog_rev5.riv';
+  static const String animationArtboard = 'meraki_dog';
+  static const String animationStateMachine = 'State Machine 1';
+
+  static const double inputFieldFixedHeight = 66.0;
+
+  static const Duration charDelay = Duration(milliseconds: 5);
+  static const Duration outOfQuestionsPopupDelay = Duration(milliseconds: 200);
+  static const Duration carouselFadeoutDelay = Duration(milliseconds: 150);
+}
+
 class SettingsScreenTexts {
   static const shareText = "check out my website https://doracle.app";
   static const shareSubject = "Look what I made!";
