@@ -84,36 +84,17 @@ class _MainScreenState extends State<MainScreen> {
         title: Text(
           _currentTitle,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.w700
-              ),
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.w700),
         ),
         actions: [
           // During development we need this
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 10, 0),
-            child: IconButton(
-              icon: const Icon(
-                Icons.home,
-                size: 24,
-              ),
-              onPressed: _navigateToHome,
-              iconSize: 50,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 50,
-                minHeight: 50,
-              ),
-              style: IconButton.styleFrom(
-                shape: CircleBorder(
-                  side: BorderSide(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
-                  ),
-                ),
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-              ),
+          IconButton(
+            icon: const Icon(
+              Icons.home,
+              size: 24,
             ),
+            onPressed: _navigateToHome,
           ),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 20, 0),

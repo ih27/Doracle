@@ -14,7 +14,7 @@ class BondButtons extends StatelessWidget {
         children: [
           _buildCompatibilityButton(
             context,
-            'You\n',
+            'You\nPet',
             'assets/images/owner_pet.png',
             () => onNavigate('/ownercompatability'),
           ),
