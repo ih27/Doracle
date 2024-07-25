@@ -255,7 +255,8 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     if (_viewModel.isHome) {
       return HomeContent(
         welcomeMessage: _viewModel.welcomeMessage,
-        onContinue: _viewModel.leaveHome,
+        onOraclePressed: _viewModel.leaveHome,
+        onBondPressed: () => widget.onNavigate('/bond'),
       );
     } else if (_isFortuneInProgress || _isFortuneCompleted) {
       return FortuneContent(

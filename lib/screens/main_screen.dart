@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../screens/owner_compatability_screen.dart';
+import '../screens/pet_compatability_screen.dart';
 import '../widgets/slide_right_route.dart';
+import '../widgets/bond_buttons.dart';
 import 'unified_fortune_screen.dart';
 import 'settings_screen.dart';
 
@@ -13,9 +16,17 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   bool _fromPurchase = false;
+  bool _canPop = false;
 
   void _navigateTo(String route) {
-    _navigatorKey.currentState?.pushReplacementNamed(route);
+    // _navigatorKey.currentState?.pushReplacementNamed(route);
+    // During development we need this
+    _navigatorKey.currentState?.pushNamed(route);
+  }
+
+  void _navigateToHome() {
+    //_navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    _navigatorKey.currentState?.pushReplacementNamed('/fortune');
   }
 
   void _onPurchaseComplete() {
@@ -23,6 +34,14 @@ class _MainScreenState extends State<MainScreen> {
       _fromPurchase = true;
     });
     _navigateTo('/fortune');
+  }
+
+  void _updateCanPop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _canPop = _navigatorKey.currentState?.canPop() ?? false;
+      });
+    });
   }
 
   @override
@@ -33,7 +52,40 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
         automaticallyImplyLeading: false,
+        leading: _canPop
+            ? IconButton(
+                icon: Icon(Icons.arrow_back,
+                    color: Theme.of(context).primaryColor),
+                onPressed: () => _navigatorKey.currentState?.pop(),
+              )
+            : null,
         actions: [
+          // During development we need this
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 10, 0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.home,
+                size: 24,
+              ),
+              onPressed: _navigateToHome,
+              iconSize: 50,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 50,
+                minHeight: 50,
+              ),
+              style: IconButton.styleFrom(
+                shape: CircleBorder(
+                  side: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 20, 0),
             child: IconButton(
@@ -87,13 +139,54 @@ class _MainScreenState extends State<MainScreen> {
                     fromPurchase: _fromPurchase,
                   );
               break;
+            case '/bond':
+              builder = (BuildContext context) =>
+                  BondButtons(onNavigate: _navigateTo);
+              break;
+            case '/petcompatability':
+              builder =
+                  (BuildContext context) => const PetCompatabilityScreen();
+              break;
+            case '/ownercompatability':
+              builder =
+                  (BuildContext context) => const OwnerCompatabilityScreen();
+              break;
             default:
               throw Exception('Invalid route: ${settings.name}');
           }
           return MaterialPageRoute(
               builder: builder, settings: settings, fullscreenDialog: true);
         },
+        observers: [
+          _MainScreenNavigatorObserver(() => _updateCanPop()),
+        ],
       ),
     );
+  }
+}
+
+class _MainScreenNavigatorObserver extends NavigatorObserver {
+  final VoidCallback _updateCanPop;
+
+  _MainScreenNavigatorObserver(this._updateCanPop);
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _updateCanPop();
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _updateCanPop();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _updateCanPop();
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _updateCanPop();
   }
 }

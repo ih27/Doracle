@@ -3,12 +3,14 @@ import '../config/theme.dart';
 
 class HomeContent extends StatelessWidget {
   final String welcomeMessage;
-  final VoidCallback onContinue;
+  final VoidCallback onOraclePressed;
+  final VoidCallback onBondPressed;
 
   const HomeContent({
     super.key,
     required this.welcomeMessage,
-    required this.onContinue,
+    required this.onOraclePressed,
+    required this.onBondPressed,
   });
 
   @override
@@ -16,47 +18,133 @@ class HomeContent extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              welcomeMessage,
-              textAlign: TextAlign.start,
-              style: AppTheme.dogTextStyle,
+        Expanded(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            alignment: Alignment.center,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  welcomeMessage,
+                  textAlign: TextAlign.center,
+                  style: AppTheme.dogTextStyle,
+                ),
+              ),
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(22),
-          child: ElevatedButton(
-            onPressed: onContinue,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
-              minimumSize: const Size(0, 40),
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+          padding: const EdgeInsets.only(bottom: 40, left: 20, right: 20),
+          child: Column(
+            children: [
+              _buildOracleButton(context),
+              const SizedBox(height: 25),
+              _buildBondButton(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOracleButton(BuildContext context) {
+    return Container(
+      width: 250,
+      height: 50,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            AppTheme.secondaryColor,
+            AppTheme.yaleBlue,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 4,
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onOraclePressed,
+          borderRadius: BorderRadius.circular(14),
+          child: Center(
             child: Text(
-              'Continue',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              'Oracle',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Colors.white,
+                    fontWeight: FontWeight.bold,
                     letterSpacing: 0,
                   ),
             ),
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildBondButton(BuildContext context) {
+    return Container(
+      width: 250,
+      height: 50,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            AppTheme.naplesYellow,
+            AppTheme.sandyBrown,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 4,
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onBondPressed,
+          borderRadius: BorderRadius.circular(14),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const Icon(
+                Icons.favorite, // Replace with FFIcons.ktwoHearth if available
+                color: AppTheme.secondaryBackground,
+                size: 35,
+              ),
+              Text(
+                'Bond',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.secondaryBackground,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0,
+                    ),
+              ),
+              const Icon(
+                Icons.favorite, // Replace with FFIcons.ktwoHearth if available
+                color: AppTheme.secondaryBackground,
+                size: 35,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
