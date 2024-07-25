@@ -1,12 +1,10 @@
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:typewritertext/typewritertext.dart';
+import 'package:flutter/foundation.dart';
+import '../helpers/constants.dart';
 import '../services/fortune_teller_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
 import '../repositories/fortune_content_repository.dart';
-import '../helpers/constants.dart';
 
 class FortuneViewModel extends ChangeNotifier {
   final FortuneContentRepository _fortuneContentRepository;
@@ -15,14 +13,9 @@ class FortuneViewModel extends ChangeNotifier {
   final RevenueCatService _purchaseService;
   final FortuneTeller _fortuneTeller;
 
-  bool _isInitialized = false;
   bool isHome = true;
-  bool isFortuneInProgress = false;
-  bool isFortuneCompleted = false;
-  bool isKeyboardVisible = false;
   String welcomeMessage = '';
   List<String> randomQuestions = [];
-  late TypeWriterController fortuneController;
   Map<String, String> cachedPrices = {};
 
   FortuneViewModel(
@@ -31,43 +24,24 @@ class FortuneViewModel extends ChangeNotifier {
     this._hapticService,
     this._purchaseService,
     this._fortuneTeller,
-  ) {
-    fortuneController = TypeWriterController.fromStream(const Stream.empty());
-  }
+  );
 
   Future<void> initialize() async {
-    if (_isInitialized) return;
-    
-    debugPrint('FortuneViewModel: Starting initialization');
-    try {
-      await Future.wait([
-        _initializeFortuneTeller(),
-        _fetchRandomQuestions(),
-      ]);
-      welcomeMessage = _getRandomWelcomeMessage();
-      _isInitialized = true;
-      notifyListeners();
-      debugPrint('FortuneViewModel: Initialization complete');
-    } catch (e, stackTrace) {
-      debugPrint('FortuneViewModel: Error during initialization: $e');
-      debugPrint('Stack trace: $stackTrace');
-      rethrow;
-    }
+    await Future.wait([
+      _initializeFortuneTeller(),
+      _fetchRandomQuestions(),
+    ]);
+    welcomeMessage = _getRandomWelcomeMessage();
+    notifyListeners();
   }
 
   Future<void> _initializeFortuneTeller() async {
-    debugPrint('FortuneViewModel: Starting _initializeFortuneTeller');
     final personaData = await _fortuneContentRepository.getRandomPersona();
-    debugPrint('FortuneViewModel: Got random persona');
-    _fortuneTeller.setPersona(
-        personaData['name']!, personaData['instructions']!);
-    debugPrint('FortuneViewModel: _initializeFortuneTeller complete');
+    _fortuneTeller.setPersona(personaData['name']!, personaData['instructions']!);
   }
 
   Future<void> _fetchRandomQuestions() async {
-    debugPrint('FortuneViewModel: Starting _fetchRandomQuestions');
     randomQuestions = await _fortuneContentRepository.fetchRandomQuestions();
-    debugPrint('FortuneViewModel: _fetchRandomQuestions complete');
   }
 
   String _getRandomWelcomeMessage() {
@@ -75,44 +49,22 @@ class FortuneViewModel extends ChangeNotifier {
         HomeScreenTexts.greetings.length];
   }
 
-  Future<void> getFortune(String question) async {
+  Stream<String> getFortune(String question) {
     if (getRemainingQuestionsCount() <= 0) {
       _hapticService.warning();
-      return;
+      return Stream.value('');
     }
 
     if (question.trim().isEmpty) {
       _hapticService.error();
-      return;
+      return Stream.value('');
     }
 
     _hapticService.success();
-    isFortuneInProgress = true;
-    isFortuneCompleted = false;
-    notifyListeners();
-
-    try {
-      await _initializeFortuneTeller();
-      final fortuneStream = _fortuneTeller.getFortune(question);
-      fortuneController = TypeWriterController.fromStream(fortuneStream);
-
-      // Wait for the fortune to complete
-      await for (final _ in fortuneStream) {}
-
-      isFortuneCompleted = true;
-    } catch (e) {
-      fortuneController = TypeWriterController.fromStream(
-          Stream.value('Our puppy is not in the mood...'));
-    } finally {
-      isFortuneInProgress = false;
-      notifyListeners();
-    }
+    return _fortuneTeller.getFortune(question);
   }
 
   void resetFortuneState() {
-    isFortuneCompleted = false;
-    isFortuneInProgress = false;
-    fortuneController = TypeWriterController.fromStream(const Stream.empty());
     _fetchRandomQuestions();
     notifyListeners();
   }
@@ -136,11 +88,9 @@ class FortuneViewModel extends ChangeNotifier {
   Future<bool> handlePurchase(int questionCount) async {
     try {
       await _purchaseService.ensureInitialized();
-
       if (!await _purchaseService.purchaseProduct(questionCount)) {
         return false;
       }
-
       await _userService.updatePurchaseHistory(questionCount);
       cachedPrices.clear();
       notifyListeners();
@@ -149,11 +99,6 @@ class FortuneViewModel extends ChangeNotifier {
       debugPrint('Purchase error: $e');
       return false;
     }
-  }
-
-  void setKeyboardVisibility(bool isVisible) {
-    isKeyboardVisible = isVisible;
-    notifyListeners();
   }
 
   void leaveHome() {
