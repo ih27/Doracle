@@ -15,6 +15,7 @@ class FortuneViewModel extends ChangeNotifier {
   final RevenueCatService _purchaseService;
   final FortuneTeller _fortuneTeller;
 
+  bool _isInitialized = false;
   bool isHome = true;
   bool isFortuneInProgress = false;
   bool isFortuneCompleted = false;
@@ -35,26 +36,43 @@ class FortuneViewModel extends ChangeNotifier {
   }
 
   Future<void> initialize() async {
-    await Future.wait([
-      _initializeFortuneTeller(),
-      _fetchRandomQuestions(),
-    ]);
-    welcomeMessage = _getRandomWelcomeMessage();
-    notifyListeners();
+    if (_isInitialized) return;
+    
+    debugPrint('FortuneViewModel: Starting initialization');
+    try {
+      await Future.wait([
+        _initializeFortuneTeller(),
+        _fetchRandomQuestions(),
+      ]);
+      welcomeMessage = _getRandomWelcomeMessage();
+      _isInitialized = true;
+      notifyListeners();
+      debugPrint('FortuneViewModel: Initialization complete');
+    } catch (e, stackTrace) {
+      debugPrint('FortuneViewModel: Error during initialization: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   Future<void> _initializeFortuneTeller() async {
+    debugPrint('FortuneViewModel: Starting _initializeFortuneTeller');
     final personaData = await _fortuneContentRepository.getRandomPersona();
-    _fortuneTeller.setPersona(personaData['name']!, personaData['instructions']!);
+    debugPrint('FortuneViewModel: Got random persona');
+    _fortuneTeller.setPersona(
+        personaData['name']!, personaData['instructions']!);
+    debugPrint('FortuneViewModel: _initializeFortuneTeller complete');
   }
 
   Future<void> _fetchRandomQuestions() async {
+    debugPrint('FortuneViewModel: Starting _fetchRandomQuestions');
     randomQuestions = await _fortuneContentRepository.fetchRandomQuestions();
-    notifyListeners();
+    debugPrint('FortuneViewModel: _fetchRandomQuestions complete');
   }
 
   String _getRandomWelcomeMessage() {
-    return HomeScreenTexts.greetings[DateTime.now().millisecondsSinceEpoch % HomeScreenTexts.greetings.length];
+    return HomeScreenTexts.greetings[DateTime.now().millisecondsSinceEpoch %
+        HomeScreenTexts.greetings.length];
   }
 
   Future<void> getFortune(String question) async {
@@ -77,13 +95,14 @@ class FortuneViewModel extends ChangeNotifier {
       await _initializeFortuneTeller();
       final fortuneStream = _fortuneTeller.getFortune(question);
       fortuneController = TypeWriterController.fromStream(fortuneStream);
-      
+
       // Wait for the fortune to complete
       await for (final _ in fortuneStream) {}
-      
+
       isFortuneCompleted = true;
     } catch (e) {
-      fortuneController = TypeWriterController.fromStream(Stream.value('Our puppy is not in the mood...'));
+      fortuneController = TypeWriterController.fromStream(
+          Stream.value('Our puppy is not in the mood...'));
     } finally {
       isFortuneInProgress = false;
       notifyListeners();

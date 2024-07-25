@@ -31,6 +31,7 @@ class UnifiedFortuneScreen extends StatefulWidget {
 class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     with ShakeDetectorMixin, WidgetsBindingObserver, FortuneAnimationMixin {
   late FortuneViewModel _viewModel;
+  late Future<void> _initializationFuture;
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocusNode = FocusNode();
 
@@ -38,7 +39,9 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   void initState() {
     super.initState();
     _viewModel = getIt<FortuneViewModel>();
+    debugPrint('UnifiedFortuneScreen: ViewModel instance obtained');
     _viewModel.addListener(_onViewModelChanged);
+    _initializationFuture = _viewModel.initialize();
     initShakeDetector(onShake: animateShake);
     WidgetsBinding.instance.addObserver(this);
     _questionFocusNode.addListener(_handleFocusChange);
@@ -251,7 +254,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _viewModel.initialize(),
+      future: _initializationFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
