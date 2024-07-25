@@ -17,14 +17,28 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   bool _fromPurchase = false;
   bool _canPop = false;
+  String _currentTitle = '';
+  final Map<String, String> _routeTitles = {
+    '/': '',
+    '/fortune': '',
+    '/bond': 'Compatibility Check',
+    '/petcompatability': '',
+    '/ownercompatability': '',
+  };
 
-  void _navigateTo(String route) {
+  void _navigateTo(String route, {String? title}) {
+    setState(() {
+      _currentTitle = title ?? _routeTitles[route] ?? '';
+    });
     // _navigatorKey.currentState?.pushReplacementNamed(route);
     // During development we need this
     _navigatorKey.currentState?.pushNamed(route);
   }
 
   void _navigateToHome() {
+    setState(() {
+      _currentTitle = '';
+    });
     //_navigatorKey.currentState?.popUntil((route) => route.isFirst);
     _navigatorKey.currentState?.pushReplacementNamed('/fortune');
   }
@@ -44,6 +58,14 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _updateTitle(Route<dynamic> route) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _currentTitle = _routeTitles[route.settings.name] ?? '';
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +81,13 @@ class _MainScreenState extends State<MainScreen> {
                 onPressed: () => _navigatorKey.currentState?.pop(),
               )
             : null,
+        title: Text(
+          _currentTitle,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.w700
+              ),
+        ),
         actions: [
           // During development we need this
           Padding(
@@ -158,7 +187,8 @@ class _MainScreenState extends State<MainScreen> {
               builder: builder, settings: settings, fullscreenDialog: true);
         },
         observers: [
-          _MainScreenNavigatorObserver(() => _updateCanPop()),
+          _MainScreenNavigatorObserver(
+              updateCanPop: _updateCanPop, updateTitle: _updateTitle),
         ],
       ),
     );
@@ -166,27 +196,41 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class _MainScreenNavigatorObserver extends NavigatorObserver {
-  final VoidCallback _updateCanPop;
+  final VoidCallback updateCanPop;
+  final Function(Route<dynamic>) updateTitle;
 
-  _MainScreenNavigatorObserver(this._updateCanPop);
+  _MainScreenNavigatorObserver({
+    required this.updateCanPop,
+    required this.updateTitle,
+  });
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _updateCanPop();
+    updateCanPop();
+    updateTitle(route);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _updateCanPop();
+    updateCanPop();
+    if (previousRoute != null) {
+      updateTitle(previousRoute);
+    }
   }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _updateCanPop();
+    updateCanPop();
+    if (previousRoute != null) {
+      updateTitle(previousRoute);
+    }
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    _updateCanPop();
+    updateCanPop();
+    if (newRoute != null) {
+      updateTitle(newRoute);
+    }
   }
 }

@@ -48,11 +48,8 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - assets/images/background.png
-    - assets/images/doracle_logo_1@2x.webp
-    - assets/images/doracle2.png
-    - assets/images/paw.png
-    - assets/animations/meraki_dog_rev5.riv
+    - assets/images/
+    - assets/animations/
 
 flutter_launcher_icons:
   android: true

@@ -12,7 +12,6 @@ class UserService extends ValueNotifier<AppUser?> {
   UserService(this._userRepository) : super(null);
 
   Future<void> loadCurrentUser(String userId) async {
-    debugPrint('loadCurrentUser called with userId: $userId');
     final userData = await _userRepository.getUser(userId);
 
     // Get the current device capability

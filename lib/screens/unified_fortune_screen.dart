@@ -17,7 +17,7 @@ import '../helpers/show_snackbar.dart';
 import '../config/dependency_injection.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
-  final Function(String) onNavigate;
+  final Function(String, {String? title}) onNavigate;
   final bool fromPurchase;
 
   const UnifiedFortuneScreen({

@@ -136,7 +136,6 @@ class RevenueCatService {
         PurchasesConfiguration(apiKey)..appUserID = userId);
     _isConfigured = true;
     await _setLastLoggedInUserId(userId);
-    debugPrint("RevenueCat SDK configured with user ID: $userId");
   }
 
   Future<void> _loginIfNeeded(String userId) async {

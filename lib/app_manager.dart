@@ -28,10 +28,10 @@ class AppManager extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: _authService.authStateChanges,
       builder: (context, snapshot) {
-        debugPrint('Auth state changed: ${snapshot.data?.uid}');
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
+          debugPrint('Auth userId: ${snapshot.data!.uid}');
           return FutureBuilder(
             future: _loadUser(snapshot.data!.uid),
             builder: (context, userSnapshot) {
