@@ -63,6 +63,7 @@ class AppRouter extends StatelessWidget {
         }
         return FadePageRoute(
           page: builder(context),
+          settings: settings,
         );
       },
     );

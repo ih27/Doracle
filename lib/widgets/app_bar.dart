@@ -62,16 +62,16 @@ class CustomAppBarState extends State<CustomAppBar> {
       automaticallyImplyLeading: false,
       leading: _data.canPop
           ? IconButton(
-              icon: Icon(Icons.arrow_back,
-                  color: Theme.of(context).primaryColor),
+              icon:
+                  Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
               onPressed: _data.onBackPressed,
             )
           : null,
       title: Text(
         _data.currentTitle,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.w700),
+              color: Theme.of(context).primaryColor,
+            ),
       ),
       actions: [
         IconButton(

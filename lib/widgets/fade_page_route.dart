@@ -6,6 +6,7 @@ class FadePageRoute extends PageRouteBuilder {
 
   FadePageRoute({
     required this.page,
+    required RouteSettings settings,
     this.duration = const Duration(milliseconds: 100),
   }) : super(
           pageBuilder: (
@@ -25,5 +26,6 @@ class FadePageRoute extends PageRouteBuilder {
             child: child,
           ),
           transitionDuration: duration,
+          settings: settings,
         );
 }
