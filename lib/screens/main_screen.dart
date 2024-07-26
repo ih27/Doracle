@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import '../screens/owner_compatability_screen.dart';
-import '../screens/pet_compatability_screen.dart';
-import '../widgets/slide_right_route.dart';
-import '../widgets/bond_buttons.dart';
-import 'unified_fortune_screen.dart';
 import 'settings_screen.dart';
+import '../widgets/slide_right_route.dart';
+import '../widgets/app_router.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,20 +15,28 @@ class _MainScreenState extends State<MainScreen> {
   bool _fromPurchase = false;
   bool _canPop = false;
   String _currentTitle = '';
-  final Map<String, String> _routeTitles = {
-    '/': '',
-    '/fortune': '',
-    '/bond': 'Compatibility Check',
-    '/petcompatability': '',
-    '/ownercompatability': '',
-  };
+  late final AppRouter _appRouter;
+  late final _MainScreenNavigatorObserver _navigatorObserver;
+
+  @override
+  void initState() {
+    super.initState();
+    _navigatorObserver = _MainScreenNavigatorObserver(
+      updateCanPop: _updateCanPop,
+      updateTitle: _updateTitle,
+    );
+    _appRouter = AppRouter(
+      navigatorKey: _navigatorKey,
+      onNavigate: _navigateTo,
+      observer: _navigatorObserver,
+      fromPurchase: _fromPurchase,
+    );
+  }
 
   void _navigateTo(String route, {String? title}) {
     setState(() {
-      _currentTitle = title ?? _routeTitles[route] ?? '';
+      _currentTitle = title ?? _appRouter.getRouteTitle(route);
     });
-    // _navigatorKey.currentState?.pushReplacementNamed(route);
-    // During development we need this
     _navigatorKey.currentState?.pushNamed(route);
   }
 
@@ -39,7 +44,6 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _currentTitle = '';
     });
-    //_navigatorKey.currentState?.popUntil((route) => route.isFirst);
     _navigatorKey.currentState?.pushReplacementNamed('/fortune');
   }
 
@@ -61,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
   void _updateTitle(Route<dynamic> route) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        _currentTitle = _routeTitles[route.settings.name] ?? '';
+        _currentTitle = _appRouter.getRouteTitle(route.settings.name ?? '');
       });
     });
   }
@@ -88,7 +92,6 @@ class _MainScreenState extends State<MainScreen> {
               fontWeight: FontWeight.w700),
         ),
         actions: [
-          // During development we need this
           IconButton(
             icon: const Icon(
               Icons.home,
@@ -136,42 +139,7 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 0,
         forceMaterialTransparency: true,
       ),
-      body: Navigator(
-        key: _navigatorKey,
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          WidgetBuilder builder;
-          switch (settings.name) {
-            case '/':
-            case '/fortune':
-              builder = (BuildContext context) => UnifiedFortuneScreen(
-                    onNavigate: _navigateTo,
-                    fromPurchase: _fromPurchase,
-                  );
-              break;
-            case '/bond':
-              builder = (BuildContext context) =>
-                  BondButtons(onNavigate: _navigateTo);
-              break;
-            case '/petcompatability':
-              builder =
-                  (BuildContext context) => const PetCompatabilityScreen();
-              break;
-            case '/ownercompatability':
-              builder =
-                  (BuildContext context) => const OwnerCompatabilityScreen();
-              break;
-            default:
-              throw Exception('Invalid route: ${settings.name}');
-          }
-          return MaterialPageRoute(
-              builder: builder, settings: settings, fullscreenDialog: true);
-        },
-        observers: [
-          _MainScreenNavigatorObserver(
-              updateCanPop: _updateCanPop, updateTitle: _updateTitle),
-        ],
-      ),
+      body: _appRouter,
     );
   }
 }
