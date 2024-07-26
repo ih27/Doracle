@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../helpers/app_icons.dart';
 
 class HomeContent extends StatelessWidget {
   final String welcomeMessage;
@@ -124,7 +125,7 @@ class HomeContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               const Icon(
-                Icons.favorite, // Replace with FFIcons.ktwoHearth if available
+                AppIcons.twoHearts,
                 color: AppTheme.secondaryBackground,
                 size: 35,
               ),
@@ -137,7 +138,7 @@ class HomeContent extends StatelessWidget {
                     ),
               ),
               const Icon(
-                Icons.favorite, // Replace with FFIcons.ktwoHearth if available
+                AppIcons.twoHearts,
                 color: AppTheme.secondaryBackground,
                 size: 35,
               ),

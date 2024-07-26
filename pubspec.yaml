@@ -36,6 +36,7 @@ dependencies:
   typewritertext: ^3.0.8
   characters: ^1.3.0
   scrollable: ^1.0.5
+  uuid: ^4.4.2
 
 dev_dependencies:
   flutter_lints: ^4.0.0
@@ -50,6 +51,10 @@ flutter:
     - .env
     - assets/images/
     - assets/animations/
+  fonts:
+    - family: doracle
+      fonts:
+        - asset: assets/fonts/doracle.ttf
 
 flutter_launcher_icons:
   android: true
