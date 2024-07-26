@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'settings_screen.dart';
-import '../widgets/slide_right_route.dart';
+import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
 
 class MainScreen extends StatefulWidget {
@@ -12,10 +11,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<CustomAppBarState> _appBarKey =
+      GlobalKey<CustomAppBarState>();
   bool _fromPurchase = false;
   bool _canPop = false;
   String _currentTitle = '';
   late final AppRouter _appRouter;
+  late final CustomAppBar _appBar;
   late final _MainScreenNavigatorObserver _navigatorObserver;
 
   @override
@@ -31,11 +33,22 @@ class _MainScreenState extends State<MainScreen> {
       observer: _navigatorObserver,
       fromPurchase: _fromPurchase,
     );
+    _appBar = CustomAppBar(
+      key: _appBarKey,
+      data: CustomAppBarData(
+        canPop: _canPop,
+        currentTitle: _currentTitle,
+        navigateToHome: _navigateToHome,
+        onPurchaseComplete: _onPurchaseComplete,
+        onBackPressed: () => _navigatorKey.currentState?.pop(),
+      ),
+    );
   }
 
   void _navigateTo(String route, {String? title}) {
     setState(() {
       _currentTitle = title ?? _appRouter.getRouteTitle(route);
+      _updateCustomAppBar();
     });
     _navigatorKey.currentState?.pushNamed(route);
   }
@@ -43,6 +56,7 @@ class _MainScreenState extends State<MainScreen> {
   void _navigateToHome() {
     setState(() {
       _currentTitle = '';
+      _updateCustomAppBar();
     });
     _navigatorKey.currentState?.pushReplacementNamed('/fortune');
   }
@@ -58,6 +72,7 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _canPop = _navigatorKey.currentState?.canPop() ?? false;
+        _updateCustomAppBar();
       });
     });
   }
@@ -66,79 +81,26 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _currentTitle = _appRouter.getRouteTitle(route.settings.name ?? '');
+        _updateCustomAppBar();
       });
     });
+  }
+
+  void _updateCustomAppBar() {
+    _appBarKey.currentState?.update(CustomAppBarData(
+      canPop: _canPop,
+      currentTitle: _currentTitle,
+      navigateToHome: _navigateToHome,
+      onPurchaseComplete: _onPurchaseComplete,
+      onBackPressed: () => _navigatorKey.currentState?.pop(),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-        automaticallyImplyLeading: false,
-        leading: _canPop
-            ? IconButton(
-                icon: Icon(Icons.arrow_back,
-                    color: Theme.of(context).primaryColor),
-                onPressed: () => _navigatorKey.currentState?.pop(),
-              )
-            : null,
-        title: Text(
-          _currentTitle,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.w700),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.home,
-              size: 24,
-            ),
-            onPressed: _navigateToHome,
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 20, 0),
-            child: IconButton(
-              icon: const Icon(
-                Icons.settings_suggest_rounded,
-                size: 24,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  SlideRightRoute(
-                    page: SettingsScreen(
-                      onPurchaseComplete: _onPurchaseComplete,
-                    ),
-                  ),
-                );
-              },
-              iconSize: 50,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 50,
-                minHeight: 50,
-              ),
-              style: IconButton.styleFrom(
-                shape: CircleBorder(
-                  side: BorderSide(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
-                  ),
-                ),
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          )
-        ],
-        centerTitle: true,
-        toolbarHeight: 60,
-        elevation: 0,
-        forceMaterialTransparency: true,
-      ),
+      appBar: _appBar,
       body: _appRouter,
     );
   }

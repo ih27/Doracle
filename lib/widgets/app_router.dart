@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../screens/unified_fortune_screen.dart';
 import '../screens/owner_compatability_screen.dart';
 import '../screens/pet_compatability_screen.dart';
-import '../widgets/bond_buttons.dart';
+import 'bond_buttons.dart';
+import 'fade_page_route.dart';
 
 class AppRouter extends StatelessWidget {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -47,12 +48,11 @@ class AppRouter extends StatelessWidget {
                 );
             break;
           case '/bond':
-            builder = (BuildContext context) =>
-                BondButtons(onNavigate: onNavigate);
+            builder =
+                (BuildContext context) => BondButtons(onNavigate: onNavigate);
             break;
           case '/petcompatability':
-            builder =
-                (BuildContext context) => const PetCompatabilityScreen();
+            builder = (BuildContext context) => const PetCompatabilityScreen();
             break;
           case '/ownercompatability':
             builder =
@@ -61,10 +61,9 @@ class AppRouter extends StatelessWidget {
           default:
             throw Exception('Invalid route: ${settings.name}');
         }
-        return MaterialPageRoute(
-            builder: builder, 
-            settings: settings,
-            fullscreenDialog: true);
+        return FadePageRoute(
+          page: builder(context),
+        );
       },
     );
   }
