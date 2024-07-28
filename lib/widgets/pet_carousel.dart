@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
 
@@ -140,18 +139,14 @@ class _PetCarouselState extends State<PetCarousel> {
 
   void _addNewPet() async {
     if (pets.length < widget.maxPets) {
-      // Here you would typically show a dialog or navigate to a new screen to get pet details
-      // For this example, we'll just add a dummy pet
-      final newPet = Pet(
-        id: const Uuid().v4(),
-        name: 'New Pet ${pets.length + 1}',
-        //imageUrl: 'https://example.com/pet_image.jpg',
-        imageUrl: 'assets/images/dog.png',
-      );
-      setState(() {
-        pets.add(newPet);
-      });
-      await _savePets();
+      // Navigate to the CreatePetScreen
+      final result = await Navigator.pushNamed(context, '/pet/create');
+      if (result != null && result is Pet) {
+        setState(() {
+          pets.add(result);
+        });
+        await _savePets();
+      }
     }
   }
 

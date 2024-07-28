@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/unified_fortune_screen.dart';
 import '../screens/owner_compatability_screen.dart';
 import '../screens/pet_compatability_screen.dart';
+import '../screens/pet_create_screen.dart';
 import 'bond_buttons.dart';
 import 'fade_page_route.dart';
 
@@ -23,8 +24,9 @@ class AppRouter extends StatelessWidget {
     '/': '',
     '/fortune': '',
     '/bond': 'Compatibility Check',
-    '/petcompatability': 'Pet Compatibility',
-    '/ownercompatability': 'Owner Compatibility',
+    '/pet/compatability': 'Compatibility Check',
+    '/pet/create': 'Create Pet',
+    '/owner/compatability': 'Owner Compatibility',
   };
 
   String getRouteTitle(String route) {
@@ -51,10 +53,13 @@ class AppRouter extends StatelessWidget {
             builder =
                 (BuildContext context) => BondButtons(onNavigate: onNavigate);
             break;
-          case '/petcompatability':
+          case '/pet/compatability':
             builder = (BuildContext context) => const PetCompatabilityScreen();
             break;
-          case '/ownercompatability':
+          case '/pet/create':
+            builder = (BuildContext context) => const CreatePetScreen();
+            break;
+          case '/owner/compatability':
             builder =
                 (BuildContext context) => const OwnerCompatabilityScreen();
             break;

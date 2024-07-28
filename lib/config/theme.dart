@@ -6,7 +6,7 @@ class AppTheme {
   static const Color primaryColor = Color(0xFF507382);
   static const Color secondaryColor = Color(0xFF18aa99);
   static const Color tertiaryColor = Color(0xFF728163);
-  static const Color alternateColor = Color(0xFFdede8f);
+  static const Color alternateColor = Color(0xFFede8df);
 
   // Utility Colors
   static const Color primaryText = Color(0xFF101518);

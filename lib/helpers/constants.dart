@@ -35,6 +35,13 @@ Keep your responses concise, about 2-3 sentences long. Maintain a balance betwee
 ''';
 }
 
+class PetCompatibilityTexts {
+  static const createSuccess = 'Pet created successfully!';
+  static const nameError = 'Pet name is required';
+  static const speciesError = 'Species is required';
+  static const requiredFieldsError = 'Please fill in all required fields';
+}
+
 class HomeScreenTexts {
   static const List<String> greetings = [
     "🐾 Woof! 🐾\n\nI'm a dog who can see the future. Or maybe I'm just hungry. Let's find out together!",
