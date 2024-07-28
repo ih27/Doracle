@@ -1,10 +1,58 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/list_space_divider.dart';
 import '../widgets/pet_carousel.dart';
-import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../models/pet_model.dart';
 
-class PetCompatabilityScreen extends StatelessWidget {
+class PetCompatabilityScreen extends StatefulWidget {
   const PetCompatabilityScreen({super.key});
+
+  @override
+  _PetCompatabilityScreenState createState() => _PetCompatabilityScreenState();
+}
+
+class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
+  List<Pet> pets = [];
+  final String _petsStorageKey = 'pets_list';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPets();
+  }
+
+  Future<void> _loadPets() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? petsJson = prefs.getString(_petsStorageKey);
+    if (petsJson != null) {
+      setState(() {
+        pets = Pet.listFromJson(petsJson);
+      });
+    }
+  }
+
+  Future<void> _savePets() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_petsStorageKey, Pet.listToJson(pets));
+  }
+
+  void _addNewPet() async {
+    final result = await Navigator.pushNamed(context, '/pet/create');
+    if (result != null && result is Pet) {
+      setState(() {
+        pets.add(result);
+      });
+      await _savePets();
+    }
+  }
+
+  void _removePet(Pet pet) async {
+    setState(() {
+      pets.removeWhere((p) => p.id == pet.id);
+    });
+    await _savePets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +68,12 @@ class PetCompatabilityScreen extends StatelessWidget {
               width: MediaQuery.sizeOf(context).width,
               height: MediaQuery.sizeOf(context).height * 0.25,
               decoration: const BoxDecoration(),
-              child: const PetCarousel(maxPets: 10),
+              child: PetCarousel(
+                pets: pets,
+                maxPets: 10,
+                onAddPet: _addNewPet,
+                onRemovePet: _removePet,
+              ),
             ),
           ),
           Container(
@@ -46,7 +99,7 @@ class PetCompatabilityScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    print('Button pressed ...');
+                    // Nothing for now
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor:
@@ -91,7 +144,12 @@ class PetCompatabilityScreen extends StatelessWidget {
               width: MediaQuery.sizeOf(context).width,
               height: MediaQuery.sizeOf(context).height * 0.25,
               decoration: const BoxDecoration(),
-              child: const PetCarousel(maxPets: 10),
+              child: PetCarousel(
+                pets: pets,
+                maxPets: 10,
+                onAddPet: _addNewPet,
+                onRemovePet: _removePet,
+              ),
             ),
           ),
         ].divide(height: 50),

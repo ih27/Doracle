@@ -3,15 +3,34 @@ import 'dart:convert';
 class Pet {
   final String id;
   final String name;
-  final String imageUrl;
+  final String species;
+  final String? birthdate;
+  final String? location;
+  final String? temperament;
+  final String? exerciseRequirement;
+  final String? socializationNeed;
 
-  Pet({required this.id, required this.name, required this.imageUrl});
+  Pet({
+    required this.id,
+    required this.name,
+    required this.species,
+    this.birthdate,
+    this.location,
+    this.temperament,
+    this.exerciseRequirement,
+    this.socializationNeed,
+  });
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
-      'imageUrl': imageUrl,
+      'species': species,
+      'birthdate': birthdate,
+      'location': location,
+      'temperament': temperament,
+      'exerciseRequirement': exerciseRequirement,
+      'socializationNeed': socializationNeed,
     };
   }
 
@@ -19,7 +38,12 @@ class Pet {
     return Pet(
       id: json['id'],
       name: json['name'],
-      imageUrl: json['imageUrl'],
+      species: json['species'],
+      birthdate: json['birthdate'],
+      location: json['location'],
+      temperament: json['temperament'],
+      exerciseRequirement: json['exerciseRequirement'],
+      socializationNeed: json['socializationNeed'],
     );
   }
 

@@ -152,7 +152,14 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     final newPet = Pet(
       id: const Uuid().v4(),
       name: _nameController.text,
-      imageUrl: 'assets/images/dog.png', // Default image for now
+      species: _species!,
+      birthdate: _birthdate != null
+          ? "${_birthdate!.year}-${_birthdate!.month.toString().padLeft(2, '0')}-${_birthdate!.day.toString().padLeft(2, '0')}"
+          : null,
+      location: _location,
+      temperament: _temperament,
+      exerciseRequirement: _exerciseRequirement,
+      socializationNeed: _socializationNeed,
     );
 
     // Return the new pet to the previous screen

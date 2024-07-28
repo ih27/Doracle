@@ -1,48 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
 
-class PetCarousel extends StatefulWidget {
+class PetCarousel extends StatelessWidget {
+  final List<Pet> pets;
   final int maxPets;
+  final VoidCallback onAddPet;
+  final Function(Pet) onRemovePet;
 
-  const PetCarousel({super.key, required this.maxPets});
-
-  @override
-  _PetCarouselState createState() => _PetCarouselState();
-}
-
-class _PetCarouselState extends State<PetCarousel> {
-  List<Pet> pets = [];
-  late CarouselController carouselController;
-  final String _petsStorageKey = 'pets_list';
-
-  @override
-  void initState() {
-    super.initState();
-    carouselController = CarouselController();
-    _loadPets();
-  }
-
-  Future<void> _loadPets() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? petsJson = prefs.getString(_petsStorageKey);
-    if (petsJson != null) {
-      setState(() {
-        pets = Pet.listFromJson(petsJson);
-      });
-    }
-  }
-
-  Future<void> _savePets() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_petsStorageKey, Pet.listToJson(pets));
-  }
+  const PetCarousel({
+    super.key,
+    required this.pets,
+    required this.maxPets,
+    required this.onAddPet,
+    required this.onRemovePet,
+  });
 
   List<Widget> get carouselItems {
     List<Widget> items = pets.map((pet) => _buildPetItem(pet)).toList();
-    if (pets.length < widget.maxPets) {
+    if (pets.length < maxPets) {
       items.add(_buildAddItem());
     }
     return items;
@@ -57,14 +34,13 @@ class _PetCarouselState extends State<PetCarousel> {
           alignment: Alignment.topRight,
           children: [
             Container(
-              width: 170, // Reduced from 180
-              height: 170, // Reduced from 180
+              width: 170,
+              height: 170,
               decoration: BoxDecoration(
                 color: AppTheme.lemonChiffon,
                 image: DecorationImage(
                   fit: BoxFit.contain,
-                  //image: NetworkImage(pet.imageUrl),
-                  image: AssetImage(pet.imageUrl),
+                  image: AssetImage(_getSpeciesImage(pet.species)),
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -75,25 +51,39 @@ class _PetCarouselState extends State<PetCarousel> {
             ),
             IconButton(
               icon: const Icon(Icons.remove_circle, color: Colors.red),
-              onPressed: () => _removePet(pet),
+              onPressed: () => onRemovePet(pet),
             ),
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 5), // Reduced from 10
+          padding: const EdgeInsets.only(top: 5),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               pet.name,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.secondaryColor,
-                    letterSpacing: 0,
-                  ),
+              style: const TextStyle(
+                color: AppTheme.secondaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
       ],
     );
+  }
+
+  String _getSpeciesImage(String species) {
+    switch (species.toLowerCase()) {
+      case 'dog':
+        return 'assets/images/dog.png';
+      case 'cat':
+        return 'assets/images/cat.png';
+      case 'bird':
+        return 'assets/images/bird.png';
+      default:
+        return 'assets/images/other.png';
+    }
   }
 
   Widget _buildAddItem() {
@@ -102,10 +92,10 @@ class _PetCarouselState extends State<PetCarousel> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: _addNewPet,
+          onTap: onAddPet,
           child: Container(
-            width: 170, // Reduced from 180
-            height: 170, // Reduced from 180
+            width: 170,
+            height: 170,
             decoration: BoxDecoration(
               color: AppTheme.lemonChiffon,
               image: const DecorationImage(
@@ -120,16 +110,17 @@ class _PetCarouselState extends State<PetCarousel> {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 5), // Reduced from 10
+        const Padding(
+          padding: EdgeInsets.only(top: 5),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               'Add',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.secondaryColor,
-                    letterSpacing: 0,
-                  ),
+              style: TextStyle(
+                color: AppTheme.secondaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -137,32 +128,11 @@ class _PetCarouselState extends State<PetCarousel> {
     );
   }
 
-  void _addNewPet() async {
-    if (pets.length < widget.maxPets) {
-      // Navigate to the CreatePetScreen
-      final result = await Navigator.pushNamed(context, '/pet/create');
-      if (result != null && result is Pet) {
-        setState(() {
-          pets.add(result);
-        });
-        await _savePets();
-      }
-    }
-  }
-
-  void _removePet(Pet pet) async {
-    setState(() {
-      pets.removeWhere((p) => p.id == pet.id);
-    });
-    await _savePets();
-  }
-
   @override
   Widget build(BuildContext context) {
     return CarouselSlider.builder(
       itemCount: carouselItems.length,
       itemBuilder: (context, index, _) => carouselItems[index],
-      carouselController: carouselController,
       options: CarouselOptions(
         viewportFraction: 0.5,
         disableCenter: true,
