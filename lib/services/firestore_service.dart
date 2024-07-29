@@ -150,7 +150,12 @@ class FirestoreService {
     }
   }
 
+  // TEMPORARY TRY
   static Future<Map<String, String>> fetchPersonas() async {
+    return {};
+  }
+
+  static Future<Map<String, String>> _fetchPersonas() async {
     if (_personasCache.isNotEmpty) {
       return _personasCache;
     }
