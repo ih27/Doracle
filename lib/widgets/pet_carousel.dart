@@ -135,10 +135,12 @@ class PetCarousel extends StatelessWidget {
       itemBuilder: (context, index, _) => carouselItems[index],
       options: CarouselOptions(
         viewportFraction: 0.5,
-        disableCenter: true,
         enlargeCenterPage: true,
         enlargeFactor: 0.35,
         enableInfiniteScroll: false,
+				pageSnapping: true,
+        scrollPhysics: const PageScrollPhysics(),
+        scrollDirection: Axis.horizontal,
       ),
     );
   }
