@@ -6,9 +6,9 @@ class Pet {
   final String species;
   final String? birthdate;
   final String? location;
-  final String? temperament;
-  final String? exerciseRequirement;
-  final String? socializationNeed;
+  final List<String> temperament;
+  final int exerciseRequirement;
+  final int socializationNeed;
 
   Pet({
     required this.id,
@@ -16,9 +16,9 @@ class Pet {
     required this.species,
     this.birthdate,
     this.location,
-    this.temperament,
-    this.exerciseRequirement,
-    this.socializationNeed,
+    required this.temperament,
+    required this.exerciseRequirement,
+    required this.socializationNeed,
   });
 
   Map<String, dynamic> toJson() {
@@ -41,9 +41,9 @@ class Pet {
       species: json['species'],
       birthdate: json['birthdate'],
       location: json['location'],
-      temperament: json['temperament'],
-      exerciseRequirement: json['exerciseRequirement'],
-      socializationNeed: json['socializationNeed'],
+      temperament: List<String>.from(json['temperament'] ?? []),
+      exerciseRequirement: json['exerciseRequirement'] as int,
+      socializationNeed: json['socializationNeed'] as int,
     );
   }
 

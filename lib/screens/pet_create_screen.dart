@@ -1,11 +1,14 @@
 import 'package:doracle/helpers/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
+import '../config/theme.dart';
 import '../models/pet_model.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_datepicker.dart';
+import '../widgets/custom_underline_textfield.dart';
 import '../widgets/sendable_textfield.dart';
-import '../widgets/single_select_dropdown.dart';
 import '../helpers/show_snackbar.dart';
 
 class CreatePetScreen extends StatefulWidget {
@@ -17,12 +20,15 @@ class CreatePetScreen extends StatefulWidget {
 
 class _CreatePetScreenState extends State<CreatePetScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _birthdateController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
   String? _species;
   DateTime? _birthdate;
   String? _location;
-  String? _temperament;
-  String? _exerciseRequirement;
-  String? _socializationNeed;
+  final List<String> _temperament = [];
+  int _exerciseRequirement = 2;
+  int _socializationNeed = 2;
 
   String? _nameError;
   String? _speciesError;
@@ -30,6 +36,8 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _birthdateController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -54,67 +62,244 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
               },
               errorText: _nameError,
             ),
-            const SizedBox(height: 16),
-            SingleSelect(
-              label: 'Species',
-              value: _species,
-              options: const ['Dog', 'Cat', 'Bird', 'Other'],
-              onChanged: (value) {
-                setState(() {
-                  _species = value;
-                  if (_speciesError != null) {
-                    _speciesError = null;
-                  }
-                });
-              },
-              errorText: _speciesError,
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: CustomDatePicker(
-                initialDate: _birthdate,
-                firstDate: DateTime(1900),
-                lastDate: DateTime.now(),
-                onDateSelected: (date) => setState(() => _birthdate = date),
-                labelText: 'Birthdate',
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _speciesError != null
+                      ? AppTheme.error
+                      : AppTheme.alternateColor,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      'Type',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primaryColor,
+                            fontSize: 18,
+                            letterSpacing: 0,
+                          ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildTypeChip('Dog', FontAwesomeIcons.dog),
+                        _buildTypeChip('Cat', FontAwesomeIcons.cat),
+                        _buildTypeChip('Bird', FontAwesomeIcons.crow),
+                        _buildTypeChip('Other', FontAwesomeIcons.paw),
+                      ],
+                    ),
+                  ),
+                  if (_speciesError != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        _speciesError!,
+                        style: const TextStyle(
+                            color: AppTheme.error, fontSize: 12),
+                      ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Center(
-              child: CustomButton(
-                text: _location == null
-                    ? 'Select Location'
-                    : 'Location: $_location',
-                onPressed: () {
-                  // Implement location selection
-                  setState(() => _location = 'Istanbul, Türkiye');
-                },
-                icon: Icons.place,
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.alternateColor,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      'Birthdate',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primaryColor,
+                            fontSize: 18,
+                            letterSpacing: 0,
+                          ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: CustomUnderlineTextField(
+                            controller: _birthdateController,
+                            readOnly: true,
+                          ),
+                        ),
+                        CustomDatePicker(
+                          initialDate: _birthdate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          onDateSelected: (DateTime date) {
+                            setState(() {
+                              _birthdate = date;
+                              _birthdateController.text =
+                                  '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            SingleSelect(
-              label: 'Temperament',
-              value: _temperament,
-              options: const ['Friendly', 'Shy', 'Energetic', 'Calm'],
-              onChanged: (value) => setState(() => _temperament = value),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.alternateColor,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      'Place of Birth',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primaryColor,
+                            fontSize: 18,
+                            letterSpacing: 0,
+                          ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: CustomUnderlineTextField(
+                            controller: _locationController,
+                            readOnly: true,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Implement location selection
+                            setState(() =>
+                                _locationController.text = 'Istanbul, Türkiye');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor:
+                                Theme.of(context).textTheme.titleSmall?.color,
+                            backgroundColor: AppTheme.primaryColor,
+                            minimumSize: Size(
+                                MediaQuery.of(context).size.width * 0.3, 40),
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Select',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  color: AppTheme.info,
+                                  letterSpacing: 0,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            SingleSelect(
-              label: 'Exercise Requirements',
+            const SizedBox(height: 8),
+            const Divider(
+              thickness: 2,
+              color: AppTheme.primaryColor,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.alternateColor,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      'Temperament',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primaryColor,
+                            fontSize: 18,
+                            letterSpacing: 0,
+                          ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildTemperamentChip('Calm'),
+                        _buildTemperamentChip('Active'),
+                        _buildTemperamentChip('Aggressive'),
+                        _buildTemperamentChip('Playful'),
+                        _buildTemperamentChip('Friendly'),
+                        _buildTemperamentChip('Shy'),
+                        _buildTemperamentChip('Energetic'),
+                        _buildTemperamentChip('Lazy'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildSliderSection(
+              title: 'Exercise Requirements',
               value: _exerciseRequirement,
-              options: const ['Low', 'Medium', 'High'],
-              onChanged: (value) =>
-                  setState(() => _exerciseRequirement = value),
+              onChanged: (newValue) {
+                setState(() => _exerciseRequirement = newValue);
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildSliderSection(
+              title: 'Socialization Needs',
+              value: _socializationNeed,
+              onChanged: (newValue) {
+                setState(() => _socializationNeed = newValue);
+              },
             ),
             const SizedBox(height: 16),
-            SingleSelect(
-              label: 'Socialization Needs',
-              value: _socializationNeed,
-              options: const ['Low', 'Medium', 'High'],
-              onChanged: (value) => setState(() => _socializationNeed = value),
-            ),
-            const SizedBox(height: 32),
             Center(
               child: CustomButton(
                 text: 'Create Pet',
@@ -124,6 +309,124 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTypeChip(String label, IconData icon) {
+    final isSelected = _species == label;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      showCheckmark: false,
+      onSelected: (bool selected) {
+        setState(() {
+          _species = selected ? label : null;
+          if (_speciesError != null) {
+            _speciesError = null;
+          }
+        });
+      },
+      avatar: Icon(icon,
+          size: 18,
+          color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText),
+      backgroundColor: AppTheme.alternateColor,
+      selectedColor: AppTheme.secondaryColor,
+      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
+            letterSpacing: 0,
+          ),
+      elevation: isSelected ? 4 : 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    );
+  }
+
+  Widget _buildTemperamentChip(String label) {
+    final isSelected = _temperament.contains(label);
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      showCheckmark: false,
+      onSelected: (bool selected) {
+        setState(() {
+          if (selected) {
+            _temperament.add(label);
+          } else {
+            _temperament.remove(label);
+          }
+        });
+      },
+      backgroundColor: AppTheme.alternateColor,
+      selectedColor: AppTheme.secondaryColor,
+      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
+            letterSpacing: 0,
+          ),
+      elevation: isSelected ? 4 : 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    );
+  }
+
+  Widget _buildSliderSection({
+    required String title,
+    required int value,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 18,
+                  letterSpacing: 0,
+                ),
+          ),
+        ),
+        Slider(
+          activeColor: AppTheme.primaryColor,
+          inactiveColor: AppTheme.alternateColor,
+          min: 1,
+          max: 3,
+          divisions: 2,
+          value: value.toDouble(),
+          onChanged: (newValue) => onChanged(newValue.round()),
+        ),
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Low',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      letterSpacing: 0,
+                    ),
+              ),
+              Text(
+                'Medium',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      letterSpacing: 0,
+                    ),
+              ),
+              Text(
+                'High',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      letterSpacing: 0,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -154,7 +457,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       name: _nameController.text,
       species: _species!,
       birthdate: _birthdate != null
-          ? "${_birthdate!.year}-${_birthdate!.month.toString().padLeft(2, '0')}-${_birthdate!.day.toString().padLeft(2, '0')}"
+          ? "${_birthdate!.day.toString().padLeft(2, '0')}/${_birthdate!.month.toString().padLeft(2, '0')}/${_birthdate!.year}"
           : null,
       location: _location,
       temperament: _temperament,

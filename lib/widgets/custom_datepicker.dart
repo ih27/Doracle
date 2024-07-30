@@ -6,7 +6,6 @@ class CustomDatePicker extends StatelessWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final ValueChanged<DateTime> onDateSelected;
-  final String labelText;
 
   const CustomDatePicker({
     super.key,
@@ -14,7 +13,6 @@ class CustomDatePicker extends StatelessWidget {
     required this.firstDate,
     required this.lastDate,
     required this.onDateSelected,
-    required this.labelText,
   });
 
   @override
@@ -24,7 +22,7 @@ class CustomDatePicker extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         foregroundColor: Theme.of(context).textTheme.titleSmall?.color,
         backgroundColor: AppTheme.primaryColor,
-        minimumSize: Size(MediaQuery.of(context).size.width * 0.5, 40),
+        minimumSize: Size(MediaQuery.of(context).size.width * 0.3, 40),
         padding: const EdgeInsets.symmetric(horizontal: 24),
         elevation: 3,
         shape: RoundedRectangleBorder(
@@ -32,7 +30,7 @@ class CustomDatePicker extends StatelessWidget {
         ),
       ),
       child: Text(
-        initialDate == null ? labelText : '$labelText: ${initialDate!.toLocal().toString().split(' ')[0]}',
+        'Select',
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: AppTheme.info,
               letterSpacing: 0,
@@ -58,8 +56,10 @@ class CustomDatePicker extends StatelessWidget {
         ),
       ),
       textTheme: theme.textTheme.copyWith(
-        bodyMedium: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.primaryText),
-        labelSmall: theme.textTheme.labelSmall?.copyWith(color: AppTheme.secondaryText),
+        bodyMedium:
+            theme.textTheme.bodyMedium?.copyWith(color: AppTheme.primaryText),
+        labelSmall:
+            theme.textTheme.labelSmall?.copyWith(color: AppTheme.secondaryText),
       ),
     );
 
