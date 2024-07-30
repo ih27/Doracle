@@ -19,6 +19,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   google_sign_in: ^6.2.1
   google_fonts: ^6.2.1
+  google_maps_flutter: ^2.7.0
   dart_openai: ^5.1.0
   purchases_flutter: ^6.29.4
   get_it: ^7.7.0

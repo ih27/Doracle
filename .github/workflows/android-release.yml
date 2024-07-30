@@ -1,4 +1,4 @@
-name: AAB Pipeline
+name: ANDROID Pipeline
 
 on: #workflow_dispatch
   push:
@@ -55,6 +55,7 @@ jobs:
           gpg -d --passphrase "${{secrets.RELEASE_GOOGLEJSON_PASSWORD}}" --batch google-services.json.asc > android/app/google-services.json
           echo "${{secrets.GCP_SA_KEY}}" > gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          echo "MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> android/local.properties
 
       - name: Get version.txt
         uses: actions/download-artifact@v4
@@ -69,19 +70,19 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: version1.txt
-      
+
       - name: Set release number and version code variable
         id: vars
         run: |
           echo "release_number=${{steps.version.outputs.content}}" >> "$GITHUB_OUTPUT"
-          echo "version_code=$((${{github.run_number}} + 100))" >> "$GITHUB_OUTPUT"      
+          echo "version_code=$((${{github.run_number}} + 100))" >> "$GITHUB_OUTPUT"
 
       - name: Update Version in YAML
         run: sed -i 's/99.99.99+99/${{steps.vars.outputs.release_number}}+${{steps.vars.outputs.version_code}}/g' pubspec.yaml
 
       - name: Update Keystore Password in Gradle Properties
         run: sed -i 's/#{STORE_PASSWORD}#/${{secrets.STORE_PASSWORD}}/g' android/key.properties
-      
+
       - name: Update Keystore Key Password in Gradle Properties
         run: sed -i 's/#{KEY_PASSWORD}#/${{secrets.KEY_PASSWORD}}/g' android/key.properties
 
@@ -117,7 +118,7 @@ jobs:
 
       - name: Build an AAB
         run: flutter build appbundle --release --obfuscate --split-debug-info=symbols
-      
+
       - name: Install Firebase CLI
         run: curl -sL https://firebase.tools | bash
 

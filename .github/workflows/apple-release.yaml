@@ -19,6 +19,7 @@ jobs:
           echo "${{secrets.RELEASE_GOOGLEPLIST}}" > GoogleService-Info.plist.asc
           gpg -d --passphrase "${{secrets.RELEASE_ENV_PASSWORD}}" --batch .env.asc > .env
           gpg -d --passphrase "${{secrets.RELEASE_GOOGLEPLIST_PASSWORD}}" --batch GoogleService-Info.plist.asc > ios/Runner/GoogleService-Info.plist
+          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> ios/Flutter/Release.xcconfig
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:

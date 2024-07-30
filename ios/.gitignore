@@ -38,3 +38,4 @@ fastlane/report.xml
 Gemfile.lock
 Podfile.lock
 Runner/GoogleService-Info.plist
+Flutter/Debug.xcconfig
