@@ -1,15 +1,16 @@
-import 'package:doracle/helpers/constants.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
+import '../helpers/show_snackbar.dart';
+import '../helpers/constants.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_datepicker.dart';
 import '../widgets/custom_underline_textfield.dart';
+import '../widgets/map_overlay.dart';
 import '../widgets/sendable_textfield.dart';
-import '../helpers/show_snackbar.dart';
 
 class CreatePetScreen extends StatefulWidget {
   const CreatePetScreen({super.key});
@@ -39,6 +40,22 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     _birthdateController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  void _showMapOverlay() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MapOverlay(
+          onLocationSelected: (LatLng location, String address) {
+            setState(() {
+              _location = address;
+              _locationController.text = _location!;
+            });
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -200,11 +217,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            // Implement location selection
-                            setState(() =>
-                                _locationController.text = 'Istanbul, Türkiye');
-                          },
+                          onPressed: _showMapOverlay,
                           style: ElevatedButton.styleFrom(
                             foregroundColor:
                                 Theme.of(context).textTheme.titleSmall?.color,
