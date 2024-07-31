@@ -2,30 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
+import '../models/owner_model.dart';
 
-class PetCarousel extends StatelessWidget {
-  final List<Pet> pets;
-  final int maxPets;
-  final VoidCallback onAddPet;
-  final Function(Pet) onEditPet;
+class EntityCarousel extends StatelessWidget {
+  final List<dynamic> entities;
+  final int maxEntities;
+  final VoidCallback onAddEntity;
+  final Function(dynamic) onEditEntity;
+  final bool isPet;
 
-  const PetCarousel({
+  const EntityCarousel({
     super.key,
-    required this.pets,
-    required this.maxPets,
-    required this.onAddPet,
-    required this.onEditPet,
+    required this.entities,
+    required this.maxEntities,
+    required this.onAddEntity,
+    required this.onEditEntity,
+    required this.isPet,
   });
 
   List<Widget> get carouselItems {
-    List<Widget> items = pets.map((pet) => _buildPetItem(pet)).toList();
-    if (pets.length < maxPets) {
+    List<Widget> items = entities.map((entity) => _buildEntityItem(entity)).toList();
+    if (entities.length < maxEntities) {
       items.add(_buildAddItem());
     }
     return items;
   }
 
-  Widget _buildPetItem(Pet pet) {
+  Widget _buildEntityItem(dynamic entity) {
+    String name = isPet ? (entity as Pet).name : (entity as Owner).name;
+    String imageAsset = _getEntityImage(entity);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +46,7 @@ class PetCarousel extends StatelessWidget {
                 color: AppTheme.alternateColor,
                 image: DecorationImage(
                   fit: BoxFit.contain,
-                  image: AssetImage(_getSpeciesImage(pet.species)),
+                  image: AssetImage(imageAsset),
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -57,7 +63,7 @@ class PetCarousel extends StatelessWidget {
                   color: AppTheme.primaryColor,
                   size: 20,
                 ),
-                onPressed: () => onEditPet(pet),
+                onPressed: () => onEditEntity(entity),
                 style: IconButton.styleFrom(
                   backgroundColor: AppTheme.alternateColor,
                   padding: EdgeInsets.zero,
@@ -79,7 +85,7 @@ class PetCarousel extends StatelessWidget {
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              pet.name,
+              name,
               style: const TextStyle(
                 color: AppTheme.primaryColor,
                 fontSize: 18,
@@ -92,16 +98,27 @@ class PetCarousel extends StatelessWidget {
     );
   }
 
-  String _getSpeciesImage(String species) {
-    switch (species.toLowerCase()) {
-      case 'dog':
-        return 'assets/images/dog.png';
-      case 'cat':
-        return 'assets/images/cat.png';
-      case 'bird':
-        return 'assets/images/bird.png';
-      default:
-        return 'assets/images/other.png';
+  String _getEntityImage(dynamic entity) {
+    if (isPet) {
+      switch ((entity as Pet).species.toLowerCase()) {
+        case 'dog':
+          return 'assets/images/dog.png';
+        case 'cat':
+          return 'assets/images/cat.png';
+        case 'bird':
+          return 'assets/images/bird.png';
+        default:
+          return 'assets/images/other.png';
+      }
+    } else {
+      switch ((entity as Owner).gender.toLowerCase()) {
+        case 'male':
+          return 'assets/images/owner_he.png';
+        case 'female':
+          return 'assets/images/owner_she.png';
+        default:
+          return 'assets/images/owner_other.png';
+      }
     }
   }
 
@@ -111,7 +128,7 @@ class PetCarousel extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: onAddPet,
+          onTap: onAddEntity,
           child: Container(
             width: 170,
             height: 170,

@@ -23,7 +23,7 @@ class UpdatePetScreen extends StatelessWidget {
       initialExerciseRequirement: pet.exerciseRequirement,
       initialSocializationNeed: pet.socializationNeed,
       onSubmit: (formData) => _updatePet(context, formData),
-      submitButtonName: 'Update Pet',
+      submitButtonName: CompatibilityTexts.updatePet,
       deleteAvailable: true,
       onDelete: () => _showDeletePetConfirmation(context),
     );
@@ -44,7 +44,7 @@ class UpdatePetScreen extends StatelessWidget {
     );
 
     Navigator.of(context).pop(updatedPet);
-    showInfoSnackBar(context, PetCompatibilityTexts.updateSuccess);
+    showInfoSnackBar(context, CompatibilityTexts.updatePetSuccess);
   }
 
   void _showDeletePetConfirmation(BuildContext context) {
@@ -54,7 +54,7 @@ class UpdatePetScreen extends StatelessWidget {
         return AlertDialog(
           title: Text('Delete ${pet.name}?'),
           backgroundColor: AppTheme.primaryBackground,
-          content: const Text(PetCompatibilityTexts.deleteConfirmation),
+          content: const Text(CompatibilityTexts.deleteConfirmation),
           actions: [
             TextButton(
               child: const Text('Cancel',
@@ -66,7 +66,7 @@ class UpdatePetScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 Navigator.of(context).pop('delete');
-                showInfoSnackBar(context, PetCompatibilityTexts.deleteSuccess);
+                showInfoSnackBar(context, CompatibilityTexts.deletePetSuccess);
               },
             ),
           ],

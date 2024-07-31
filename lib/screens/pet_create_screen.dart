@@ -13,7 +13,7 @@ class CreatePetScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PetForm(
       onSubmit: (formData) => _createPet(context, formData),
-      submitButtonName: 'Create Pet',
+      submitButtonName: CompatibilityTexts.createPet,
     );
   }
 
@@ -32,6 +32,6 @@ class CreatePetScreen extends StatelessWidget {
     );
 
     Navigator.of(context).pop(newPet);
-    showInfoSnackBar(context, PetCompatibilityTexts.createSuccess);
+    showInfoSnackBar(context, CompatibilityTexts.createPetSuccess);
   }
 }

@@ -35,14 +35,26 @@ You are a knowledgeable oracle providing brief, witty insights on future-oriente
 ''';
 }
 
-class PetCompatibilityTexts {
-  static const createSuccess = 'Pet created successfully.';
-  static const updateSuccess = 'Pet updated successfully.';
-  static const deleteSuccess = 'Pet deleted successfully.';
+class CompatibilityTexts {
+  static const genericTitle = 'Compatibility Check';
+  static const createPet = 'Create Pet';
+  static const updatePet = 'Update Pet';
+  static const deletePet = 'Delete Pet';
+  static const createPetSuccess = 'Pet created successfully.';
+  static const updatePetSuccess = 'Pet updated successfully.';
+  static const deletePetSuccess = 'Pet deleted successfully.';
+  static const createOwner = 'Create Profile';
+  static const updateOwner = 'Update Profile';
+  static const deleteOwner = 'Delete Profile';
+  static const createOwnerSuccess = 'Profile created successfully.';
+  static const updateOwnerSuccess = 'Profile updated successfully.';
+  static const deleteOwnerSuccess = 'Profile deleted successfully.';
   static const deleteConfirmation =
-      'This action cannot be undone. Your pet data will be permanently deleted.';
-  static const nameError = 'Please enter a name for your pet';
-  static const speciesError = 'Please select a species for your pet';
+      'This action cannot be undone. Your data will be permanently deleted.';
+  static const petNameError = 'Please enter a name for your pet';
+  static const petSpeciesError = 'Please select a species for your pet';
+  static const ownerNameError = 'Please enter a name';
+  static const ownerGenderError = 'Please select a gender';
   static const requiredFieldsError = 'Please fill in all required fields.';
 }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/list_space_divider.dart';
-import '../widgets/pet_carousel.dart';
+import '../widgets/entity_carousel.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
 
@@ -91,11 +91,12 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
               width: MediaQuery.sizeOf(context).width,
               height: MediaQuery.sizeOf(context).height * 0.25,
               decoration: const BoxDecoration(),
-              child: PetCarousel(
-                pets: pets,
-                maxPets: 10,
-                onAddPet: _addNewPet,
-                onEditPet: _editPet,
+              child: EntityCarousel(
+                entities: pets,
+                maxEntities: 10,
+                onAddEntity: _addNewPet,
+                onEditEntity: (entity) => _editPet(entity as Pet),
+                isPet: true,
               ),
             ),
           ),
@@ -167,11 +168,12 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
               width: MediaQuery.sizeOf(context).width,
               height: MediaQuery.sizeOf(context).height * 0.25,
               decoration: const BoxDecoration(),
-              child: PetCarousel(
-                pets: pets,
-                maxPets: 10,
-                onAddPet: _addNewPet,
-                onEditPet: _editPet,
+              child: EntityCarousel(
+                entities: pets,
+                maxEntities: 10,
+                onAddEntity: _addNewPet,
+                onEditEntity: (entity) => _editPet(entity as Pet),
+                isPet: true,
               ),
             ),
           ),

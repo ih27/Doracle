@@ -9,28 +9,28 @@ import '../widgets/sendable_textfield.dart';
 import '../config/theme.dart';
 import '../helpers/constants.dart';
 
-class PetForm extends StatefulWidget {
+class OwnerForm extends StatefulWidget {
   final String? initialName;
-  final String? initialSpecies;
+  final String? initialGender;
   final DateTime? initialBirthdate;
   final String? initialLocation;
-  final List<String> initialTemperament;
-  final int initialExerciseRequirement;
-  final int initialSocializationNeed;
+  final List<String> initialInterests;
+  final int initialActivityLevel;
+  final int initialPetExperience;
   final bool deleteAvailable;
   final Function(Map<String, dynamic>) onSubmit;
   final VoidCallback? onDelete;
   final String submitButtonName;
 
-  const PetForm({
+  const OwnerForm({
     super.key,
     this.initialName,
-    this.initialSpecies,
+    this.initialGender,
     this.initialBirthdate,
     this.initialLocation,
-    this.initialTemperament = const [],
-    this.initialExerciseRequirement = 2,
-    this.initialSocializationNeed = 2,
+    this.initialInterests = const [],
+    this.initialActivityLevel = 2,
+    this.initialPetExperience = 2,
     this.deleteAvailable = false,
     required this.onSubmit,
     this.onDelete,
@@ -38,23 +38,23 @@ class PetForm extends StatefulWidget {
   });
 
   @override
-  _PetFormState createState() => _PetFormState();
+  _OwnerFormState createState() => _OwnerFormState();
 }
 
-class _PetFormState extends State<PetForm> {
+class _OwnerFormState extends State<OwnerForm> {
   late TextEditingController _nameController;
   late TextEditingController _birthdateController;
   late TextEditingController _locationController;
 
-  String? _species;
+  String? _gender;
   DateTime? _birthdate;
   String? _location;
-  late List<String> _temperament;
-  late int _exerciseRequirement;
-  late int _socializationNeed;
+  late List<String> _interests;
+  late int _activityLevel;
+  late int _petExperience;
 
   String? _nameError;
-  String? _speciesError;
+  String? _genderError;
 
   @override
   void initState() {
@@ -67,12 +67,12 @@ class _PetFormState extends State<PetForm> {
     );
     _locationController = TextEditingController(text: widget.initialLocation);
 
-    _species = widget.initialSpecies;
+    _gender = widget.initialGender;
     _birthdate = widget.initialBirthdate;
     _location = widget.initialLocation;
-    _temperament = List.from(widget.initialTemperament);
-    _exerciseRequirement = widget.initialExerciseRequirement;
-    _socializationNeed = widget.initialSocializationNeed;
+    _interests = List.from(widget.initialInterests);
+    _activityLevel = widget.initialActivityLevel;
+    _petExperience = widget.initialPetExperience;
   }
 
   @override
@@ -109,7 +109,7 @@ class _PetFormState extends State<PetForm> {
           children: [
             SendableTextField(
               controller: _nameController,
-              labelText: 'Pet Name',
+              labelText: 'Owner Name',
               onSubmitted: (_) {},
               onChanged: (value) {
                 if (_nameError != null) {
@@ -122,7 +122,7 @@ class _PetFormState extends State<PetForm> {
               maxLength: 40,
             ),
             const SizedBox(height: 8),
-            _buildSpeciesSection(),
+            _buildGenderSection(),
             const SizedBox(height: 8),
             _buildBirthdateSection(),
             const SizedBox(height: 8),
@@ -133,21 +133,21 @@ class _PetFormState extends State<PetForm> {
               color: AppTheme.primaryColor,
             ),
             const SizedBox(height: 8),
-            _buildTemperamentSection(),
+            _buildInterestsSection(),
             const SizedBox(height: 8),
             _buildSliderSection(
-              title: 'Exercise Requirements',
-              value: _exerciseRequirement,
+              title: 'Activity Level',
+              value: _activityLevel,
               onChanged: (newValue) {
-                setState(() => _exerciseRequirement = newValue);
+                setState(() => _activityLevel = newValue);
               },
             ),
             const SizedBox(height: 8),
             _buildSliderSection(
-              title: 'Socialization Needs',
-              value: _socializationNeed,
+              title: 'Pet Experience',
+              value: _petExperience,
               onChanged: (newValue) {
-                setState(() => _socializationNeed = newValue);
+                setState(() => _petExperience = newValue);
               },
             ),
             const SizedBox(height: 8),
@@ -158,14 +158,14 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
-  Widget _buildSpeciesSection() {
+  Widget _buildGenderSection() {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.secondaryBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color:
-              _speciesError != null ? AppTheme.error : AppTheme.alternateColor,
+              _genderError != null ? AppTheme.error : AppTheme.alternateColor,
           width: 1,
         ),
       ),
@@ -175,7 +175,7 @@ class _PetFormState extends State<PetForm> {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              'Type',
+              'Gender',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontSize: 18,
@@ -189,18 +189,17 @@ class _PetFormState extends State<PetForm> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildTypeChip('Dog', FontAwesomeIcons.dog),
-                _buildTypeChip('Cat', FontAwesomeIcons.cat),
-                _buildTypeChip('Bird', FontAwesomeIcons.crow),
-                _buildTypeChip('Other', FontAwesomeIcons.paw),
+                _buildGenderChip('Male', FontAwesomeIcons.mars),
+                _buildGenderChip('Female', FontAwesomeIcons.venus),
+                _buildGenderChip('Other', FontAwesomeIcons.transgender),
               ],
             ),
           ),
-          if (_speciesError != null)
+          if (_genderError != null)
             Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                _speciesError!,
+                _genderError!,
                 style: const TextStyle(color: AppTheme.error, fontSize: 12),
               ),
             ),
@@ -278,7 +277,7 @@ class _PetFormState extends State<PetForm> {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              'Place of Birth',
+              'Location',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontSize: 18,
@@ -326,7 +325,7 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
-  Widget _buildTemperamentSection() {
+  Widget _buildInterestsSection() {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.secondaryBackground,
@@ -342,7 +341,7 @@ class _PetFormState extends State<PetForm> {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              'Temperament',
+              'Interests',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontSize: 18,
@@ -356,14 +355,14 @@ class _PetFormState extends State<PetForm> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildTemperamentChip('Calm'),
-                _buildTemperamentChip('Active'),
-                _buildTemperamentChip('Aggressive'),
-                _buildTemperamentChip('Playful'),
-                _buildTemperamentChip('Friendly'),
-                _buildTemperamentChip('Shy'),
-                _buildTemperamentChip('Energetic'),
-                _buildTemperamentChip('Lazy'),
+                _buildInterestChip('Dogs'),
+                _buildInterestChip('Cats'),
+                _buildInterestChip('Birds'),
+                _buildInterestChip('Fish'),
+                _buildInterestChip('Reptiles'),
+                _buildInterestChip('Small Animals'),
+                _buildInterestChip('Outdoors'),
+                _buildInterestChip('Training'),
               ],
             ),
           ),
@@ -432,17 +431,17 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
-  Widget _buildTypeChip(String label, IconData icon) {
-    final isSelected = _species == label;
+  Widget _buildGenderChip(String label, IconData icon) {
+    final isSelected = _gender == label;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
       showCheckmark: false,
       onSelected: (bool selected) {
         setState(() {
-          _species = selected ? label : null;
-          if (_speciesError != null) {
-            _speciesError = null;
+          _gender = selected ? label : null;
+          if (_genderError != null) {
+            _genderError = null;
           }
         });
       },
@@ -462,8 +461,8 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
-  Widget _buildTemperamentChip(String label) {
-    final isSelected = _temperament.contains(label);
+  Widget _buildInterestChip(String label) {
+    final isSelected = _interests.contains(label);
     return FilterChip(
       label: Text(label),
       selected: isSelected,
@@ -471,9 +470,9 @@ class _PetFormState extends State<PetForm> {
       onSelected: (bool selected) {
         setState(() {
           if (selected) {
-            _temperament.add(label);
+            _interests.add(label);
           } else {
-            _temperament.remove(label);
+            _interests.remove(label);
           }
         });
       },
@@ -504,7 +503,7 @@ class _PetFormState extends State<PetForm> {
           TextButton(
             onPressed: widget.onDelete,
             child: const Text(
-              'Delete Pet',
+              'Delete Owner',
               style: TextStyle(color: Colors.red),
             ),
           ),
@@ -517,12 +516,12 @@ class _PetFormState extends State<PetForm> {
     if (_validateForm()) {
       widget.onSubmit({
         'name': _nameController.text,
-        'species': _species,
+        'gender': _gender,
         'birthdate': _birthdate,
         'location': _location,
-        'temperament': _temperament,
-        'exerciseRequirement': _exerciseRequirement,
-        'socializationNeed': _socializationNeed,
+        'interests': _interests,
+        'activityLevel': _activityLevel,
+        'petExperience': _petExperience,
       });
     }
   }
@@ -532,14 +531,14 @@ class _PetFormState extends State<PetForm> {
 
     if (_nameController.text.isEmpty) {
       setState(() {
-        _nameError = CompatibilityTexts.petNameError;
+        _nameError = CompatibilityTexts.ownerNameError;
       });
       isValid = false;
     }
 
-    if (_species == null) {
+    if (_gender == null) {
       setState(() {
-        _speciesError = CompatibilityTexts.petSpeciesError;
+        _genderError = CompatibilityTexts.ownerGenderError;
       });
       isValid = false;
     }
