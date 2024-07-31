@@ -1,5 +1,6 @@
 import 'package:doracle/config/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SendableTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -12,6 +13,7 @@ class SendableTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final String? errorText;
   final FocusNode? focusNode;
+  final int? maxLength;
 
   const SendableTextField({
     super.key,
@@ -25,6 +27,7 @@ class SendableTextField extends StatelessWidget {
     this.errorText,
     this.focusNode,
     this.onChanged,
+    this.maxLength,
   });
 
   @override
@@ -37,12 +40,17 @@ class SendableTextField extends StatelessWidget {
       textInputAction: TextInputAction.go,
       onSubmitted: onSubmitted,
       onChanged: onChanged,
+      maxLength: maxLength, // Set the maxLength
+      maxLengthEnforcement: maxLength != null 
+          ? MaxLengthEnforcement.enforced 
+          : MaxLengthEnforcement.none,
       style: AppTheme.humanTextStyle,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: useHintText ? labelText : null,
         errorText: errorText,
         suffixIcon: suffixIcon,
+        counterText: '',
         labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.secondary,
             ),

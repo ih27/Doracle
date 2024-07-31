@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 
 enum SnackBarType { info, error }
 
@@ -6,7 +7,7 @@ void showSnackBar(BuildContext context, String message, {SnackBarType type = Sna
   final snackBar = SnackBar(
     showCloseIcon: true,
     content: Text(message),
-    backgroundColor: type == SnackBarType.error ? Colors.red : Colors.blue,
+    backgroundColor: type == SnackBarType.error ? Colors.red : AppTheme.primaryColor,
     margin: const EdgeInsets.symmetric(horizontal: 15),
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(

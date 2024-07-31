@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/pet_form_utils.dart';
-import '../helpers/show_snackbar.dart';
 import '../widgets/custom_datepicker.dart';
 import '../widgets/custom_underline_textfield.dart';
 import '../widgets/map_overlay.dart';
@@ -20,6 +19,7 @@ class PetForm extends StatefulWidget {
   final int initialSocializationNeed;
   final bool deleteAvailable;
   final Function(Map<String, dynamic>) onSubmit;
+  final VoidCallback? onDelete;
   final String submitButtonName;
 
   const PetForm({
@@ -33,6 +33,7 @@ class PetForm extends StatefulWidget {
     this.initialSocializationNeed = 2,
     this.deleteAvailable = false,
     required this.onSubmit,
+    this.onDelete,
     required this.submitButtonName,
   });
 
@@ -60,6 +61,8 @@ class _PetFormState extends State<PetForm> {
   bool get deleteAvailable => widget.deleteAvailable;
 
   String get initialName => widget.initialName!;
+
+  VoidCallback? get onDelete => widget.onDelete;
 
   @override
   void initState() {
@@ -124,6 +127,7 @@ class _PetFormState extends State<PetForm> {
                 }
               },
               errorText: _nameError,
+              maxLength: 40,
             ),
             const SizedBox(height: 8),
             _buildSpeciesSection(),
@@ -503,10 +507,10 @@ class _PetFormState extends State<PetForm> {
             child: Text(submitButtonName),
           ),
         ),
-        if (deleteAvailable) ...[
+        if (deleteAvailable && onDelete != null) ...[
           const SizedBox(height: 8),
           TextButton(
-            onPressed: _showDeletePetConfirmation,
+            onPressed: onDelete,
             child: const Text(
               'Delete Pet',
               style: TextStyle(color: Colors.red),
@@ -518,7 +522,7 @@ class _PetFormState extends State<PetForm> {
   }
 
   void _submitForm() {
-    if (validateForm()) {
+    if (_validateForm()) {
       widget.onSubmit({
         'name': _nameController.text,
         'species': _species,
@@ -531,7 +535,7 @@ class _PetFormState extends State<PetForm> {
     }
   }
 
-  bool validateForm() {
+  bool _validateForm() {
     bool isValid = true;
 
     if (_nameController.text.isEmpty) {
@@ -549,33 +553,5 @@ class _PetFormState extends State<PetForm> {
     }
 
     return isValid;
-  }
-
-  void _showDeletePetConfirmation() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Delete $initialName?'),
-          backgroundColor: AppTheme.primaryBackground,
-          content: const Text(PetCompatibilityTexts.deleteConfirmation),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context)
-                    .pop(null); // Return null to indicate deletion
-                showInfoSnackBar(context, PetCompatibilityTexts.deleteSuccess);
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }

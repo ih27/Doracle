@@ -48,11 +48,26 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
   }
 
   void _editPet(Pet pet) async {
-    final result = await Navigator.pushNamed(context, '/pet/edit',
-        arguments: pet);
-    if (result != null && result is Pet) {
-      // TODO
+    final result =
+        await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
+    if (result != null) {
+      if (result is Pet) {
+        _updatePet(pet, result);
+      } else if (result == 'delete') {
+        _removePet(pet);
+      }
     }
+    // If result is null, do nothing (user simply navigated back)
+  }
+
+  void _updatePet(Pet pet, Pet updatedPet) async {
+    setState(() {
+      int index = pets.indexWhere((p) => p.id == pet.id);
+      if (index != -1) {
+        pets[index] = updatedPet;
+      }
+    });
+    await _savePets();
   }
 
   void _removePet(Pet pet) async {

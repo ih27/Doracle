@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import '../helpers/pet_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
@@ -24,6 +25,7 @@ class UpdatePetScreen extends StatelessWidget {
       onSubmit: (formData) => _updatePet(context, formData),
       submitButtonName: 'Update Pet',
       deleteAvailable: true,
+      onDelete: () => _showDeletePetConfirmation(context),
     );
   }
 
@@ -43,5 +45,33 @@ class UpdatePetScreen extends StatelessWidget {
 
     Navigator.of(context).pop(updatedPet);
     showInfoSnackBar(context, PetCompatibilityTexts.updateSuccess);
+  }
+
+  void _showDeletePetConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Delete ${pet.name}?'),
+          backgroundColor: AppTheme.primaryBackground,
+          content: const Text(PetCompatibilityTexts.deleteConfirmation),
+          actions: [
+            TextButton(
+              child: const Text('Cancel',
+                  style: TextStyle(color: AppTheme.primaryColor)),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+            TextButton(
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pop('delete');
+                showInfoSnackBar(context, PetCompatibilityTexts.deleteSuccess);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
