@@ -61,6 +61,8 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requests access to your location to allow you to easily enter your pet's place of birth. This information is used to generate compatibility reports between you and your pet, or between multiple pets. Your location is only accessed when you choose to use it for this purpose.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>We use your data to provide personalized fortune readings and improve our mystical services. This helps us offer a better experience tailored to your spiritual journey.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>

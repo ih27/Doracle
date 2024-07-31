@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/pet_model.dart';
+import '../screens/pet_edit_screen.dart';
 import '../screens/unified_fortune_screen.dart';
 import '../screens/owner_compatability_screen.dart';
 import '../screens/pet_compatability_screen.dart';
@@ -26,6 +28,7 @@ class AppRouter extends StatelessWidget {
     '/bond': 'Compatibility Check',
     '/pet/compatability': 'Compatibility Check',
     '/pet/create': 'Create Pet',
+    '/pet/edit': 'Update Pet',
     '/owner/compatability': 'Owner Compatibility',
   };
 
@@ -58,6 +61,10 @@ class AppRouter extends StatelessWidget {
             break;
           case '/pet/create':
             builder = (BuildContext context) => const CreatePetScreen();
+            break;
+          case '/pet/edit':
+            builder = (BuildContext context) =>
+                UpdatePetScreen(pet: settings.arguments as Pet);
             break;
           case '/owner/compatability':
             builder =

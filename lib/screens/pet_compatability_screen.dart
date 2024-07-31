@@ -47,6 +47,14 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
     }
   }
 
+  void _editPet(Pet pet) async {
+    final result = await Navigator.pushNamed(context, '/pet/edit',
+        arguments: pet);
+    if (result != null && result is Pet) {
+      // TODO
+    }
+  }
+
   void _removePet(Pet pet) async {
     setState(() {
       pets.removeWhere((p) => p.id == pet.id);
@@ -72,7 +80,7 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                 pets: pets,
                 maxPets: 10,
                 onAddPet: _addNewPet,
-                onRemovePet: _removePet,
+                onEditPet: _editPet,
               ),
             ),
           ),
@@ -104,7 +112,7 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor:
                         Theme.of(context).textTheme.titleSmall?.color,
-                    backgroundColor: AppTheme.primaryColor,
+                    backgroundColor: AppTheme.accent1,
                     minimumSize:
                         Size(MediaQuery.of(context).size.width * 0.5, 50),
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -148,7 +156,7 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                 pets: pets,
                 maxPets: 10,
                 onAddPet: _addNewPet,
-                onRemovePet: _removePet,
+                onEditPet: _editPet,
               ),
             ),
           ),

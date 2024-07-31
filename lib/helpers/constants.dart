@@ -36,10 +36,14 @@ You are a knowledgeable oracle providing brief, witty insights on future-oriente
 }
 
 class PetCompatibilityTexts {
-  static const createSuccess = 'Pet created successfully!';
-  static const nameError = 'Pet name is required';
-  static const speciesError = 'Species is required';
-  static const requiredFieldsError = 'Please fill in all required fields';
+  static const createSuccess = 'Pet created successfully.';
+  static const updateSuccess = 'Pet updated successfully.';
+  static const deleteSuccess = 'Pet deleted successfully.';
+  static const deleteConfirmation =
+      'This action cannot be undone. Your pet data will be permanently deleted.';
+  static const nameError = 'Please enter a name for your pet';
+  static const speciesError = 'Please select a species for your pet';
+  static const requiredFieldsError = 'Please fill in all required fields.';
 }
 
 class HomeScreenTexts {

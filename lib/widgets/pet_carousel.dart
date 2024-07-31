@@ -7,14 +7,14 @@ class PetCarousel extends StatelessWidget {
   final List<Pet> pets;
   final int maxPets;
   final VoidCallback onAddPet;
-  final Function(Pet) onRemovePet;
+  final Function(Pet) onEditPet;
 
   const PetCarousel({
     super.key,
     required this.pets,
     required this.maxPets,
     required this.onAddPet,
-    required this.onRemovePet,
+    required this.onEditPet,
   });
 
   List<Widget> get carouselItems {
@@ -37,21 +37,40 @@ class PetCarousel extends StatelessWidget {
               width: 170,
               height: 170,
               decoration: BoxDecoration(
-                color: AppTheme.lemonChiffon,
+                color: AppTheme.alternateColor,
                 image: DecorationImage(
                   fit: BoxFit.contain,
                   image: AssetImage(_getSpeciesImage(pet.species)),
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppTheme.secondaryColor,
+                  color: AppTheme.primaryColor,
                   width: 2,
                 ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.remove_circle, color: Colors.red),
-              onPressed: () => onRemovePet(pet),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(0, 4, 4, 0),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.edit,
+                  color: AppTheme.primaryColor,
+                  size: 20,
+                ),
+                onPressed: () => onEditPet(pet),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppTheme.alternateColor,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(35, 35),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: const BorderSide(
+                      color: AppTheme.primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -62,7 +81,7 @@ class PetCarousel extends StatelessWidget {
             child: Text(
               pet.name,
               style: const TextStyle(
-                color: AppTheme.secondaryColor,
+                color: AppTheme.primaryColor,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -97,14 +116,14 @@ class PetCarousel extends StatelessWidget {
             width: 170,
             height: 170,
             decoration: BoxDecoration(
-              color: AppTheme.lemonChiffon,
+              color: AppTheme.alternateColor,
               image: const DecorationImage(
                 fit: BoxFit.contain,
                 image: AssetImage('assets/images/plus.png'),
               ),
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppTheme.secondaryColor,
+                color: AppTheme.primaryColor,
                 width: 2,
               ),
             ),
@@ -117,7 +136,7 @@ class PetCarousel extends StatelessWidget {
             child: Text(
               'Add',
               style: TextStyle(
-                color: AppTheme.secondaryColor,
+                color: AppTheme.primaryColor,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -136,9 +155,9 @@ class PetCarousel extends StatelessWidget {
       options: CarouselOptions(
         viewportFraction: 0.5,
         enlargeCenterPage: true,
-        enlargeFactor: 0.35,
+        enlargeFactor: 0.2,
         enableInfiniteScroll: false,
-				pageSnapping: true,
+        pageSnapping: true,
         scrollPhysics: const PageScrollPhysics(),
         scrollDirection: Axis.horizontal,
       ),

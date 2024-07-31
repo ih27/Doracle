@@ -42,10 +42,10 @@ class BondButtons extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.9,
         height: 190,
         decoration: BoxDecoration(
-          color: AppTheme.lemonChiffon,
+          color: AppTheme.alternateColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: AppTheme.secondaryColor,
+            color: AppTheme.accent1,
             width: 2,
           ),
         ),
@@ -60,7 +60,7 @@ class BondButtons extends StatelessWidget {
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: AppTheme.secondaryColor,
+                        color: AppTheme.primaryColor,
                         letterSpacing: 0,
                         fontWeight: FontWeight.bold,
                       ),
