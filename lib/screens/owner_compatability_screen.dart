@@ -27,6 +27,15 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
     _loadOwners();
   }
 
+  // TEMPORARY DEBUG METHOD
+  Future<void> _clearOwners() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_ownersStorageKey);
+    setState(() {
+      owners = [];
+    });
+  }
+
   Future<void> _loadPets() async {
     final prefs = await SharedPreferences.getInstance();
     final String? petsJson = prefs.getString(_petsStorageKey);

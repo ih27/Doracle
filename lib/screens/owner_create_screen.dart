@@ -26,9 +26,14 @@ class CreateOwnerScreen extends StatelessWidget {
           ? formatDate(formData['birthdate'])
           : null,
       location: formData['location'],
-      interests: formData['interests'],
+      livingSituation: formData['livingSituation'],
       activityLevel: formData['activityLevel'],
+      interactionLevel: formData['interactionLevel'],
+      workSchedule: formData['workSchedule'],
       petExperience: formData['petExperience'],
+      groomingCommitment: formData['groomingCommitment'],
+      noiseTolerance: formData['noiseTolerance'],
+      petReason: formData['petReason'],
     );
 
     Navigator.of(context).pop(newOwner);

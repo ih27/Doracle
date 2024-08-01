@@ -13,9 +13,14 @@ class OwnerForm extends StatefulWidget {
   final String? initialGender;
   final DateTime? initialBirthdate;
   final String? initialLocation;
-  final List<String> initialInterests;
+  final String? initialLivingSituation;
   final int initialActivityLevel;
-  final int initialPetExperience;
+  final int initialInteractionLevel;
+  final String? initialWorkSchedule;
+  final String? initialPetExperience;
+  final int initialGroomingCommitment;
+  final int initialNoiseTolerance;
+  final String? initialPetReason;
   final bool deleteAvailable;
   final Function(Map<String, dynamic>) onSubmit;
   final VoidCallback? onDelete;
@@ -27,9 +32,14 @@ class OwnerForm extends StatefulWidget {
     this.initialGender,
     this.initialBirthdate,
     this.initialLocation,
-    this.initialInterests = const [],
+    this.initialLivingSituation,
     this.initialActivityLevel = 2,
-    this.initialPetExperience = 2,
+    this.initialInteractionLevel = 2,
+    this.initialWorkSchedule,
+    this.initialPetExperience,
+    this.initialGroomingCommitment = 2,
+    this.initialNoiseTolerance = 2,
+    this.initialPetReason,
     this.deleteAvailable = false,
     required this.onSubmit,
     this.onDelete,
@@ -48,9 +58,14 @@ class _OwnerFormState extends State<OwnerForm> {
   String? _gender;
   DateTime? _birthdate;
   String? _location;
-  late List<String> _interests;
+  String? _livingSituation;
   late int _activityLevel;
-  late int _petExperience;
+  late int _interactionLevel;
+  String? _workSchedule;
+  String? _petExperience;
+  late int _groomingCommitment;
+  late int _noiseTolerance;
+  String? _petReason;
 
   String? _nameError;
   String? _genderError;
@@ -69,9 +84,14 @@ class _OwnerFormState extends State<OwnerForm> {
     _gender = widget.initialGender;
     _birthdate = widget.initialBirthdate;
     _location = widget.initialLocation;
-    _interests = List.from(widget.initialInterests);
+    _livingSituation = widget.initialLivingSituation;
     _activityLevel = widget.initialActivityLevel;
+    _interactionLevel = widget.initialInteractionLevel;
+    _workSchedule = widget.initialWorkSchedule;
     _petExperience = widget.initialPetExperience;
+    _groomingCommitment = widget.initialGroomingCommitment;
+    _noiseTolerance = widget.initialNoiseTolerance;
+    _petReason = widget.initialPetReason;
   }
 
   @override
@@ -132,22 +152,88 @@ class _OwnerFormState extends State<OwnerForm> {
               color: AppTheme.primaryColor,
             ),
             const SizedBox(height: 8),
-            _buildInterestsSection(),
+            _buildSingleSelectSection(
+              label: CompatibilityTexts.ownerLivingSituationLabel,
+              options: CompatibilityTexts.ownerLivingSituationChoices,
+              selectedValue: _livingSituation,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _livingSituation = newValue;
+                });
+              },
+              context: context,
+            ),
             const SizedBox(height: 8),
             _buildSliderSection(
-              title: 'Activity Level',
+              title: CompatibilityTexts.ownerActivityLevelLabel,
               value: _activityLevel,
               onChanged: (newValue) {
                 setState(() => _activityLevel = newValue);
               },
+              values: CompatibilityTexts.ownerActivityLevelChoices,
             ),
             const SizedBox(height: 8),
             _buildSliderSection(
-              title: 'Pet Experience',
-              value: _petExperience,
+              title: CompatibilityTexts.ownerInteractionLevelLabel,
+              value: _interactionLevel,
               onChanged: (newValue) {
-                setState(() => _petExperience = newValue);
+                setState(() => _interactionLevel = newValue);
               },
+              values: CompatibilityTexts.ownerInteractionLevelChoices,
+            ),
+            const SizedBox(height: 8),
+            _buildSingleSelectSection(
+              label: CompatibilityTexts.ownerWorkScheduleLabel,
+              options: CompatibilityTexts.ownerWorkScheduleChoices,
+              selectedValue: _workSchedule,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _workSchedule = newValue;
+                });
+              },
+              context: context,
+            ),
+            const SizedBox(height: 8),
+            _buildSingleSelectSection(
+              label: CompatibilityTexts.ownerPetExperienceLabel,
+              options: CompatibilityTexts.ownerPetExperienceChoices,
+              selectedValue: _petExperience,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _petExperience = newValue;
+                });
+              },
+              context: context,
+            ),
+            const SizedBox(height: 8),
+            _buildSliderSection(
+              title: CompatibilityTexts.ownerGroomingCommitmentLabel,
+              value: _groomingCommitment,
+              onChanged: (newValue) {
+                setState(() => _groomingCommitment = newValue);
+              },
+              values: CompatibilityTexts.ownerGroomingCommitmentChoices,
+            ),
+            const SizedBox(height: 8),
+            _buildSliderSection(
+              title: CompatibilityTexts.ownerNoiseToleranceLabel,
+              value: _noiseTolerance,
+              onChanged: (newValue) {
+                setState(() => _noiseTolerance = newValue);
+              },
+              values: CompatibilityTexts.ownerNoiseToleranceChoices,
+            ),
+            const SizedBox(height: 8),
+            _buildSingleSelectSection(
+              label: CompatibilityTexts.ownerPetReasonLabel,
+              options: CompatibilityTexts.ownerPetReasonChoices,
+              selectedValue: _petReason,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _petReason = newValue;
+                });
+              },
+              context: context,
             ),
             const SizedBox(height: 8),
             _buildFormButtons(widget.deleteAvailable),
@@ -324,7 +410,13 @@ class _OwnerFormState extends State<OwnerForm> {
     );
   }
 
-  Widget _buildInterestsSection() {
+  Widget _buildSingleSelectSection({
+    required String label,
+    required List<String> options,
+    required String? selectedValue,
+    required Function(String?) onChanged,
+    required BuildContext context,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.secondaryBackground,
@@ -340,7 +432,7 @@ class _OwnerFormState extends State<OwnerForm> {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              'Interests',
+              label,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontSize: 18,
@@ -354,14 +446,12 @@ class _OwnerFormState extends State<OwnerForm> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildInterestChip('Dogs'),
-                _buildInterestChip('Cats'),
-                _buildInterestChip('Birds'),
-                _buildInterestChip('Fish'),
-                _buildInterestChip('Reptiles'),
-                _buildInterestChip('Small Animals'),
-                _buildInterestChip('Outdoors'),
-                _buildInterestChip('Training'),
+                for (String optionName in options)
+                  _buildSingleSelectChip(
+                    optionName,
+                    selectedValue,
+                    onChanged,
+                  )
               ],
             ),
           ),
@@ -374,7 +464,10 @@ class _OwnerFormState extends State<OwnerForm> {
     required String title,
     required int value,
     required ValueChanged<int> onChanged,
+    required List<String> values,
   }) {
+    final sliderMax = values.length.toDouble();
+    final divisions = values.length - 1;
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,8 +487,8 @@ class _OwnerFormState extends State<OwnerForm> {
           activeColor: AppTheme.primaryColor,
           inactiveColor: AppTheme.alternateColor,
           min: 1,
-          max: 3,
-          divisions: 2,
+          max: sliderMax,
+          divisions: divisions,
           value: value.toDouble(),
           onChanged: (newValue) => onChanged(newValue.round()),
         ),
@@ -405,24 +498,13 @@ class _OwnerFormState extends State<OwnerForm> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Low',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      letterSpacing: 0,
-                    ),
-              ),
-              Text(
-                'Medium',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      letterSpacing: 0,
-                    ),
-              ),
-              Text(
-                'High',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      letterSpacing: 0,
-                    ),
-              ),
+              for (String valueName in values)
+                Text(
+                  valueName,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        letterSpacing: 0,
+                      ),
+                ),
             ],
           ),
         ),
@@ -463,20 +545,18 @@ class _OwnerFormState extends State<OwnerForm> {
     );
   }
 
-  Widget _buildInterestChip(String label) {
-    final isSelected = _interests.contains(label);
-    return FilterChip(
-      label: Text(label),
+  Widget _buildSingleSelectChip(
+    String optionName,
+    String? selectedValue,
+    Function(String?) onChanged,
+  ) {
+    final isSelected = selectedValue == optionName;
+    return ChoiceChip(
+      label: Text(optionName),
       selected: isSelected,
       showCheckmark: false,
       onSelected: (bool selected) {
-        setState(() {
-          if (selected) {
-            _interests.add(label);
-          } else {
-            _interests.remove(label);
-          }
-        });
+        onChanged(selected ? optionName : null);
       },
       backgroundColor: AppTheme.alternateColor,
       selectedColor: AppTheme.secondaryColor,
@@ -521,9 +601,14 @@ class _OwnerFormState extends State<OwnerForm> {
         'gender': _gender,
         'birthdate': _birthdate,
         'location': _location,
-        'interests': _interests,
+        'livingSituation': _livingSituation,
         'activityLevel': _activityLevel,
+        'interactionLevel': _interactionLevel,
+        'workSchedule': _workSchedule,
         'petExperience': _petExperience,
+        'groomingCommitment': _groomingCommitment,
+        'noiseTolerance': _noiseTolerance,
+        'petReason': _petReason,
       });
     }
   }
@@ -548,3 +633,31 @@ class _OwnerFormState extends State<OwnerForm> {
     return isValid;
   }
 }
+
+// Widget _buildMultiSelectChip(String label) {
+//     final isSelected = _interests.contains(label);
+//     return FilterChip(
+//       label: Text(label),
+//       selected: isSelected,
+//       showCheckmark: false,
+//       onSelected: (bool selected) {
+//         setState(() {
+//           if (selected) {
+//             _interests.add(label);
+//           } else {
+//             _interests.remove(label);
+//           }
+//         });
+//       },
+//       backgroundColor: AppTheme.alternateColor,
+//       selectedColor: AppTheme.secondaryColor,
+//       labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+//             color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
+//             letterSpacing: 0,
+//           ),
+//       elevation: isSelected ? 4 : 0,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(16),
+//       ),
+//     );
+//   }

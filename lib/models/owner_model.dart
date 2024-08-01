@@ -6,9 +6,14 @@ class Owner {
   final String gender;
   final String? birthdate;
   final String? location;
-  final List<String> interests;
+  final String? livingSituation;
   final int activityLevel;
-  final int petExperience;
+  final int interactionLevel;
+  final String? workSchedule;
+  final String? petExperience;
+  final int groomingCommitment;
+  final int noiseTolerance;
+  final String? petReason;
 
   Owner({
     required this.id,
@@ -16,9 +21,14 @@ class Owner {
     required this.gender,
     this.birthdate,
     this.location,
-    required this.interests,
+    this.livingSituation,
     required this.activityLevel,
-    required this.petExperience,
+    required this.interactionLevel,
+    this.workSchedule,
+    this.petExperience,
+    required this.groomingCommitment,
+    required this.noiseTolerance,
+    this.petReason,
   });
 
   Map<String, dynamic> toJson() {
@@ -28,9 +38,14 @@ class Owner {
       'gender': gender,
       'birthdate': birthdate,
       'location': location,
-      'interests': interests,
+      'livingSituation': livingSituation,
       'activityLevel': activityLevel,
+      'interactionLevel': interactionLevel,
+      'workSchedule': workSchedule,
       'petExperience': petExperience,
+      'groomingCommitment': groomingCommitment,
+      'noiseTolerance': noiseTolerance,
+      'petReason': petReason,
     };
   }
 
@@ -41,9 +56,14 @@ class Owner {
       gender: json['gender'],
       birthdate: json['birthdate'],
       location: json['location'],
-      interests: List<String>.from(json['interests'] ?? []),
+      livingSituation: json['livingSituation'],
       activityLevel: json['activityLevel'] as int,
-      petExperience: json['petExperience'] as int,
+      interactionLevel: json['interactionLevel'] as int,
+      workSchedule: json['workSchedule'],
+      petExperience: json['petExperience'],
+      groomingCommitment: json['groomingCommitment'] as int,
+      noiseTolerance: json['noiseTolerance'] as int,
+      petReason: json['petReason'],
     );
   }
 

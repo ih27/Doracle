@@ -19,9 +19,14 @@ class UpdateOwnerScreen extends StatelessWidget {
       initialBirthdate:
           owner.birthdate != null ? parseDateString(owner.birthdate!) : null,
       initialLocation: owner.location,
-      initialInterests: owner.interests,
+      initialLivingSituation: owner.livingSituation,
       initialActivityLevel: owner.activityLevel,
+      initialInteractionLevel: owner.interactionLevel,
+      initialWorkSchedule: owner.workSchedule,
       initialPetExperience: owner.petExperience,
+      initialGroomingCommitment: owner.groomingCommitment,
+      initialNoiseTolerance: owner.noiseTolerance,
+      initialPetReason: owner.petReason,
       onSubmit: (formData) => _updateOwner(context, formData),
       submitButtonName: CompatibilityTexts.updateOwner,
       deleteAvailable: true,
@@ -38,9 +43,14 @@ class UpdateOwnerScreen extends StatelessWidget {
           ? formatDate(formData['birthdate'])
           : null,
       location: formData['location'],
-      interests: formData['interests'],
+      livingSituation: formData['livingSituation'],
       activityLevel: formData['activityLevel'],
+      interactionLevel: formData['interactionLevel'],
+      workSchedule: formData['workSchedule'],
       petExperience: formData['petExperience'],
+      groomingCommitment: formData['groomingCommitment'],
+      noiseTolerance: formData['noiseTolerance'],
+      petReason: formData['petReason'],
     );
 
     Navigator.of(context).pop(updatedOwner);

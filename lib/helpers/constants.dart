@@ -56,6 +56,57 @@ class CompatibilityTexts {
   static const ownerNameError = 'Please enter a name';
   static const ownerGenderError = 'Please select a gender';
   static const requiredFieldsError = 'Please fill in all required fields.';
+  static const ownerLivingSituationLabel = 'Living Situation';
+  static const ownerLivingSituationChoices = [
+    'Apartment',
+    'House with yard',
+    'Villa',
+    'Other',
+  ];
+  static const ownerActivityLevelLabel = 'Daily Activity Level';
+  static const ownerActivityLevelChoices = [
+    'Sedentary',
+    'Low Active',
+    'Active',
+    'Very Active',
+  ];
+  static const ownerInteractionLevelLabel = 'Desired Interaction Level';
+  static const ownerInteractionLevelChoices = [
+    'Low Maintenance',
+    'Regular Attention',
+    'Constant Companion',
+  ];
+  static const ownerWorkScheduleLabel = 'Work Schedule';
+  static const ownerWorkScheduleChoices = [
+    'Work from home',
+    'Part-time away',
+    'Full-time away',
+  ];
+  static const ownerPetExperienceLabel = 'Pet Experience';
+  static const ownerPetExperienceChoices = [
+    'First-time',
+    'Some experience',
+    'Full-time away',
+  ];
+  static const ownerGroomingCommitmentLabel = 'Grooming Commitment';
+  static const ownerGroomingCommitmentChoices = [
+    'Minimal',
+    'Normal',
+    'Extensive',
+  ];
+  static const ownerNoiseToleranceLabel = 'Noise Tolerance';
+  static const ownerNoiseToleranceChoices = [
+    'Need Quiet',
+    'Moderate Noise OK',
+    'High Tolerance',
+  ];
+  static const ownerPetReasonLabel = 'Primary Reason for Pet';
+  static const ownerPetReasonChoices = [
+    'Companionship',
+    'Protection',
+    'Exercise motivation',
+    'Other'
+  ];
 }
 
 class HomeScreenTexts {
