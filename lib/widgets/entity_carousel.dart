@@ -4,11 +4,11 @@ import '../config/theme.dart';
 import '../models/pet_model.dart';
 import '../models/owner_model.dart';
 
-class EntityCarousel extends StatelessWidget {
-  final List<dynamic> entities;
+class EntityCarousel<T> extends StatelessWidget {
+  final List<T> entities;
   final int maxEntities;
   final VoidCallback onAddEntity;
-  final Function(dynamic) onEditEntity;
+  final Function(T) onEditEntity;
   final bool isPet;
 
   const EntityCarousel({
@@ -20,15 +20,33 @@ class EntityCarousel extends StatelessWidget {
     required this.isPet,
   });
 
-  List<Widget> get carouselItems {
-    List<Widget> items = entities.map((entity) => _buildEntityItem(entity)).toList();
-    if (entities.length < maxEntities) {
-      items.add(_buildAddItem());
-    }
-    return items;
+  @override
+  Widget build(BuildContext context) {
+    return _buildCarousel(context);
   }
 
-  Widget _buildEntityItem(dynamic entity) {
+  Widget _buildCarousel(BuildContext context) {
+    List<Widget> items = entities.map((entity) => _buildEntityItem(context, entity)).toList();
+    if (entities.length < maxEntities) {
+      items.add(_buildAddItem(context));
+    }
+
+    return CarouselSlider.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index, _) => items[index],
+      options: CarouselOptions(
+        viewportFraction: 0.5,
+        enlargeCenterPage: true,
+        enlargeFactor: 0.2,
+        enableInfiniteScroll: false,
+        pageSnapping: true,
+        scrollPhysics: const PageScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+      ),
+    );
+  }
+
+  Widget _buildEntityItem(BuildContext context, T entity) {
     String name = isPet ? (entity as Pet).name : (entity as Owner).name;
     String imageAsset = _getEntityImage(entity);
 
@@ -98,7 +116,7 @@ class EntityCarousel extends StatelessWidget {
     );
   }
 
-  String _getEntityImage(dynamic entity) {
+  String _getEntityImage(T entity) {
     if (isPet) {
       switch ((entity as Pet).species.toLowerCase()) {
         case 'dog':
@@ -122,7 +140,7 @@ class EntityCarousel extends StatelessWidget {
     }
   }
 
-  Widget _buildAddItem() {
+  Widget _buildAddItem(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -161,23 +179,6 @@ class EntityCarousel extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CarouselSlider.builder(
-      itemCount: carouselItems.length,
-      itemBuilder: (context, index, _) => carouselItems[index],
-      options: CarouselOptions(
-        viewportFraction: 0.5,
-        enlargeCenterPage: true,
-        enlargeFactor: 0.2,
-        enableInfiniteScroll: false,
-        pageSnapping: true,
-        scrollPhysics: const PageScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-      ),
     );
   }
 }
