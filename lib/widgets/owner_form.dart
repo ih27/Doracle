@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/pet_form_utils.dart';
 import '../widgets/custom_datepicker.dart';
@@ -109,7 +108,7 @@ class _OwnerFormState extends State<OwnerForm> {
           children: [
             SendableTextField(
               controller: _nameController,
-              labelText: 'Owner Name',
+              labelText: 'Your Name',
               onSubmitted: (_) {},
               onChanged: (value) {
                 if (_nameError != null) {
@@ -189,9 +188,9 @@ class _OwnerFormState extends State<OwnerForm> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildGenderChip('Male', FontAwesomeIcons.mars),
-                _buildGenderChip('Female', FontAwesomeIcons.venus),
-                _buildGenderChip('Other', FontAwesomeIcons.transgender),
+                _buildGenderSelection('Male', 'assets/images/owner_he.png'),
+                _buildGenderSelection('Female', 'assets/images/owner_she.png'),
+                _buildGenderSelection('Other', 'assets/images/owner_other.png'),
               ],
             ),
           ),
@@ -431,32 +430,35 @@ class _OwnerFormState extends State<OwnerForm> {
     );
   }
 
-  Widget _buildGenderChip(String label, IconData icon) {
+  Widget _buildGenderSelection(String label, String assetName) {
     final isSelected = _gender == label;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      showCheckmark: false,
-      onSelected: (bool selected) {
-        setState(() {
-          _gender = selected ? label : null;
-          if (_genderError != null) {
-            _genderError = null;
-          }
-        });
-      },
-      avatar: Icon(icon,
-          size: 18,
-          color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText),
-      backgroundColor: AppTheme.alternateColor,
-      selectedColor: AppTheme.secondaryColor,
-      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
-            letterSpacing: 0,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _gender = isSelected ? null : label;
+            if (_genderError != null) {
+              _genderError = null;
+            }
+          });
+        },
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: AppTheme.secondaryBackground,
+            border: Border.all(
+              color: AppTheme.primaryColor,
+              width: isSelected ? 5 : 1,
+            ),
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              image: AssetImage(assetName),
+              fit: BoxFit.cover,
+            ),
           ),
-      elevation: isSelected ? 4 : 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
