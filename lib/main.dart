@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
 import 'config/notifications.dart';
 import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
@@ -15,7 +14,6 @@ import 'app_manager.dart';
 import 'services/analytics_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
-import 'viewmodels/entity_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,13 +37,7 @@ Future<void> main() async {
   await setupNotifications();
   setupDependencies();
   await _initializeApp();
-  runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => PetManager()),
-        ChangeNotifierProvider(create: (_) => OwnerManager()),
-      ],
-      child: const MyApp(),
-    ),);
+  runApp(const MyApp());
   cleanUpNotifications();
 }
 

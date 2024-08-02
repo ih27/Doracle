@@ -11,6 +11,7 @@ import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../services/fortune_teller_service.dart';
+import '../entities/entity_manager.dart';
 import '../viewmodels/fortune_view_model.dart';
 
 final getIt = GetIt.instance;
@@ -31,6 +32,10 @@ void setupDependencies() {
   getIt.registerLazySingleton<UserRepository>(
     () => FirestoreUserRepository(),
   );
+
+  // Managers
+  getIt.registerLazySingleton<PetManager>(() => PetManager());
+  getIt.registerLazySingleton<OwnerManager>(() => OwnerManager());
 
   // Services
   getIt.registerLazySingleton<AnalyticsService>(() => AnalyticsService());

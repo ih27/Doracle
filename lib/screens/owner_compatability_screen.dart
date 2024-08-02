@@ -1,55 +1,117 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../config/dependency_injection.dart';
 import '../helpers/list_space_divider.dart';
-import '../viewmodels/entity_manager.dart';
+import '../entities/entity_manager.dart';
 import '../widgets/entity_carousel.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
 import '../models/owner_model.dart';
 
-class OwnerCompatabilityScreen extends StatelessWidget {
+class OwnerCompatabilityScreen extends StatefulWidget {
   const OwnerCompatabilityScreen({super.key});
 
   @override
+  _OwnerCompatabilityScreenState createState() =>
+      _OwnerCompatabilityScreenState();
+}
+
+class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
+  final PetManager _petManager = getIt<PetManager>();
+  final OwnerManager _ownerManager = getIt<OwnerManager>();
+  Pet? selectedPet;
+  Owner? selectedOwner;
+
+  bool get isCompatibilityCheckEnabled =>
+      selectedPet != null && selectedOwner != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePets();
+    _initializeOwners();
+  }
+
+  Future<void> _initializePets() async {
+    await _petManager.loadEntities();
+    if (_petManager.entities.isNotEmpty) {
+      setState(() {
+        selectedPet = _petManager.entities[0];
+      });
+    }
+  }
+
+  Future<void> _initializeOwners() async {
+    await _ownerManager.loadEntities();
+    if (_ownerManager.entities.isNotEmpty) {
+      setState(() {
+        selectedOwner = _ownerManager.entities[0];
+      });
+    }
+  }
+
+  void _addNewPet() async {
+    final result = await Navigator.pushNamed(context, '/pet/create');
+    if (result != null && result is Pet) {
+      await _petManager.addEntity(result);
+    }
+  }
+
+  void _editPet(Pet pet) async {
+    final result =
+        await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
+    if (result != null) {
+      if (result is Pet) {
+        await _petManager.updateEntity(pet, result);
+      } else if (result == 'delete') {
+        await _petManager.removeEntity(pet);
+      }
+    }
+  }
+
+  void _selectPet(int index) {
+    setState(() {
+      if (index < _petManager.entities.length) {
+        selectedPet = _petManager.entities[index];
+      } else {
+        selectedPet = null;
+      }
+    });
+  }
+
+  void _addNewOwner() async {
+    final result = await Navigator.pushNamed(context, '/owner/create');
+    if (result != null && result is Owner) {
+      await _ownerManager.addEntity(result);
+    }
+  }
+
+  void _editOwner(Owner owner) async {
+    final result =
+        await Navigator.pushNamed(context, '/owner/edit', arguments: owner);
+    if (result != null) {
+      if (result is Owner) {
+        await _ownerManager.updateEntity(owner, result);
+      } else if (result == 'delete') {
+        await _ownerManager.removeEntity(owner);
+      }
+    }
+  }
+
+  void _selectOwner(int index) {
+    setState(() {
+      if (index < _ownerManager.entities.length) {
+        selectedOwner = _ownerManager.entities[index];
+      } else {
+        selectedOwner = null;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer2<PetManager, OwnerManager>(
-      builder: (context, petManager, ownerManager, child) {
-        void addNewPet() async {
-          final result = await Navigator.pushNamed(context, '/pet/create');
-          if (result != null && result is Pet) {
-            await petManager.addEntity(result);
-          }
-        }
-
-        void editPet(Pet pet) async {
-          final result = await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
-          if (result != null) {
-            if (result is Pet) {
-              await petManager.updateEntity(pet, result);
-            } else if (result == 'delete') {
-              await petManager.removeEntity(pet);
-            }
-          }
-        }
-
-        void addNewOwner() async {
-          final result = await Navigator.pushNamed(context, '/owner/create');
-          if (result != null && result is Owner) {
-            await ownerManager.addEntity(result);
-          }
-        }
-
-        void editOwner(Owner owner) async {
-          final result = await Navigator.pushNamed(context, '/owner/edit', arguments: owner);
-          if (result != null) {
-            if (result is Owner) {
-              await ownerManager.updateEntity(owner, result);
-            } else if (result == 'delete') {
-              await ownerManager.removeEntity(owner);
-            }
-          }
-        }
-
+    return AnimatedBuilder(
+      animation: Listenable.merge([_petManager, _ownerManager]),
+      builder: (context, child) {
         return Align(
           alignment: AlignmentDirectional.topStart,
           child: Column(
@@ -63,11 +125,12 @@ class OwnerCompatabilityScreen extends StatelessWidget {
                   height: MediaQuery.sizeOf(context).height * 0.25,
                   decoration: const BoxDecoration(),
                   child: EntityCarousel<Pet>(
-                    entities: petManager.entities,
+                    entities: _petManager.entities,
                     maxEntities: 10,
-                    onAddEntity: addNewPet,
-                    onEditEntity: editPet,
+                    onAddEntity: _addNewPet,
+                    onEditEntity: _editPet,
                     isPet: true,
+                    onPageChanged: _selectPet,
                   ),
                 ),
               ),
@@ -82,7 +145,8 @@ class OwnerCompatabilityScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 0.2,
                         height: 4,
@@ -93,19 +157,29 @@ class OwnerCompatabilityScreen extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // Implement compatibility check logic
-                      },
+                      onPressed: isCompatibilityCheckEnabled
+                          ? () {
+                              // Implement compatibility check logic here
+                              debugPrint(
+                                  'Checking compatibility between ${selectedPet!.name} and ${selectedOwner!.name}');
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).textTheme.titleSmall?.color,
-                        backgroundColor: AppTheme.accent1,
-                        minimumSize: Size(MediaQuery.of(context).size.width * 0.5, 50),
+                        foregroundColor:
+                            Theme.of(context).textTheme.titleSmall?.color,
+                        backgroundColor: isCompatibilityCheckEnabled
+                            ? AppTheme.primaryColor
+                            : AppTheme.accent1,
+                        minimumSize:
+                            Size(MediaQuery.of(context).size.width * 0.5, 50),
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        elevation: 3,
+                        elevation: isCompatibilityCheckEnabled ? 3 : 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: const BorderSide(
-                            color: Colors.transparent,
+                          side: BorderSide(
+                            color: isCompatibilityCheckEnabled
+                                ? Colors.transparent
+                                : AppTheme.primaryColor,
                             width: 1,
                           ),
                         ),
@@ -118,7 +192,8 @@ class OwnerCompatabilityScreen extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 0.2,
                         height: 4,
@@ -138,11 +213,12 @@ class OwnerCompatabilityScreen extends StatelessWidget {
                   height: MediaQuery.sizeOf(context).height * 0.25,
                   decoration: const BoxDecoration(),
                   child: EntityCarousel<Owner>(
-                    entities: ownerManager.entities,
-                    maxEntities: 10,
-                    onAddEntity: addNewOwner,
-                    onEditEntity: editOwner,
+                    entities: _ownerManager.entities,
+                    maxEntities: 5,
+                    onAddEntity: _addNewOwner,
+                    onEditEntity: _editOwner,
                     isPet: false,
+                    onPageChanged: _selectOwner,
                   ),
                 ),
               ),

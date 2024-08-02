@@ -7,7 +7,9 @@ abstract class EntityManager<T> extends ChangeNotifier {
   List<T> _entities = [];
   final String storageKey;
 
-  EntityManager(this.storageKey);
+  EntityManager(this.storageKey) {
+    loadEntities();
+  }
 
   List<T> get entities => _entities;
 

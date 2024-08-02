@@ -9,6 +9,7 @@ class EntityCarousel<T> extends StatelessWidget {
   final int maxEntities;
   final VoidCallback onAddEntity;
   final Function(T) onEditEntity;
+  final Function(int)? onPageChanged;
   final bool isPet;
 
   const EntityCarousel({
@@ -17,6 +18,7 @@ class EntityCarousel<T> extends StatelessWidget {
     required this.maxEntities,
     required this.onAddEntity,
     required this.onEditEntity,
+    this.onPageChanged,
     required this.isPet,
   });
 
@@ -26,7 +28,8 @@ class EntityCarousel<T> extends StatelessWidget {
   }
 
   Widget _buildCarousel(BuildContext context) {
-    List<Widget> items = entities.map((entity) => _buildEntityItem(context, entity)).toList();
+    List<Widget> items =
+        entities.map((entity) => _buildEntityItem(context, entity)).toList();
     if (entities.length < maxEntities) {
       items.add(_buildAddItem(context));
     }
@@ -42,6 +45,11 @@ class EntityCarousel<T> extends StatelessWidget {
         pageSnapping: true,
         scrollPhysics: const PageScrollPhysics(),
         scrollDirection: Axis.horizontal,
+        onPageChanged: (index, reason) {
+          if (onPageChanged != null) {
+            onPageChanged!(index);
+          }
+        },
       ),
     );
   }

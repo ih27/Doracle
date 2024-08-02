@@ -1,36 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../config/dependency_injection.dart';
 import '../helpers/list_space_divider.dart';
-import '../viewmodels/entity_manager.dart';
+import '../entities/entity_manager.dart';
 import '../widgets/entity_carousel.dart';
 import '../config/theme.dart';
 import '../models/pet_model.dart';
 
-class PetCompatabilityScreen extends StatelessWidget {
+class PetCompatabilityScreen extends StatefulWidget {
   const PetCompatabilityScreen({super.key});
 
   @override
+  _PetCompatabilityScreenState createState() => _PetCompatabilityScreenState();
+}
+
+class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
+  final PetManager _petManager = getIt<PetManager>();
+  Pet? selectedPet1;
+  Pet? selectedPet2;
+
+  bool get isCompatibilityCheckEnabled =>
+      selectedPet1 != null &&
+      selectedPet2 != null &&
+      selectedPet1 != selectedPet2;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePets();
+  }
+
+  Future<void> _initializePets() async {
+    await _petManager.loadEntities();
+    if (_petManager.entities.isNotEmpty) {
+      setState(() {
+        selectedPet1 = selectedPet2 = _petManager.entities[0];
+      });
+    }
+  }
+
+  Future<void> _addNewPet() async {
+    final result = await Navigator.pushNamed(context, '/pet/create');
+    if (result != null && result is Pet) {
+      await _petManager.addEntity(result);
+    }
+  }
+
+  Future<void> _editPet(Pet pet) async {
+    final result =
+        await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
+    if (result != null) {
+      if (result is Pet) {
+        await _petManager.updateEntity(pet, result);
+      } else if (result == 'delete') {
+        await _petManager.removeEntity(pet);
+      }
+    }
+  }
+
+  void _selectPet(int index, bool isFirstCarousel) {
+    if (index < _petManager.entities.length) {
+      setState(() {
+        if (isFirstCarousel) {
+          selectedPet1 = _petManager.entities[index];
+        } else {
+          selectedPet2 = _petManager.entities[index];
+        }
+      });
+    } else {
+      setState(() {
+        if (isFirstCarousel) {
+          selectedPet1 = null;
+        } else {
+          selectedPet2 = null;
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<PetManager>(
-      builder: (context, petManager, child) {
-        void addNewPet() async {
-          final result = await Navigator.pushNamed(context, '/pet/create');
-          if (result != null && result is Pet) {
-            await petManager.addEntity(result);
-          }
-        }
-
-        void editPet(Pet pet) async {
-          final result = await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
-          if (result != null) {
-            if (result is Pet) {
-              await petManager.updateEntity(pet, result);
-            } else if (result == 'delete') {
-              await petManager.removeEntity(pet);
-            }
-          }
-        }
-
+    return AnimatedBuilder(
+      animation: _petManager,
+      builder: (context, child) {
         return Align(
           alignment: AlignmentDirectional.topStart,
           child: Column(
@@ -44,11 +95,12 @@ class PetCompatabilityScreen extends StatelessWidget {
                   height: MediaQuery.sizeOf(context).height * 0.25,
                   decoration: const BoxDecoration(),
                   child: EntityCarousel<Pet>(
-                    entities: petManager.entities,
+                    entities: _petManager.entities,
                     maxEntities: 10,
-                    onAddEntity: addNewPet,
-                    onEditEntity: editPet,
+                    onAddEntity: _addNewPet,
+                    onEditEntity: _editPet,
                     isPet: true,
+                    onPageChanged: (index) => _selectPet(index, true),
                   ),
                 ),
               ),
@@ -74,19 +126,29 @@ class PetCompatabilityScreen extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // Nothing for now
-                      },
+                      onPressed: isCompatibilityCheckEnabled
+                          ? () {
+                              // Implement compatibility check logic here
+                              debugPrint(
+                                  'Checking compatibility between ${selectedPet1!.name} and ${selectedPet2!.name}');
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).textTheme.titleSmall?.color,
-                        backgroundColor: AppTheme.accent1,
-                        minimumSize: Size(MediaQuery.of(context).size.width * 0.5, 50),
+                        foregroundColor:
+                            Theme.of(context).textTheme.titleSmall?.color,
+                        backgroundColor: isCompatibilityCheckEnabled
+                            ? AppTheme.primaryColor
+                            : AppTheme.accent1,
+                        minimumSize:
+                            Size(MediaQuery.of(context).size.width * 0.5, 50),
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        elevation: 3,
+                        elevation: isCompatibilityCheckEnabled ? 3 : 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: const BorderSide(
-                            color: Colors.transparent,
+                          side: BorderSide(
+                            color: isCompatibilityCheckEnabled
+                                ? Colors.transparent
+                                : AppTheme.primaryColor,
                             width: 1,
                           ),
                         ),
@@ -95,6 +157,9 @@ class PetCompatabilityScreen extends StatelessWidget {
                         'Check Compatibility',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               letterSpacing: 0,
+                              color: isCompatibilityCheckEnabled
+                                  ? AppTheme.info
+                                  : AppTheme.secondaryText,
                             ),
                       ),
                     ),
@@ -119,11 +184,12 @@ class PetCompatabilityScreen extends StatelessWidget {
                   height: MediaQuery.sizeOf(context).height * 0.25,
                   decoration: const BoxDecoration(),
                   child: EntityCarousel<Pet>(
-                    entities: petManager.entities,
+                    entities: _petManager.entities,
                     maxEntities: 10,
-                    onAddEntity: addNewPet,
-                    onEditEntity: editPet,
+                    onAddEntity: _addNewPet,
+                    onEditEntity: _editPet,
                     isPet: true,
+                    onPageChanged: (index) => _selectPet(index, false),
                   ),
                 ),
               ),
