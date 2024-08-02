@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/list_space_divider.dart';
@@ -17,6 +18,8 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
   final PetManager _petManager = getIt<PetManager>();
   Pet? selectedPet1;
   Pet? selectedPet2;
+  final CarouselController _carouselController1 = CarouselController();
+  final CarouselController _carouselController2 = CarouselController();
 
   bool get isCompatibilityCheckEnabled =>
       selectedPet1 != null &&
@@ -42,6 +45,8 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
     final result = await Navigator.pushNamed(context, '/pet/create');
     if (result != null && result is Pet) {
       await _petManager.addEntity(result);
+      // Update carousel positions after adding a new pet
+      _updateCarouselPositions();
     }
   }
 
@@ -54,11 +59,14 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
       } else if (result == 'delete') {
         await _petManager.removeEntity(pet);
       }
+      // Update carousel positions after editing or deleting a pet
+      _updateCarouselPositions();
     }
   }
 
   void _selectPet(int index, bool isFirstCarousel) {
-    if (index < _petManager.entities.length) {
+    if (_petManager.entities.isNotEmpty &&
+        index < _petManager.entities.length) {
       setState(() {
         if (isFirstCarousel) {
           selectedPet1 = _petManager.entities[index];
@@ -73,6 +81,35 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
         } else {
           selectedPet2 = null;
         }
+      });
+    }
+  }
+
+  void _updateCarouselPositions() {
+    if (_petManager.entities.isNotEmpty) {
+      int index1 = selectedPet1 != null
+          ? _petManager.entities.indexOf(selectedPet1!)
+          : 0;
+      int index2 = selectedPet2 != null
+          ? _petManager.entities.indexOf(selectedPet2!)
+          : 0;
+
+      // Ensure indices are within bounds
+      index1 = index1.clamp(0, _petManager.entities.length - 1);
+      index2 = index2.clamp(0, _petManager.entities.length - 1);
+
+      _carouselController1.jumpToPage(index1);
+      _carouselController2.jumpToPage(index2);
+
+      setState(() {
+        selectedPet1 = _petManager.entities[index1];
+        selectedPet2 = _petManager.entities[index2];
+      });
+    } else {
+      // If there are no pets, reset both selections to null
+      setState(() {
+        selectedPet1 = null;
+        selectedPet2 = null;
       });
     }
   }
@@ -101,6 +138,11 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                     onEditEntity: _editPet,
                     isPet: true,
                     onPageChanged: (index) => _selectPet(index, true),
+                    carouselController: _carouselController1,
+                    initialPage: _petManager.entities.isNotEmpty
+                        ? _petManager.entities
+                            .indexOf(selectedPet1 ?? _petManager.entities.first)
+                        : 0,
                   ),
                 ),
               ),
@@ -115,7 +157,8 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 0.2,
                         height: 4,
@@ -164,7 +207,8 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
                       child: Container(
                         width: MediaQuery.sizeOf(context).width * 0.2,
                         height: 4,
@@ -190,6 +234,11 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                     onEditEntity: _editPet,
                     isPet: true,
                     onPageChanged: (index) => _selectPet(index, false),
+                    carouselController: _carouselController2,
+                    initialPage: _petManager.entities.isNotEmpty
+                        ? _petManager.entities
+                            .indexOf(selectedPet2 ?? _petManager.entities.first)
+                        : 0,
                   ),
                 ),
               ),

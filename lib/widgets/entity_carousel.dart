@@ -11,6 +11,8 @@ class EntityCarousel<T> extends StatelessWidget {
   final Function(T) onEditEntity;
   final Function(int)? onPageChanged;
   final bool isPet;
+  final CarouselController carouselController;
+  final int initialPage;
 
   const EntityCarousel({
     super.key,
@@ -20,6 +22,8 @@ class EntityCarousel<T> extends StatelessWidget {
     required this.onEditEntity,
     this.onPageChanged,
     required this.isPet,
+    required this.carouselController,
+    this.initialPage = 0,
   });
 
   @override
@@ -37,6 +41,7 @@ class EntityCarousel<T> extends StatelessWidget {
     return CarouselSlider.builder(
       itemCount: items.length,
       itemBuilder: (context, index, _) => items[index],
+      carouselController: carouselController,
       options: CarouselOptions(
         viewportFraction: 0.5,
         enlargeCenterPage: true,
@@ -45,6 +50,7 @@ class EntityCarousel<T> extends StatelessWidget {
         pageSnapping: true,
         scrollPhysics: const PageScrollPhysics(),
         scrollDirection: Axis.horizontal,
+        initialPage: initialPage,
         onPageChanged: (index, reason) {
           if (onPageChanged != null) {
             onPageChanged!(index);

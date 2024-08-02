@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/list_space_divider.dart';
@@ -20,6 +21,8 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
   final OwnerManager _ownerManager = getIt<OwnerManager>();
   Pet? selectedPet;
   Owner? selectedOwner;
+  final CarouselController _petCarouselController = CarouselController();
+  final CarouselController _ownerCarouselController = CarouselController();
 
   bool get isCompatibilityCheckEnabled =>
       selectedPet != null && selectedOwner != null;
@@ -53,6 +56,7 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
     final result = await Navigator.pushNamed(context, '/pet/create');
     if (result != null && result is Pet) {
       await _petManager.addEntity(result);
+      _updateCarouselPositions();
     }
   }
 
@@ -65,12 +69,14 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
       } else if (result == 'delete') {
         await _petManager.removeEntity(pet);
       }
+      _updateCarouselPositions();
     }
   }
 
   void _selectPet(int index) {
     setState(() {
-      if (index < _petManager.entities.length) {
+      if (_petManager.entities.isNotEmpty &&
+          index < _petManager.entities.length) {
         selectedPet = _petManager.entities[index];
       } else {
         selectedPet = null;
@@ -82,6 +88,7 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
     final result = await Navigator.pushNamed(context, '/owner/create');
     if (result != null && result is Owner) {
       await _ownerManager.addEntity(result);
+      _updateCarouselPositions();
     }
   }
 
@@ -94,17 +101,50 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
       } else if (result == 'delete') {
         await _ownerManager.removeEntity(owner);
       }
+      _updateCarouselPositions();
     }
   }
 
   void _selectOwner(int index) {
     setState(() {
-      if (index < _ownerManager.entities.length) {
+      if (_ownerManager.entities.isNotEmpty &&
+          index < _ownerManager.entities.length) {
         selectedOwner = _ownerManager.entities[index];
       } else {
         selectedOwner = null;
       }
     });
+  }
+
+  void _updateCarouselPositions() {
+    if (_petManager.entities.isNotEmpty) {
+      int petIndex =
+          selectedPet != null ? _petManager.entities.indexOf(selectedPet!) : 0;
+      petIndex = petIndex.clamp(0, _petManager.entities.length - 1);
+      _petCarouselController.jumpToPage(petIndex);
+      setState(() {
+        selectedPet = _petManager.entities[petIndex];
+      });
+    } else {
+      setState(() {
+        selectedPet = null;
+      });
+    }
+
+    if (_ownerManager.entities.isNotEmpty) {
+      int ownerIndex = selectedOwner != null
+          ? _ownerManager.entities.indexOf(selectedOwner!)
+          : 0;
+      ownerIndex = ownerIndex.clamp(0, _ownerManager.entities.length - 1);
+      _ownerCarouselController.jumpToPage(ownerIndex);
+      setState(() {
+        selectedOwner = _ownerManager.entities[ownerIndex];
+      });
+    } else {
+      setState(() {
+        selectedOwner = null;
+      });
+    }
   }
 
   @override
@@ -131,6 +171,11 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
                     onEditEntity: _editPet,
                     isPet: true,
                     onPageChanged: _selectPet,
+                    carouselController: _petCarouselController,
+                    initialPage: _petManager.entities.isNotEmpty
+                        ? _petManager.entities
+                            .indexOf(selectedPet ?? _petManager.entities.first)
+                        : 0,
                   ),
                 ),
               ),
@@ -219,6 +264,11 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
                     onEditEntity: _editOwner,
                     isPet: false,
                     onPageChanged: _selectOwner,
+                    carouselController: _ownerCarouselController,
+                    initialPage: _ownerManager.entities.isNotEmpty
+                        ? _ownerManager.entities.indexOf(
+                            selectedOwner ?? _ownerManager.entities.first)
+                        : 0,
                   ),
                 ),
               ),
