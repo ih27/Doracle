@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/list_space_divider.dart';
 import '../entities/entity_manager.dart';
@@ -21,6 +22,11 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
   final CarouselController _carouselController1 = CarouselController();
   final CarouselController _carouselController2 = CarouselController();
 
+  bool _showAnimation = false;
+  late StateMachineController _riveController;
+  SMIBool? _animationTrigger;
+  SMINumber? _animationSelector;
+
   bool get isCompatibilityCheckEnabled =>
       selectedPet1 != null &&
       selectedPet2 != null &&
@@ -31,6 +37,24 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
     super.initState();
     _initializePets();
   }
+
+  @override
+  void dispose() {
+    _riveController.dispose();
+    super.dispose();
+  }
+
+  void initializeRiveController(Artboard artboard) {
+    final controller =
+        StateMachineController.fromArtboard(artboard, 'State Machine 1');
+    artboard.addController(controller!);
+    _riveController = controller;
+    _animationTrigger = controller.findInput<bool>('isPressed') as SMIBool;
+    _animationSelector = controller.findInput<double>('Selector') as SMINumber;
+    _animationSelector?.value = 2; // heart animation
+  }
+
+  void _animateHearts() => _animationTrigger?.value = true;
 
   Future<void> _initializePets() async {
     await _petManager.loadEntities();
@@ -114,6 +138,100 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
     }
   }
 
+  void _checkCompatibility() {
+    // setState(() {
+    //   _showAnimation = true;
+    // });
+    // Here you would typically call your compatibility check logic
+    debugPrint(
+        'Checking compatibility between ${selectedPet1!.name} and ${selectedPet2!.name}');
+    //_animateHearts();
+  }
+
+  Widget _buildMiddleSection() {
+    if (_showAnimation) {
+      return Container(
+        width: 100,
+        height: 100,
+        color: Colors.black,
+        child: Center(
+          child: SizedBox(
+            child: RiveAnimation.asset('assets/animations/globe.riv',
+                onInit: initializeRiveController,
+                fit: BoxFit.contain),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: MediaQuery.of(context).size.width,
+        height: 50,
+        decoration: const BoxDecoration(
+          color: AppTheme.primaryBackground,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.2,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed:
+                  isCompatibilityCheckEnabled ? _checkCompatibility : null,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Theme.of(context).textTheme.titleSmall?.color,
+                backgroundColor: isCompatibilityCheckEnabled
+                    ? AppTheme.primaryColor
+                    : AppTheme.accent1,
+                minimumSize: Size(MediaQuery.of(context).size.width * 0.5, 50),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                elevation: isCompatibilityCheckEnabled ? 3 : 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(
+                    color: isCompatibilityCheckEnabled
+                        ? Colors.transparent
+                        : AppTheme.primaryColor,
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Check Compatibility',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      letterSpacing: 0,
+                      color: isCompatibilityCheckEnabled
+                          ? AppTheme.info
+                          : AppTheme.secondaryText,
+                    ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.2,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -146,81 +264,7 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                   ),
                 ),
               ),
-              Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: 50,
-                decoration: const BoxDecoration(
-                  color: AppTheme.primaryBackground,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
-                      child: Container(
-                        width: MediaQuery.sizeOf(context).width * 0.2,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: isCompatibilityCheckEnabled
-                          ? () {
-                              // Implement compatibility check logic here
-                              debugPrint(
-                                  'Checking compatibility between ${selectedPet1!.name} and ${selectedPet2!.name}');
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor:
-                            Theme.of(context).textTheme.titleSmall?.color,
-                        backgroundColor: isCompatibilityCheckEnabled
-                            ? AppTheme.primaryColor
-                            : AppTheme.accent1,
-                        minimumSize:
-                            Size(MediaQuery.of(context).size.width * 0.5, 50),
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        elevation: isCompatibilityCheckEnabled ? 3 : 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(
-                            color: isCompatibilityCheckEnabled
-                                ? Colors.transparent
-                                : AppTheme.primaryColor,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        'Check Compatibility',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              letterSpacing: 0,
-                              color: isCompatibilityCheckEnabled
-                                  ? AppTheme.info
-                                  : AppTheme.secondaryText,
-                            ),
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
-                      child: Container(
-                        width: MediaQuery.sizeOf(context).width * 0.2,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildMiddleSection(),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 0, 10),
                 child: Container(
