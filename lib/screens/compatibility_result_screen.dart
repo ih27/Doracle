@@ -66,11 +66,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _buildOverallCompatibility(context),
-                _buildCompatibilityScores(context),
-                _buildAstrologicalCompatibility(context),
-                _buildPersonalizedRecommendations(context),
-                _buildImprovementPlan(context),
+                _buildOverallCompatibility(),
+                _buildCompatibilityScores(),
+                _buildAstrologicalCompatibility(),
+                _buildPersonalizedRecommendations(),
+                _buildImprovementPlan(),
               ].divide(height: 10),
             ),
           ),
@@ -79,7 +79,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     );
   }
 
-  Widget _buildOverallCompatibility(BuildContext context) {
+  Widget _buildOverallCompatibility() {
+    final overallPercent = _compatibilityResult['overall'] ?? 0;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 12),
       child: Column(
@@ -88,15 +89,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: CircularPercentIndicator(
-              percent: _compatibilityResult['overall'] ?? 0,
+              percent: overallPercent,
               radius: 60,
               lineWidth: 20,
               animation: true,
               animateFromLastPercent: true,
-              progressColor: AppTheme.secondaryColor,
+              progressColor: _getColorFor(overallPercent),
               backgroundColor: AppTheme.alternateColor,
               center: Text(
-                '${((_compatibilityResult['overall'] ?? 0) * 100).toInt()}%',
+                '${(overallPercent * 100).toInt()}%',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.bold,
@@ -117,22 +118,21 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     );
   }
 
-  Widget _buildCompatibilityScores(BuildContext context) {
+  Widget _buildCompatibilityScores() {
+    final temperamentPercent = _compatibilityResult['temperament'] ?? 0;
+    final excercisePercent = _compatibilityResult['exercise'] ?? 0;
+    final carePercent = _compatibilityResult['care'] ?? 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildScoreColumn(context, 'Temperament\nScore',
-            _compatibilityResult['temperament'] ?? 0, AppTheme.naplesYellow),
-        _buildScoreColumn(context, 'Exercise\nScore',
-            _compatibilityResult['exercise'] ?? 0, AppTheme.sandyBrown),
-        _buildScoreColumn(context, 'Care\nScore',
-            _compatibilityResult['care'] ?? 0, AppTheme.tomato),
+        _buildScoreColumn('Temperament\nScore', temperamentPercent),
+        _buildScoreColumn('Exercise\nScore', excercisePercent),
+        _buildScoreColumn('Care\nScore', carePercent),
       ],
     );
   }
 
-  Widget _buildScoreColumn(
-      BuildContext context, String label, double percent, Color color) {
+  Widget _buildScoreColumn(String label, double percent) {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
@@ -144,7 +144,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
             lineWidth: 15,
             animation: true,
             animateFromLastPercent: true,
-            progressColor: color,
+            progressColor: _getColorFor(percent),
             backgroundColor: AppTheme.alternateColor,
             center: Text(
               '${(percent * 100).toInt()}%',
@@ -170,7 +170,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Widget _buildCompatibilitySection(
-      BuildContext context, String title, String subtitle, String imagePath) {
+      String title, String subtitle, String imagePath) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -236,30 +236,40 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     );
   }
 
-  Widget _buildAstrologicalCompatibility(BuildContext context) {
+  Widget _buildAstrologicalCompatibility() {
     return _buildCompatibilitySection(
-      context,
       'Astrological',
       'Compatibility',
       'assets/images/owner_pet_02.png',
     );
   }
 
-  Widget _buildPersonalizedRecommendations(BuildContext context) {
+  Widget _buildPersonalizedRecommendations() {
     return _buildCompatibilitySection(
-      context,
       'Personalized',
       'Recommendations',
       'assets/images/owner_pet_03.png',
     );
   }
 
-  Widget _buildImprovementPlan(BuildContext context) {
+  Widget _buildImprovementPlan() {
     return _buildCompatibilitySection(
-      context,
       '7-Day Compatibility',
       'Improvement Plan',
       'assets/images/owner_pet_04.png',
     );
+  }
+
+  Color _getColorFor(double percent) {
+    Color progressColor = AppTheme.tomato;
+    final percentInt = (percent * 100).toInt();
+    if (percentInt >= 75) {
+      progressColor = AppTheme.secondaryColor;
+    } else if (percentInt >= 50) {
+      progressColor = AppTheme.naplesYellow;
+    } else if (percentInt >= 25) {
+      progressColor = AppTheme.sandyBrown;
+    }
+    return progressColor;
   }
 }
