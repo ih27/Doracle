@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'entity_model.dart';
 
-class Pet {
+class Pet implements Entity {
   final String id;
   final String name;
   final String species;
@@ -52,4 +53,28 @@ class Pet {
 
   static String listToJson(List<Pet> data) =>
       json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+  @override
+  dynamic get(String propertyName) {
+    switch (propertyName) {
+      case 'id':
+        return id;
+      case 'name':
+        return name;
+      case 'species':
+        return species;
+      case 'birthdate':
+        return birthdate;
+      case 'location':
+        return location;
+      case 'temperament':
+        return temperament;
+      case 'exerciseRequirement':
+        return exerciseRequirement;
+      case 'socializationNeed':
+        return socializationNeed;
+      default:
+        throw ArgumentError('Property $propertyName does not exist on Pet');
+    }
+  }
 }

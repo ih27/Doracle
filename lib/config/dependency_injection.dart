@@ -6,6 +6,7 @@ import '../repositories/fortune_content_repository.dart';
 import '../repositories/user_repository.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
+import '../services/compatibility_guesser_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
@@ -51,16 +52,14 @@ void setupDependencies() {
         '', // Initial empty persona name
         getIt<OpenAIService>(),
       ));
+  getIt.registerLazySingleton(
+      () => CompatibilityGuesser(getIt<OpenAIService>()));
   getIt.registerLazySingleton<OpenAIService>(
     () => OpenAIService(
       dotenv.env['OPENAI_API_KEY']!,
-      '', // Empty string as placeholder, will be set when creating an instance
+      '',
+      '', // Empty strings as placeholder, will be set when creating an instance
     ),
   );
   getIt.registerLazySingleton<HapticService>(() => HapticService());
-}
-
-// Helper function to create FortuneTeller with specific persona
-void setFortuneTellerPersona(String personaName, String personaInstructions) {
-  getIt<FortuneTeller>().setPersona(personaName, personaInstructions);
 }

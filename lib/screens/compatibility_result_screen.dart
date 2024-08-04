@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/list_space_divider.dart';
+import '../services/compatibility_guesser_service.dart';
 
-class CompatibilityResultScreen extends StatelessWidget {
+class CompatibilityResultScreen extends StatefulWidget {
   final dynamic entity1;
   final dynamic entity2;
 
@@ -15,7 +17,45 @@ class CompatibilityResultScreen extends StatelessWidget {
   });
 
   @override
+  _CompatibilityResultScreenState createState() =>
+      _CompatibilityResultScreenState();
+}
+
+class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
+  final CompatibilityGuesser _compatibilityGuesser =
+      getIt<CompatibilityGuesser>();
+  Map<String, dynamic> _compatibilityResult = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCompatibility();
+  }
+
+  Future<void> _fetchCompatibility() async {
+    try {
+      final result = await _compatibilityGuesser.getCompatibility(
+          widget.entity1, widget.entity2);
+      setState(() {
+        _compatibilityResult = result;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Handle error
+      debugPrint('Error fetching compatibility: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       body: Align(
         alignment: AlignmentDirectional.topCenter,
@@ -48,7 +88,7 @@ class CompatibilityResultScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: CircularPercentIndicator(
-              percent: 0.95,
+              percent: _compatibilityResult['overall'] ?? 0,
               radius: 60,
               lineWidth: 20,
               animation: true,
@@ -56,7 +96,7 @@ class CompatibilityResultScreen extends StatelessWidget {
               progressColor: AppTheme.secondaryColor,
               backgroundColor: AppTheme.alternateColor,
               center: Text(
-                '95%',
+                '${((_compatibilityResult['overall'] ?? 0) * 100).toInt()}%',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.bold,
@@ -65,7 +105,7 @@ class CompatibilityResultScreen extends StatelessWidget {
             ),
           ),
           Text(
-            'You\'re very harmonious!',
+            _compatibilityResult['astrology'] ?? '',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppTheme.primaryColor,
@@ -81,11 +121,12 @@ class CompatibilityResultScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildScoreColumn(
-            context, 'Temperament\nScore', 0.7, AppTheme.naplesYellow),
-        _buildScoreColumn(
-            context, 'Exercise\nScore', 0.45, AppTheme.sandyBrown),
-        _buildScoreColumn(context, 'Care\nScore', 0.25, AppTheme.tomato),
+        _buildScoreColumn(context, 'Temperament\nScore',
+            _compatibilityResult['temperament'] ?? 0, AppTheme.naplesYellow),
+        _buildScoreColumn(context, 'Exercise\nScore',
+            _compatibilityResult['exercise'] ?? 0, AppTheme.sandyBrown),
+        _buildScoreColumn(context, 'Care\nScore',
+            _compatibilityResult['care'] ?? 0, AppTheme.tomato),
       ],
     );
   }

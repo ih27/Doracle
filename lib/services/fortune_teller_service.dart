@@ -11,7 +11,7 @@ class FortuneTeller {
 
   void setPersona(String newPersonaName, String newInstructions) {
     personaName = newPersonaName;
-    openAIService.setInstructions(newInstructions);
+    openAIService.setFortuneTellerInstructions(newInstructions);
   }
 
   Stream<String> getFortune(String question) async* {
