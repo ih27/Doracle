@@ -40,16 +40,18 @@ class CompatibilityTexts {
   static const createPet = 'Create Pet';
   static const updatePet = 'Update Pet';
   static const deletePet = 'Delete Pet';
-  static const createPetSuccess = 'Pet created successfully.';
-  static const updatePetSuccess = 'Pet updated successfully.';
-  static const deletePetSuccess = 'Pet deleted successfully.';
   static const createOwner = 'Create Profile';
   static const updateOwner = 'Update Profile';
   static const deleteOwner = 'Delete Profile';
   static const resultTitle = 'Result';
+
+  static const createPetSuccess = 'Pet created successfully.';
+  static const updatePetSuccess = 'Pet updated successfully.';
+  static const deletePetSuccess = 'Pet deleted successfully.';
   static const createOwnerSuccess = 'Profile created successfully.';
   static const updateOwnerSuccess = 'Profile updated successfully.';
   static const deleteOwnerSuccess = 'Profile deleted successfully.';
+
   static const deleteConfirmation =
       'This action cannot be undone. Your data will be permanently deleted.';
   static const petNameError = 'Please enter a name for your pet';
@@ -57,6 +59,7 @@ class CompatibilityTexts {
   static const ownerNameError = 'Please enter a name';
   static const ownerGenderError = 'Please select a gender';
   static const requiredFieldsError = 'Please fill in all required fields.';
+
   static const ownerLivingSituationLabel = 'Living Situation';
   static const ownerLivingSituationChoices = [
     'Apartment',
@@ -108,6 +111,18 @@ class CompatibilityTexts {
     'Exercise motivation',
     'Other'
   ];
+
+  static const astrologyCardId = 'astrology';
+  static const astrologyCardTitle = 'Astrological';
+  static const astrologyCardSubtitle = 'Compatibility';
+
+  static const recommendationCardId = 'recommendation';
+  static const recommendationCardTitle = 'Personalized';
+  static const recommendationCardSubtitle = 'Recommendations';
+
+  static const improvementCardId = 'improvement';
+  static const improvementCardTitle = '7-Day Compatibility';
+  static const improvementCardSubtitle = 'Improvement Plan';
 }
 
 class HomeScreenTexts {

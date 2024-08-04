@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/compatibility_result_card_screen.dart';
 import '../screens/compatibility_result_screen.dart';
 import '../screens/owner_create_screen.dart';
 import '../screens/owner_edit_screen.dart';
@@ -36,6 +37,7 @@ class AppRouter extends StatelessWidget {
     '/owner/create': CompatibilityTexts.createOwner,
     '/owner/edit': CompatibilityTexts.updateOwner,
     '/result': CompatibilityTexts.resultTitle,
+    '/result/card': '',
   };
 
   String getRouteTitle(String route) {
@@ -91,6 +93,11 @@ class AppRouter extends StatelessWidget {
                   entity1: args['entity1'],
                   entity2: args['entity2'],
                 );
+            break;
+          case '/result/card':
+            final args = settings.arguments as Map<String, dynamic>;
+            builder = (BuildContext context) =>
+                CompatibilityResultCardScreen(cardId: args['cardId']);
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');

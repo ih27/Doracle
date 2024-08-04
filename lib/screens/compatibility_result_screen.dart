@@ -1,3 +1,4 @@
+import 'package:doracle/helpers/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -170,67 +171,78 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Widget _buildCompatibilitySection(
-      String title, String subtitle, String imagePath) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
-        height: 190,
-        decoration: BoxDecoration(
-          color: AppTheme.alternateColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppTheme.accent1,
-            width: 2,
-          ),
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 15),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AutoSizeText(
-                    title,
-                    minFontSize: 20,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontSize: 25,
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  AutoSizeText(
-                    subtitle,
-                    minFontSize: 20,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontSize: 25,
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
+      String cardId, String title, String subtitle, String imagePath) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/result/card',
+          arguments: {'cardId': cardId},
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Container(
+          height: 190,
+          decoration: BoxDecoration(
+            color: AppTheme.alternateColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppTheme.accent1,
+              width: 2,
             ),
-            Align(
-              alignment: AlignmentDirectional.bottomEnd,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.contain,
-                      alignment: AlignmentDirectional.bottomCenter,
-                      image: AssetImage(imagePath),
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 15),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AutoSizeText(
+                      title,
+                      minFontSize: 20,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontSize: 25,
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    AutoSizeText(
+                      subtitle,
+                      minFontSize: 20,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontSize: 25,
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: AlignmentDirectional.bottomEnd,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.contain,
+                        alignment: AlignmentDirectional.bottomCenter,
+                        image: AssetImage(imagePath),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -238,24 +250,27 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
   Widget _buildAstrologicalCompatibility() {
     return _buildCompatibilitySection(
-      'Astrological',
-      'Compatibility',
+      CompatibilityTexts.astrologyCardId,
+      CompatibilityTexts.astrologyCardTitle,
+      CompatibilityTexts.astrologyCardSubtitle,
       'assets/images/owner_pet_02.png',
     );
   }
 
   Widget _buildPersonalizedRecommendations() {
     return _buildCompatibilitySection(
-      'Personalized',
-      'Recommendations',
+      CompatibilityTexts.recommendationCardId,
+      CompatibilityTexts.recommendationCardTitle,
+      CompatibilityTexts.recommendationCardSubtitle,
       'assets/images/owner_pet_03.png',
     );
   }
 
   Widget _buildImprovementPlan() {
     return _buildCompatibilitySection(
-      '7-Day Compatibility',
-      'Improvement Plan',
+      CompatibilityTexts.improvementCardId,
+      CompatibilityTexts.improvementCardTitle,
+      CompatibilityTexts.improvementCardSubtitle,
       'assets/images/owner_pet_04.png',
     );
   }
