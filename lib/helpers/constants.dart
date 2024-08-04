@@ -46,6 +46,7 @@ class CompatibilityTexts {
   static const createOwner = 'Create Profile';
   static const updateOwner = 'Update Profile';
   static const deleteOwner = 'Delete Profile';
+  static const resultTitle = 'Result';
   static const createOwnerSuccess = 'Profile created successfully.';
   static const updateOwnerSuccess = 'Profile updated successfully.';
   static const deleteOwnerSuccess = 'Profile deleted successfully.';

@@ -1,7 +1,5 @@
-import 'package:doracle/helpers/constants.dart';
 import 'package:flutter/material.dart';
-import '../models/owner_model.dart';
-import '../models/pet_model.dart';
+import '../screens/compatibility_result_screen.dart';
 import '../screens/owner_create_screen.dart';
 import '../screens/owner_edit_screen.dart';
 import '../screens/pet_edit_screen.dart';
@@ -9,6 +7,7 @@ import '../screens/unified_fortune_screen.dart';
 import '../screens/owner_compatability_screen.dart';
 import '../screens/pet_compatability_screen.dart';
 import '../screens/pet_create_screen.dart';
+import '../helpers/constants.dart';
 import 'bond_buttons.dart';
 import 'fade_page_route.dart';
 
@@ -36,6 +35,7 @@ class AppRouter extends StatelessWidget {
     '/owner/compatability': CompatibilityTexts.genericTitle,
     '/owner/create': CompatibilityTexts.createOwner,
     '/owner/edit': CompatibilityTexts.updateOwner,
+    '/result': CompatibilityTexts.resultTitle,
   };
 
   String getRouteTitle(String route) {
@@ -69,8 +69,9 @@ class AppRouter extends StatelessWidget {
             builder = (BuildContext context) => const CreatePetScreen();
             break;
           case '/pet/edit':
-            builder = (BuildContext context) =>
-                UpdatePetScreen(pet: settings.arguments as Pet);
+            final args = settings.arguments as Map<String, dynamic>;
+            builder =
+                (BuildContext context) => UpdatePetScreen(pet: args['pet']);
             break;
           case '/owner/compatability':
             builder =
@@ -80,8 +81,16 @@ class AppRouter extends StatelessWidget {
             builder = (BuildContext context) => const CreateOwnerScreen();
             break;
           case '/owner/edit':
+            final args = settings.arguments as Map<String, dynamic>;
             builder = (BuildContext context) =>
-                UpdateOwnerScreen(owner: settings.arguments as Owner);
+                UpdateOwnerScreen(owner: args['owner']);
+            break;
+          case '/result':
+            final args = settings.arguments as Map<String, dynamic>;
+            builder = (BuildContext context) => CompatibilityResultScreen(
+                  entity1: args['entity1'],
+                  entity2: args['entity2'],
+                );
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');

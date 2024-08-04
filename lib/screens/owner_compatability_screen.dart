@@ -61,8 +61,13 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
   }
 
   void _editPet(Pet pet) async {
-    final result =
-        await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
+    final result = await Navigator.pushNamed(
+      context,
+      '/pet/edit',
+      arguments: {
+        'pet': pet,
+      },
+    );
     if (result != null) {
       if (result is Pet) {
         await _petManager.updateEntity(pet, result);
@@ -93,8 +98,13 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
   }
 
   void _editOwner(Owner owner) async {
-    final result =
-        await Navigator.pushNamed(context, '/owner/edit', arguments: owner);
+    final result = await Navigator.pushNamed(
+      context,
+      '/owner/edit',
+      arguments: {
+        'owner': owner,
+      },
+    );
     if (result != null) {
       if (result is Owner) {
         await _ownerManager.updateEntity(owner, result);
@@ -204,9 +214,14 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
                     ElevatedButton(
                       onPressed: isCompatibilityCheckEnabled
                           ? () {
-                              // Implement compatibility check logic here
-                              debugPrint(
-                                  'Checking compatibility between ${selectedPet!.name} and ${selectedOwner!.name}');
+                              Navigator.pushNamed(
+                                context,
+                                '/result',
+                                arguments: {
+                                  'entity1': selectedPet,
+                                  'entity2': selectedOwner,
+                                },
+                              );
                             }
                           : null,
                       style: ElevatedButton.styleFrom(

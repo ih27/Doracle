@@ -51,8 +51,13 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
   }
 
   Future<void> _editPet(Pet pet) async {
-    final result =
-        await Navigator.pushNamed(context, '/pet/edit', arguments: pet);
+    final result = await Navigator.pushNamed(
+      context,
+      '/pet/edit',
+      arguments: {
+        'pet': pet,
+      },
+    );
     if (result != null) {
       if (result is Pet) {
         await _petManager.updateEntity(pet, result);
@@ -171,9 +176,14 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
                     ElevatedButton(
                       onPressed: isCompatibilityCheckEnabled
                           ? () {
-                              // Implement compatibility check logic here
-                              debugPrint(
-                                  'Checking compatibility between ${selectedPet1!.name} and ${selectedPet2!.name}');
+                              Navigator.pushNamed(
+                                context,
+                                '/result',
+                                arguments: {
+                                  'entity1': selectedPet1,
+                                  'entity2': selectedPet2,
+                                },
+                              );
                             }
                           : null,
                       style: ElevatedButton.styleFrom(

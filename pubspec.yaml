@@ -40,6 +40,7 @@ dependencies:
   scrollable: ^1.0.5
   uuid: ^4.4.2
   geocoding: ^3.0.0
+  percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_lints: ^4.0.0
