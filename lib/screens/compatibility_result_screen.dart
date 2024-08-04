@@ -278,11 +278,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   Color _getColorFor(double percent) {
     Color progressColor = AppTheme.tomato;
     final percentInt = (percent * 100).toInt();
-    if (percentInt >= 75) {
+    if (percentInt > 75) {
       progressColor = AppTheme.secondaryColor;
-    } else if (percentInt >= 50) {
+    } else if (percentInt > 50) {
       progressColor = AppTheme.naplesYellow;
-    } else if (percentInt >= 25) {
+    } else if (percentInt > 25) {
       progressColor = AppTheme.sandyBrown;
     }
     return progressColor;
