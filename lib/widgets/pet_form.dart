@@ -55,6 +55,7 @@ class _PetFormState extends State<PetForm> {
 
   String? _nameError;
   String? _speciesError;
+  String? _temperamentError;
 
   @override
   void initState() {
@@ -332,7 +333,9 @@ class _PetFormState extends State<PetForm> {
         color: AppTheme.secondaryBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.alternateColor,
+          color: _temperamentError != null
+              ? AppTheme.error
+              : AppTheme.alternateColor,
           width: 1,
         ),
       ),
@@ -367,6 +370,14 @@ class _PetFormState extends State<PetForm> {
               ],
             ),
           ),
+          if (_temperamentError != null)
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                _temperamentError!,
+                style: const TextStyle(color: AppTheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -475,6 +486,9 @@ class _PetFormState extends State<PetForm> {
           } else {
             _temperament.remove(label);
           }
+          if (_temperamentError != null) {
+            _temperamentError = null;
+          }
         });
       },
       backgroundColor: AppTheme.alternateColor,
@@ -540,6 +554,13 @@ class _PetFormState extends State<PetForm> {
     if (_species == null) {
       setState(() {
         _speciesError = CompatibilityTexts.petSpeciesError;
+      });
+      isValid = false;
+    }
+
+    if (_temperament.isEmpty) {
+      setState(() {
+        _temperamentError = CompatibilityTexts.petTemperamentError;
       });
       isValid = false;
     }

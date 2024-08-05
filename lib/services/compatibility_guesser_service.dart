@@ -84,14 +84,6 @@ class CompatibilityGuesser {
   }
 
   double _calculatePlaytimeScore(Pet pet1, Pet pet2) {
-    // If exercise or socialization data is not available, return a neutral score
-    if (pet1.exerciseRequirement == 0 ||
-        pet2.exerciseRequirement == 0 ||
-        pet1.socializationNeed == 0 ||
-        pet2.socializationNeed == 0) {
-      return 0.5;
-    }
-
     double exerciseCompatibility =
         1 - (((pet1.exerciseRequirement - pet2.exerciseRequirement).abs()) / 2);
     double socialCompatibility =

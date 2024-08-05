@@ -140,7 +140,7 @@ class EntityCarousel<T> extends StatelessWidget {
         case 'bird':
           return 'assets/images/bird.png';
         default:
-          return 'assets/images/other.png';
+          return 'assets/images/fish.png';
       }
     } else {
       switch ((entity as Owner).gender.toLowerCase()) {

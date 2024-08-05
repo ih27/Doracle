@@ -51,11 +51,14 @@ class CompatibilityTexts {
   static const createOwnerSuccess = 'Profile created successfully.';
   static const updateOwnerSuccess = 'Profile updated successfully.';
   static const deleteOwnerSuccess = 'Profile deleted successfully.';
-
   static const deleteConfirmation =
       'This action cannot be undone. Your data will be permanently deleted.';
+
   static const petNameError = 'Please enter a name for your pet';
   static const petSpeciesError = 'Please select a species for your pet';
+  static const petTemperamentError =
+      'Please select at least one trait for your pet';
+
   static const ownerNameError = 'Please enter a name';
   static const ownerGenderError = 'Please select a gender';
   static const requiredFieldsError = 'Please fill in all required fields.';
