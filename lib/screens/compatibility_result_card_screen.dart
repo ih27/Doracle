@@ -135,7 +135,7 @@ class _CompatibilityResultCardScreenState
         );
       },
       body: Container(
-        color: AppTheme.lemonChiffon.withOpacity(0.3),
+        color: AppTheme.lemonChiffon,
         padding: const EdgeInsets.all(16.0),
         width: MediaQuery.of(context).size.width,
         child: Text(

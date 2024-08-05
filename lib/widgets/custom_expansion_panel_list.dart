@@ -20,7 +20,7 @@ class CustomExpansionPanelList extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: child.isExpanded
-                ? AppTheme.lemonChiffon.withOpacity(0.3)
+                ? AppTheme.lemonChiffon
                 : AppTheme.primaryBackground,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
