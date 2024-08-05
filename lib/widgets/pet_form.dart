@@ -192,7 +192,7 @@ class _PetFormState extends State<PetForm> {
                 _buildTypeChip('Dog', FontAwesomeIcons.dog),
                 _buildTypeChip('Cat', FontAwesomeIcons.cat),
                 _buildTypeChip('Bird', FontAwesomeIcons.crow),
-                _buildTypeChip('Other', FontAwesomeIcons.paw),
+                _buildTypeChip('Fish', FontAwesomeIcons.fish),
               ],
             ),
           ),

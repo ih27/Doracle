@@ -1,11 +1,12 @@
-import 'package:doracle/helpers/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/list_space_divider.dart';
+import '../helpers/constants.dart';
 import '../services/compatibility_guesser_service.dart';
+import '../models/pet_model.dart';
 
 class CompatibilityResultScreen extends StatefulWidget {
   final dynamic entity1;
@@ -36,8 +37,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
   Future<void> _fetchCompatibility() async {
     try {
-      final result = await _compatibilityGuesser.getCompatibility(
-          widget.entity1, widget.entity2);
+      final result = widget.entity2 is Pet
+          ? await _compatibilityGuesser.getPetCompatibility(
+              widget.entity1, widget.entity2)
+          : await _compatibilityGuesser.getCompatibility(
+              widget.entity1, widget.entity2);
       setState(() {
         _compatibilityResult = result;
         _isLoading = false;
@@ -107,7 +111,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
             ),
           ),
           Text(
-            _compatibilityResult['astrology'] ?? '',
+            _getLevelFor(overallPercent),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppTheme.primaryColor,
@@ -121,14 +125,20 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
   Widget _buildCompatibilityScores() {
     final temperamentPercent = _compatibilityResult['temperament'] ?? 0;
+    final playtimePercent = _compatibilityResult['playtime'] ?? 0;
     final excercisePercent = _compatibilityResult['exercise'] ?? 0;
+    final treatSharingPercent = _compatibilityResult['treatSharing'] ?? 0;
     final carePercent = _compatibilityResult['care'] ?? 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildScoreColumn('Temperament\nScore', temperamentPercent),
-        _buildScoreColumn('Exercise\nScore', excercisePercent),
-        _buildScoreColumn('Care\nScore', carePercent),
+        widget.entity2 is Pet
+            ? _buildScoreColumn('Playtime\nScore', playtimePercent)
+            : _buildScoreColumn('Exercise\nScore', excercisePercent),
+        widget.entity2 is Pet
+            ? _buildScoreColumn('Treat\nSharing', treatSharingPercent)
+            : _buildScoreColumn('Care\nScore', carePercent),
       ],
     );
   }
@@ -286,5 +296,20 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       progressColor = AppTheme.sandyBrown;
     }
     return progressColor;
+  }
+
+  String _getLevelFor(double percent) {
+    String level = 'They\'re like oil and water!';
+    final percentInt = (percent * 100).toInt();
+    if (percentInt > 80) {
+      level = 'They\'re very harmonious!';
+    } else if (percentInt > 60) {
+      level = 'They\'re a promising pair!';
+    } else if (percentInt > 40) {
+      level = 'They\'re finding their rhythm.';
+    } else if (percentInt > 20) {
+      level = 'There\'s room for improvement.';
+    }
+    return level;
   }
 }
