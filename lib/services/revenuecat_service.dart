@@ -41,11 +41,33 @@ class RevenueCatService {
     }
   }
 
+  Future<bool> buySubscription(String subscriptionType) async {
+    try {
+      await ensureInitialized();
+      // IMPLEMENT LATER
+      return true;
+    } catch (e) {
+      debugPrint("Buy subscription error: $e");
+      return false;
+    }
+  }
+
   Future<Map<String, String>> fetchPrices() async {
     try {
       await ensureInitialized();
       final products = await _getProducts();
       return {for (var p in products) p.identifier: p.priceString};
+    } catch (e) {
+      debugPrint("Error fetching prices: $e");
+      return {};
+    }
+  }
+
+  Future<Map<String, String>> fetchSubscriptionPrices() async {
+    try {
+      await ensureInitialized();
+      // IMPLEMENT LATER
+      return {'monthly' : '\$2.99', 'annual' : '\$2.50'};
     } catch (e) {
       debugPrint("Error fetching prices: $e");
       return {};

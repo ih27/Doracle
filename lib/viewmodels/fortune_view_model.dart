@@ -30,6 +30,7 @@ class FortuneViewModel extends ChangeNotifier {
     await Future.wait([
       _initializeFortuneTeller(),
       _fetchRandomQuestions(),
+      _fetchPricesIfNeeded(),
     ]);
     welcomeMessage = _getRandomWelcomeMessage();
     notifyListeners();
@@ -37,7 +38,8 @@ class FortuneViewModel extends ChangeNotifier {
 
   Future<void> _initializeFortuneTeller() async {
     final personaData = await _fortuneContentRepository.getRandomPersona();
-    _fortuneTeller.setPersona(personaData['name']!, personaData['instructions']!);
+    _fortuneTeller.setPersona(
+        personaData['name']!, personaData['instructions']!);
   }
 
   Future<void> _fetchRandomQuestions() async {
@@ -71,10 +73,10 @@ class FortuneViewModel extends ChangeNotifier {
 
   int getRemainingQuestionsCount() => _userService.getRemainingQuestionsCount();
 
-  bool hasRunOutOfQuestions() => _userService.hasRunOutOfQuestions();
+  bool _hasRunOutOfQuestions() => _userService.hasRunOutOfQuestions();
 
-  Future<void> fetchPricesIfNeeded() async {
-    if (hasRunOutOfQuestions() && cachedPrices.isEmpty) {
+  Future<void> _fetchPricesIfNeeded() async {
+    if (_hasRunOutOfQuestions() && cachedPrices.isEmpty) {
       try {
         await _purchaseService.ensureInitialized();
         cachedPrices = await _purchaseService.fetchPrices();

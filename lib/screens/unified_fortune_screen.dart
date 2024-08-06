@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:typewritertext/typewritertext.dart';
+import '../helpers/purchase_utils.dart';
 import '../viewmodels/fortune_view_model.dart';
 import '../mixins/fortune_animation_mixin.dart';
 import '../mixins/shake_detector_mixin.dart';
@@ -119,7 +120,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   Future<void> _handleQuestionSubmission(String question) async {
     if (_viewModel.getRemainingQuestionsCount() <= 0) {
-      _showOutOfQuestionsOverlay();
+      _showIAPOverlay();
       return;
     }
 
@@ -189,39 +190,18 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     );
   }
 
-  void _showOutOfQuestionsOverlay() {
-    showGeneralDialog(
+  void _showIAPOverlay() {
+    showCustomOverlay<int>(
       context: context,
-      barrierDismissible: false,
-      pageBuilder: (BuildContext dialogContext, Animation<double> animation,
-          Animation<double> secondaryAnimation) {
-        return SafeArea(
-          child: Center(
-            child: SizedBox(
-              width: MediaQuery.of(dialogContext).size.width * 0.95,
-              height: MediaQuery.of(dialogContext).size.height * 0.65,
-              child: OutOfQuestionsOverlay(
-                onClose: () => Navigator.of(dialogContext).pop(),
-                onPurchase: (int questions) {
-                  Navigator.of(dialogContext).pop();
-                  _handlePurchase(questions);
-                },
-                prices: _viewModel.cachedPrices,
-              ),
-            ),
-          ),
-        );
-      },
-      transitionDuration: FortuneConstants.outOfQuestionsPopupDelay,
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
-          child: FadeTransition(
-            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
-            child: child,
-          ),
-        );
-      },
+      heightFactor: 0.65,
+      overlayBuilder: (dialogContext, close) => OutOfQuestionsOverlay(
+        onClose: close,
+        onPurchase: (int questions) {
+          close();
+          _handlePurchase(questions);
+        },
+        prices: _viewModel.cachedPrices,
+      ),
     );
   }
 
@@ -315,7 +295,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                 focusNode: _questionFocusNode,
                 onSubmitted: _onQuestionSubmitted,
                 remainingQuestions: _viewModel.getRemainingQuestionsCount(),
-                onShowOutOfQuestions: _showOutOfQuestionsOverlay,
+                onShowOutOfQuestions: _showIAPOverlay,
               ),
             ),
           ],

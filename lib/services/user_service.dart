@@ -1,9 +1,8 @@
+import 'package:flutter/foundation.dart';
+import 'haptic_service.dart';
 import '../config/dependency_injection.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
-import 'package:flutter/foundation.dart';
-
-import 'haptic_service.dart';
 
 class UserService extends ValueNotifier<AppUser?> {
   final UserRepository _userRepository;
@@ -19,8 +18,9 @@ class UserService extends ValueNotifier<AppUser?> {
 
     if (userData != null) {
       try {
-        value = AppUser.fromMap({...userData, 'id': userId, 'canVibrate': currentCanVibrate});
-        
+        value = AppUser.fromMap(
+            {...userData, 'id': userId, 'canVibrate': currentCanVibrate});
+
         // Update Firestore if the canVibrate status has changed
         if (userData['canVibrate'] != currentCanVibrate) {
           await updateUserField('canVibrate', currentCanVibrate);
@@ -63,6 +63,17 @@ class UserService extends ValueNotifier<AppUser?> {
     if (value != null) {
       value!.addPurchaseToHistory({
         'questionCount': questionCount,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+      await _userRepository.updateUser(value!.id, value!.toMap());
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateSubscriptionHistory(String subscriptionType) async {
+    if (value != null) {
+      value!.addPurchaseToHistory({
+        'subscriptionType': subscriptionType,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
       await _userRepository.updateUser(value!.id, value!.toMap());

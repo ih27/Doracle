@@ -152,7 +152,7 @@ class FortuneConstants {
   static const double inputFieldFixedHeight = 66.0;
 
   static const Duration charDelay = Duration(milliseconds: 5);
-  static const Duration outOfQuestionsPopupDelay = Duration(milliseconds: 200);
+  static const Duration iapPopupDelay = Duration(milliseconds: 200);
   static const Duration carouselFadeoutDelay = Duration(milliseconds: 150);
 }
 
