@@ -46,7 +46,9 @@ void setupDependencies() {
   );
   getIt.registerLazySingleton<UserService>(
       () => UserService(getIt<UserRepository>()));
-  getIt.registerLazySingleton<RevenueCatService>(() => RevenueCatService());
+  getIt.registerLazySingleton<RevenueCatService>(() => RevenueCatService(
+        getIt<AuthService>(),
+      ));
   getIt.registerLazySingleton<FortuneTeller>(() => FortuneTeller(
         getIt<UserService>(),
         '', // Initial empty persona name

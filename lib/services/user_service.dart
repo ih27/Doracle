@@ -72,7 +72,7 @@ class UserService extends ValueNotifier<AppUser?> {
 
   Future<void> updateSubscriptionHistory(String subscriptionType) async {
     if (value != null) {
-      value!.addPurchaseToHistory({
+      value!.addSubscriptionToHistory({
         'subscriptionType': subscriptionType,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });

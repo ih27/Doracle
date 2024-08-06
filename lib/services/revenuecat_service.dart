@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_service.dart';
 
 class RevenueCatService {
+  final AuthService _authService;
   final String _lastUserIdKey = 'last_revenue_cat_user_id';
   final Map<int, String> _productsHash = {
     10: 'small_treat',
@@ -17,9 +19,12 @@ class RevenueCatService {
   bool _isEntitled = false;
   List<StoreProduct>? _cachedProducts;
   Map<String, Package> _cachedSubscriptions = {};
+
   List<String> get _products => _productsHash.values.toList();
   Completer<void>? _initializationCompleter;
   bool get isEntitled => _isEntitled;
+
+  RevenueCatService(this._authService);
 
   Future<bool> _getEntitlementStatus() async {
     final customerInfo = await Purchases.getCustomerInfo();
@@ -122,7 +127,7 @@ class RevenueCatService {
 
       // Update the entitlement status after initialization
       _isEntitled = await _getEntitlementStatus();
-      
+
       _initializationCompleter!.complete();
     } catch (e) {
       debugPrint("Error in initializeAndLogin: $e");
@@ -140,8 +145,16 @@ class RevenueCatService {
       // If not initialized, attempt to initialize with the last known user ID
       String? userId = await _getLastLoggedInUserId();
       if (userId == null) {
-        throw StateError(
-            'RevenueCatService cannot auto-initialize without a user ID. Call initializeAndLogin first.');
+        final currentUser = _authService.currentUser;
+        if (currentUser != null) {
+          userId = currentUser.uid;
+          // Update the last logged in user ID in SharedPreferences
+          await _setLastLoggedInUserId(userId);
+        } else {
+          // If still no user, then throw the StateError
+          throw StateError(
+              'RevenueCatService cannot auto-initialize without a user ID. Call initializeAndLogin first.');
+        }
       }
       return initializeAndLogin(userId);
     }
