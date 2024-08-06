@@ -45,10 +45,14 @@ class _CompatibilityResultCardScreenState
             padding: const EdgeInsets.fromLTRB(25, 10, 25, 0),
             child: CustomExpansionPanelList(
               expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  _isExpanded[index] = !_isExpanded[index];
-                });
+                if (_purchaseService.isEntitled) {
+                  setState(() {
+                    _isExpanded[index] = !_isExpanded[index];
+                  });
+                }
               },
+              onNonExpandableTap:
+                  _purchaseService.isEntitled ? null : _showIAPOverlay,
               children: [
                 _buildCustomExpansionPanel(
                   0,
@@ -72,38 +76,39 @@ class _CompatibilityResultCardScreenState
             ),
           ),
           const SizedBox(height: 25),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: 160,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _purchaseButton(),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: 275,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Detailed compatibility reports.',
-                            style: Theme.of(context).textTheme.bodyMedium),
-                        Text('In-depth practical compatibility analysis.',
-                            style: Theme.of(context).textTheme.bodyMedium),
-                        Text(
-                            'Comprehensive astrological compatibility breakdown.',
-                            style: Theme.of(context).textTheme.bodyMedium),
-                      ],
+          if (!_purchaseService.isEntitled)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: 160,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _purchaseButton(),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: 275,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Detailed compatibility reports.',
+                              style: Theme.of(context).textTheme.bodyMedium),
+                          Text('In-depth practical compatibility analysis.',
+                              style: Theme.of(context).textTheme.bodyMedium),
+                          Text(
+                              'Comprehensive astrological compatibility breakdown.',
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -113,6 +118,7 @@ class _CompatibilityResultCardScreenState
       int index, String header, String summary, String details) {
     return CustomExpansionPanel(
       isExpanded: _isExpanded[index],
+      canExpand: _purchaseService.isEntitled,
       headerBuilder: (BuildContext context, bool isExpanded) {
         return Container(
           color:

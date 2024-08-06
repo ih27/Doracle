@@ -4,11 +4,13 @@ import '../config/theme.dart';
 class CustomExpansionPanelList extends StatelessWidget {
   final List<CustomExpansionPanel> children;
   final ExpansionPanelCallback expansionCallback;
+  final VoidCallback? onNonExpandableTap;
 
   const CustomExpansionPanelList({
     super.key,
     required this.children,
     required this.expansionCallback,
+    this.onNonExpandableTap,
   });
 
   @override
@@ -35,7 +37,9 @@ class CustomExpansionPanelList extends StatelessWidget {
           child: Column(
             children: [
               InkWell(
-                onTap: () => expansionCallback(index, child.isExpanded),
+                onTap: child.canExpand
+                    ? () => expansionCallback(index, child.isExpanded)
+                    : onNonExpandableTap,
                 child: child.headerBuilder(context, child.isExpanded),
               ),
               if (child.isExpanded) child.body,
@@ -51,10 +55,12 @@ class CustomExpansionPanel {
   final Widget Function(BuildContext, bool) headerBuilder;
   final Widget body;
   final bool isExpanded;
+  final bool canExpand;
 
   CustomExpansionPanel({
     required this.headerBuilder,
     required this.body,
     this.isExpanded = false,
+    this.canExpand = true,
   });
 }

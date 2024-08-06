@@ -21,6 +21,15 @@ class RevenueCatService {
   Completer<void>? _initializationCompleter;
   bool get isEntitled => _isEntitled;
 
+  Future<bool> _getEntitlementStatus() async {
+    final customerInfo = await Purchases.getCustomerInfo();
+    if (customerInfo.entitlements.active.isNotEmpty) {
+      debugPrint(customerInfo.entitlements.active.toString());
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> purchaseProduct(int questionCount) async {
     try {
       await ensureInitialized();
@@ -110,6 +119,10 @@ class RevenueCatService {
       } else {
         await _loginIfNeeded(userId);
       }
+
+      // Update the entitlement status after initialization
+      _isEntitled = await _getEntitlementStatus();
+      
       _initializationCompleter!.complete();
     } catch (e) {
       debugPrint("Error in initializeAndLogin: $e");

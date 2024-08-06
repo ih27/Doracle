@@ -9,6 +9,7 @@ class AppUser extends ChangeNotifier {
   List<Map<String, dynamic>> questionHistory;
   List<Map<String, dynamic>> purchaseHistory;
   bool canVibrate;
+  bool isEntitled;
   static const _remainingQuestionsCount = 50;
   static const _totalQuestionsAsked = 0;
   dynamic lastQuestionTimestamp;
@@ -18,6 +19,7 @@ class AppUser extends ChangeNotifier {
     required this.id,
     required this.email,
     required this.canVibrate,
+    this.isEntitled = false,
     this.remainingQuestionsCount = _remainingQuestionsCount,
     this.totalQuestionsAsked = _totalQuestionsAsked,
     this.questionHistory = const [],
@@ -40,6 +42,9 @@ class AppUser extends ChangeNotifier {
       case 'canVibrate':
         canVibrate = value as bool;
         break;
+      case 'isEntitled':
+        isEntitled = value as bool;
+        break;
     }
     notifyListeners();
   }
@@ -59,11 +64,19 @@ class AppUser extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addSubscriptionToHistory(Map<String, dynamic> purchase) {
+    purchaseHistory.add(purchase);
+    isEntitled = true;
+    lastPurchaseTimestamp = FieldValue.serverTimestamp();
+    notifyListeners();
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'email': email,
       'canVibrate': canVibrate,
+      'isEntitled': isEntitled,
       'remainingQuestionsCount': remainingQuestionsCount,
       'totalQuestionsAsked': totalQuestionsAsked,
       'questionHistory': questionHistory,
@@ -78,6 +91,7 @@ class AppUser extends ChangeNotifier {
       id: map['id'] ?? '',
       email: map['email'] ?? '',
       canVibrate: map['canVibrate'] ?? false,
+      isEntitled: map['isEntitled'] ?? false,
       remainingQuestionsCount:
           map['remainingQuestionsCount'] ?? _remainingQuestionsCount,
       totalQuestionsAsked: map['totalQuestionsAsked'] ?? _totalQuestionsAsked,
