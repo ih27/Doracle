@@ -14,9 +14,12 @@ class RevenueCatService {
   };
   String? _lastInitializedUserId;
   bool _isConfigured = false;
+  bool _isEntitled = false;
   List<StoreProduct>? _cachedProducts;
+  Map<String, Package> _cachedSubscriptions = {};
   List<String> get _products => _productsHash.values.toList();
   Completer<void>? _initializationCompleter;
+  bool get isEntitled => _isEntitled;
 
   Future<bool> purchaseProduct(int questionCount) async {
     try {
@@ -42,13 +45,18 @@ class RevenueCatService {
   }
 
   Future<bool> buySubscription(String subscriptionType) async {
+    debugPrint('Trying to purchase: $subscriptionType');
     try {
       await ensureInitialized();
-      // IMPLEMENT LATER
-      return true;
+      CustomerInfo customerInfo = await Purchases.purchasePackage(
+          _cachedSubscriptions[subscriptionType]!);
+      if (customerInfo.entitlements.active.isNotEmpty) {
+        _isEntitled = true;
+      }
+      return _isEntitled;
     } catch (e) {
       debugPrint("Buy subscription error: $e");
-      return false;
+      return _isEntitled;
     }
   }
 
@@ -66,16 +74,20 @@ class RevenueCatService {
   Future<Map<String, String>> fetchSubscriptionPrices() async {
     try {
       await ensureInitialized();
-      // IMPLEMENT LATER
-      return {'monthly' : '\$2.99', 'annual' : '\$2.50'};
+      final subscriptions = await _getSubscriptions();
+      return {
+        for (var p in subscriptions.values)
+          p.identifier: p.storeProduct.priceString
+      };
     } catch (e) {
-      debugPrint("Error fetching prices: $e");
+      debugPrint("Error fetching subscription prices: $e");
       return {};
     }
   }
 
   void clearProductCache() {
     _cachedProducts = null;
+    _cachedSubscriptions = {};
   }
 
   Future<void> initializeAndLogin(String userId) async {
@@ -130,6 +142,22 @@ class RevenueCatService {
     } catch (e) {
       debugPrint("Error getting products: $e");
       return [];
+    }
+  }
+
+  Future<Map<String, Package>> _getSubscriptions() async {
+    try {
+      Offerings offerings = await Purchases.getOfferings();
+      if (offerings.current != null &&
+          offerings.current?.monthly != null &&
+          offerings.current?.annual != null) {
+        _cachedSubscriptions['monthly'] = offerings.current!.monthly!;
+        _cachedSubscriptions['annual'] = offerings.current!.annual!;
+      }
+      return _cachedSubscriptions;
+    } catch (e) {
+      debugPrint("Error getting subscriptions: $e");
+      return {};
     }
   }
 

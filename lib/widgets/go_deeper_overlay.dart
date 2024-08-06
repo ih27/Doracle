@@ -1,6 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:doracle/helpers/string_extensions.dart';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../helpers/purchase_utils.dart';
 
 class GoDeeperOverlay extends StatelessWidget {
   final VoidCallback onClose;
@@ -95,14 +97,14 @@ class GoDeeperOverlay extends StatelessWidget {
         children: [
           _buildSubscriptionCard(
             context,
-            'Monthly',
-            prices['monthly'] ?? '\$2.99',
+            'monthly',
+            prices['\$rc_monthly'] ?? '\$2.99',
             false,
           ),
           _buildSubscriptionCard(
             context,
-            'Annual',
-            prices['annual'] ?? '\$2.50',
+            'annual',
+            convertAnnualToMonthly(prices['\$rc_annual']) ?? '\$2.49',
             true,
           ),
         ],
@@ -111,7 +113,7 @@ class GoDeeperOverlay extends StatelessWidget {
   }
 
   Widget _buildSubscriptionCard(
-      BuildContext context, String title, String price, bool isBestValue) {
+      BuildContext context, String packageId, String price, bool isBestValue) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -142,7 +144,7 @@ class GoDeeperOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$title\nSubscription',
+                '${packageId.capitalize()}\nSubscription',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontSize: 20,
@@ -170,7 +172,7 @@ class GoDeeperOverlay extends StatelessWidget {
                 ],
               ),
               ElevatedButton(
-                onPressed: () => onPurchase(title),
+                onPressed: () => onPurchase(packageId),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isBestValue
                       ? AppTheme.secondaryColor
