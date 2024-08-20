@@ -79,9 +79,9 @@ class CompatibilityTexts {
   ];
   static const ownerInteractionLevelLabel = 'Desired Interaction Level';
   static const ownerInteractionLevelChoices = [
-    'Low Maintenance',
-    'Regular Attention',
-    'Constant Companion',
+    'Low',
+    'Moderate',
+    'High',
   ];
   static const ownerWorkScheduleLabel = 'Work Schedule';
   static const ownerWorkScheduleChoices = [
@@ -93,7 +93,7 @@ class CompatibilityTexts {
   static const ownerPetExperienceChoices = [
     'First-time',
     'Some experience',
-    'Full-time away',
+    'Expert',
   ];
   static const ownerGroomingCommitmentLabel = 'Grooming Commitment';
   static const ownerGroomingCommitmentChoices = [
@@ -124,7 +124,7 @@ class CompatibilityTexts {
   static const recommendationCardSubtitle = 'Recommendations';
 
   static const improvementCardId = 'improvement';
-  static const improvementCardTitle = '7-Day Compatibility';
+  static const improvementCardTitle = '10-Day Compatibility';
   static const improvementCardSubtitle = 'Improvement Plan';
 }
 

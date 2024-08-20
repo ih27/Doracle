@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../helpers/string_extensions.dart';
 
 class SubscribeSuccessPopup extends StatelessWidget {
   final String subscriptionType;
@@ -26,7 +27,7 @@ class SubscribeSuccessPopup extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '$subscriptionType Subscription',
+              '${subscriptionType.capitalize()} Subscription',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppTheme.success,

@@ -91,7 +91,7 @@ class GoDeeperOverlay extends StatelessWidget {
 
   Widget _buildSubscriptionOptions(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -118,7 +118,7 @@ class GoDeeperOverlay extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: MediaQuery.of(context).size.width * 0.4,
+          width: MediaQuery.of(context).size.width * 0.42,
           height: 280,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(

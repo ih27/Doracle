@@ -221,7 +221,7 @@ class _CompatibilityResultCardScreenState
   void _showIAPOverlay() {
     showCustomOverlay<String>(
       context: context,
-      heightFactor: 0.53,
+      heightFactor: 0.55,
       overlayBuilder: (dialogContext, close) => GoDeeperOverlay(
         onClose: close,
         onPurchase: (String subscriptionType) {
