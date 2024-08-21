@@ -33,15 +33,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchCompatibility();
+    _fetchScores();
   }
 
-  Future<void> _fetchCompatibility() async {
+  Future<void> _fetchScores() async {
     try {
       final result = widget.entity2 is Owner
-          ? await _compatibilityGuesser.getPetOwnerCompatibility(
+          ? await _compatibilityGuesser.getPetOwnerScores(
               widget.entity1 as Pet, widget.entity2 as Owner)
-          : await _compatibilityGuesser.getPetCompatibility(
+          : await _compatibilityGuesser.getPetPetScores(
               widget.entity1 as Pet, widget.entity2 as Pet);
       setState(() {
         _compatibilityResult = result;
@@ -49,7 +49,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       });
     } catch (e) {
       // Handle error
-      debugPrint('Error fetching compatibility: $e');
+      debugPrint('Error fetching scores: $e');
       setState(() {
         _isLoading = false;
       });
