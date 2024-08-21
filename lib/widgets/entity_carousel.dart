@@ -32,35 +32,45 @@ class EntityCarousel<T> extends StatelessWidget {
   }
 
   Widget _buildCarousel(BuildContext context) {
-    List<Widget> items =
-        entities.map((entity) => _buildEntityItem(context, entity)).toList();
-    if (entities.length < maxEntities) {
-      items.add(_buildAddItem(context));
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth = constraints.maxWidth * 0.4;
+        final itemHeight = itemWidth; // Square aspect ratio
 
-    return CarouselSlider.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index, _) => items[index],
-      carouselController: carouselController,
-      options: CarouselOptions(
-        viewportFraction: 0.5,
-        enlargeCenterPage: true,
-        enlargeFactor: 0.2,
-        enableInfiniteScroll: false,
-        pageSnapping: true,
-        scrollPhysics: const PageScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        initialPage: initialPage,
-        onPageChanged: (index, reason) {
-          if (onPageChanged != null) {
-            onPageChanged!(index);
-          }
-        },
-      ),
+        List<Widget> carouselItems = entities
+            .map((entity) =>
+                _buildEntityItem(context, entity, itemWidth, itemHeight))
+            .toList();
+
+        if (entities.length < maxEntities) {
+          carouselItems.add(_buildAddItem(context, itemWidth, itemHeight));
+        }
+
+        return CarouselSlider(
+          items: carouselItems,
+          carouselController: carouselController,
+          options: CarouselOptions(
+            viewportFraction: 0.5,
+            enlargeCenterPage: true,
+            enlargeFactor: 0.1,
+            enableInfiniteScroll: false,
+            pageSnapping: true,
+            scrollPhysics: const PageScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            initialPage: initialPage,
+            onPageChanged: (index, reason) {
+              if (onPageChanged != null) {
+                onPageChanged!(index);
+              }
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildEntityItem(BuildContext context, T entity) {
+  Widget _buildEntityItem(
+      BuildContext context, T entity, double width, double height) {
     String name = isPet ? (entity as Pet).name : (entity as Owner).name;
     String imageAsset = _getEntityImage(entity);
 
@@ -72,8 +82,8 @@ class EntityCarousel<T> extends StatelessWidget {
           alignment: Alignment.topRight,
           children: [
             Container(
-              width: 170,
-              height: 170,
+              width: width,
+              height: height,
               decoration: BoxDecoration(
                 color: AppTheme.alternateColor,
                 image: DecorationImage(
@@ -130,31 +140,7 @@ class EntityCarousel<T> extends StatelessWidget {
     );
   }
 
-  String _getEntityImage(T entity) {
-    if (isPet) {
-      switch ((entity as Pet).species.toLowerCase()) {
-        case 'dog':
-          return 'assets/images/dog.png';
-        case 'cat':
-          return 'assets/images/cat.png';
-        case 'bird':
-          return 'assets/images/bird.png';
-        default:
-          return 'assets/images/fish.png';
-      }
-    } else {
-      switch ((entity as Owner).gender.toLowerCase()) {
-        case 'male':
-          return 'assets/images/owner_he.png';
-        case 'female':
-          return 'assets/images/owner_she.png';
-        default:
-          return 'assets/images/owner_other.png';
-      }
-    }
-  }
-
-  Widget _buildAddItem(BuildContext context) {
+  Widget _buildAddItem(BuildContext context, double width, double height) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -162,8 +148,8 @@ class EntityCarousel<T> extends StatelessWidget {
         GestureDetector(
           onTap: onAddEntity,
           child: Container(
-            width: 170,
-            height: 170,
+            width: width,
+            height: height,
             decoration: BoxDecoration(
               color: AppTheme.alternateColor,
               image: const DecorationImage(
@@ -194,5 +180,29 @@ class EntityCarousel<T> extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _getEntityImage(T entity) {
+    if (isPet) {
+      switch ((entity as Pet).species.toLowerCase()) {
+        case 'dog':
+          return 'assets/images/dog.png';
+        case 'cat':
+          return 'assets/images/cat.png';
+        case 'bird':
+          return 'assets/images/bird.png';
+        default:
+          return 'assets/images/fish.png';
+      }
+    } else {
+      switch ((entity as Owner).gender.toLowerCase()) {
+        case 'male':
+          return 'assets/images/owner_he.png';
+        case 'female':
+          return 'assets/images/owner_she.png';
+        default:
+          return 'assets/images/owner_other.png';
+      }
+    }
   }
 }

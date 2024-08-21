@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
-import '../helpers/pet_form_utils.dart';
+import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import '../models/pet_model.dart';
@@ -18,6 +18,8 @@ class UpdatePetScreen extends StatelessWidget {
       initialSpecies: pet.species,
       initialBirthdate:
           pet.birthdate != null ? parseDateString(pet.birthdate!) : null,
+      initialBirthtime:
+          pet.birthtime != null ? parseTimeString(pet.birthtime!) : null,
       initialLocation: pet.location,
       initialTemperament: pet.temperament,
       initialExerciseRequirement: pet.exerciseRequirement,
@@ -36,6 +38,9 @@ class UpdatePetScreen extends StatelessWidget {
       species: formData['species'],
       birthdate: formData['birthdate'] != null
           ? formatDate(formData['birthdate'])
+          : null,
+      birthtime: formData['birthtime'] != null
+          ? formatTime(formData['birthtime'])
           : null,
       location: formData['location'],
       temperament: formData['temperament'],
