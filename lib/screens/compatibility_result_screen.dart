@@ -5,6 +5,7 @@ import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/list_space_divider.dart';
 import '../helpers/constants.dart';
+import '../models/owner_model.dart';
 import '../services/compatibility_guesser_service.dart';
 import '../models/pet_model.dart';
 
@@ -37,11 +38,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
   Future<void> _fetchCompatibility() async {
     try {
-      final result = widget.entity2 is Pet
-          ? await _compatibilityGuesser.getPetCompatibility(
-              widget.entity1, widget.entity2)
-          : await _compatibilityGuesser.getCompatibility(
-              widget.entity1, widget.entity2);
+      final result = widget.entity2 is Owner
+          ? await _compatibilityGuesser.getPetOwnerCompatibility(
+              widget.entity1 as Pet, widget.entity2 as Owner)
+          : await _compatibilityGuesser.getPetCompatibility(
+              widget.entity1 as Pet, widget.entity2 as Pet);
       setState(() {
         _compatibilityResult = result;
         _isLoading = false;
@@ -126,7 +127,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   Widget _buildCompatibilityScores() {
     final temperamentPercent = _compatibilityResult['temperament'] ?? 0;
     final playtimePercent = _compatibilityResult['playtime'] ?? 0;
-    final excercisePercent = _compatibilityResult['exercise'] ?? 0;
+    final lifestyleMatchPercent = _compatibilityResult['lifestyle'] ?? 0;
     final treatSharingPercent = _compatibilityResult['treatSharing'] ?? 0;
     final carePercent = _compatibilityResult['care'] ?? 0;
     return Row(
@@ -135,7 +136,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
         _buildScoreColumn('Temperament\nScore', temperamentPercent),
         widget.entity2 is Pet
             ? _buildScoreColumn('Playtime\nScore', playtimePercent)
-            : _buildScoreColumn('Exercise\nScore', excercisePercent),
+            : _buildScoreColumn('Lifestyle\nMatch', lifestyleMatchPercent),
         widget.entity2 is Pet
             ? _buildScoreColumn('Treat\nSharing', treatSharingPercent)
             : _buildScoreColumn('Care\nScore', carePercent),

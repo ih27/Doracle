@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/owner_model.dart';
 import '../models/pet_model.dart';
 import 'openai_service.dart';
 
@@ -33,6 +34,181 @@ class CompatibilityGuesser {
       'treatSharing': treatSharingScore,
       //...additionalInfo,
     };
+  }
+
+  Future<Map<String, dynamic>> getPetOwnerCompatibility(
+      Pet pet, Owner owner) async {
+    double lifestyleMatchScore = _calculateLifestyleMatchScore(pet, owner);
+    double careRequirementsScore = _calculateCareRequirementsScore(pet, owner);
+    double temperamentCompatibilityScore =
+        _calculateTemperamentCompatibilityScore(pet, owner);
+
+    double overallScore = (lifestyleMatchScore +
+            careRequirementsScore +
+            temperamentCompatibilityScore) /
+        3;
+
+    //String prompt = _generatePetOwnerPrompt(pet, owner, overallScore);
+    String prompt = _generatePrompt(pet, owner);
+    final response = await openAIService.getCompatibility(prompt);
+
+    return {
+      'overall': overallScore,
+      'temperament': temperamentCompatibilityScore,
+      'lifestyle': lifestyleMatchScore,
+      'care': careRequirementsScore,
+    };
+  }
+
+  double _calculateLifestyleMatchScore(Pet pet, Owner owner) {
+    double exerciseCompatibility =
+        _getExerciseCompatibility(pet.exerciseRequirement, owner.activityLevel);
+    double socialCompatibility =
+        _getSocialCompatibility(pet.socializationNeed, owner.interactionLevel);
+    double livingSituationCompatibility =
+        _getLivingSituationCompatibility(pet.species, owner.livingSituation);
+
+    return (exerciseCompatibility +
+            socialCompatibility +
+            livingSituationCompatibility) /
+        3;
+  }
+
+  double _getExerciseCompatibility(int petRequirement, int ownerActivity) {
+    int difference = (petRequirement - ownerActivity).abs();
+    if (difference == 0) return 1.0;
+    if (difference == 1) return 0.5;
+    return 0.0;
+  }
+
+  double _getSocialCompatibility(int petNeed, int ownerInteraction) {
+    int difference = (petNeed - ownerInteraction).abs();
+    if (difference == 0) return 1.0;
+    if (difference == 1) return 0.5;
+    return 0.0;
+  }
+
+  double _getLivingSituationCompatibility(
+      String petSpecies, String? ownerLivingSituation) {
+    if (petSpecies == 'bird' || petSpecies == 'fish') return 1.0;
+
+    switch (ownerLivingSituation) {
+      case 'House with yard':
+      case 'Villa':
+        return 1.0;
+      case 'Apartment':
+        return 0.5;
+      default:
+        return 0.75;
+    }
+  }
+
+  double _calculateCareRequirementsScore(Pet pet, Owner owner) {
+    double scheduleCompatibility =
+        _getScheduleCompatibility(owner.workSchedule);
+    double experienceCompatibility =
+        _getExperienceCompatibility(owner.petExperience);
+    double groomingCompatibility =
+        _getGroomingCompatibility(pet.species, owner.groomingCommitment);
+
+    return (scheduleCompatibility +
+            experienceCompatibility +
+            groomingCompatibility) /
+        3;
+  }
+
+  double _getExperienceCompatibility(String? petExperience) {
+    switch (petExperience) {
+      case 'Expert':
+        return 1.0;
+      case 'Some experience':
+        return 0.75;
+      case 'First-time':
+        return 0.5;
+      default:
+        return 0.5;
+    }
+  }
+
+  double _getGroomingCompatibility(
+      String petSpecies, int ownerGroomingCommitment) {
+    int petGroomingNeeds = _getPetGroomingNeeds(petSpecies);
+    if (petGroomingNeeds <= ownerGroomingCommitment) return 1.0;
+    if (petGroomingNeeds - ownerGroomingCommitment == 1) return 0.75;
+    return 0.5;
+  }
+
+  double _getScheduleCompatibility(String? workSchedule) {
+    switch (workSchedule) {
+      case 'Work from home':
+        return 1.0;
+      case 'Part-time away':
+        return 0.75;
+      case 'Full-time away':
+        return 0.5;
+      default:
+        return 0.5;
+    }
+  }
+
+  int _getPetGroomingNeeds(String petSpecies) {
+    switch (petSpecies.toLowerCase()) {
+      case 'dog':
+        return 3; // Extensive
+      case 'cat':
+        return 2; // Normal
+      default:
+        return 1; // Minimal
+    }
+  }
+
+  double _calculateTemperamentCompatibilityScore(Pet pet, Owner owner) {
+    double noiseCompatibility =
+        _getNoiseCompatibility(pet.temperament, owner.noiseTolerance);
+    double purposeCompatibility =
+        _getPurposeCompatibility(pet.temperament, owner.petReason);
+
+    return (noiseCompatibility + purposeCompatibility) / 2;
+  }
+
+  double _getNoiseCompatibility(
+      List<String> petTemperament, int ownerNoiseTolerance) {
+    if ((petTemperament.contains('calm') || petTemperament.contains('shy')) &&
+        ownerNoiseTolerance == 1) {
+      return 1.0;
+    }
+    if ((petTemperament.contains('active') ||
+            petTemperament.contains('playful')) &&
+        ownerNoiseTolerance == 2) {
+      return 1.0;
+    }
+    if (petTemperament.contains('energetic') && ownerNoiseTolerance == 3) {
+      return 1.0;
+    }
+    return 0.5;
+  }
+
+  double _getPurposeCompatibility(
+      List<String> petTemperament, String? ownerPetReason) {
+    switch (ownerPetReason) {
+      case 'Companionship':
+        return petTemperament.contains('friendly') ||
+                petTemperament.contains('playful')
+            ? 1.0
+            : 0.75;
+      case 'Protection':
+        return petTemperament.contains('active') ||
+                petTemperament.contains('aggressive')
+            ? 1.0
+            : 0.75;
+      case 'Exercise motivation':
+        return petTemperament.contains('energetic') ||
+                petTemperament.contains('active')
+            ? 1.0
+            : 0.75;
+      default:
+        return 0.75;
+    }
   }
 
   double _calculateTemperamentScore(Pet pet1, Pet pet2) {
@@ -114,7 +290,23 @@ class CompatibilityGuesser {
     Please provide:
     1. A short astrological compatibility statement (2-3 sentences)
     2. 3-5 personalized recommendations for improving their relationship
-    3. A 7-day compatibility improvement plan with daily activities
+    3. A 10-day compatibility improvement plan with daily activities
+
+    Keep the tone light and fun, suitable for a fortune-telling app.
+    ''';
+  }
+
+  String _generatePetOwnerPrompt(Pet pet, Owner owner, double overallScore) {
+    return '''
+    Generate a compatibility analysis for a pet and an owner:
+    Pet: ${pet.name} (${pet.species})
+    Owner: ${owner.name}
+    Overall Compatibility Score: ${(overallScore * 100).toStringAsFixed(2)}%
+
+    Please provide:
+    1. A short astrological compatibility statement (2-3 sentences)
+    2. 3-5 personalized recommendations for improving their relationship
+    3. A 10-day compatibility improvement plan with daily activities
 
     Keep the tone light and fun, suitable for a fortune-telling app.
     ''';
@@ -138,20 +330,20 @@ class CompatibilityGuesser {
   //   };
   // }
 
-  Future<Map<String, dynamic>> getCompatibility(
-      dynamic entity1, dynamic entity2) async {
-    String prompt = _generatePrompt(entity1, entity2);
-    final response = await openAIService.getCompatibility(prompt);
+  // Future<Map<String, dynamic>> getCompatibility(
+  //     dynamic entity1, dynamic entity2) async {
+  //   String prompt = _generatePrompt(entity1, entity2);
+  //   final response = await openAIService.getCompatibility(prompt);
 
-    // Parse the response and extract compatibility scores
-    // This is a placeholder implementation
-    return {
-      'overall': 0.95,
-      'temperament': 0.7,
-      'exercise': 0.45,
-      'care': 0.25,
-    };
-  }
+  //   // Parse the response and extract compatibility scores
+  //   // This is a placeholder implementation
+  //   return {
+  //     'overall': 0.95,
+  //     'temperament': 0.7,
+  //     'exercise': 0.45,
+  //     'care': 0.25,
+  //   };
+  // }
 
   String _generatePrompt(dynamic entity1, dynamic entity2) {
     // Generate a prompt based on the entities' attributes
