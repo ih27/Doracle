@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
-import '../helpers/pet_form_utils.dart';
+import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import '../models/owner_model.dart';
@@ -18,6 +18,8 @@ class UpdateOwnerScreen extends StatelessWidget {
       initialGender: owner.gender,
       initialBirthdate:
           owner.birthdate != null ? parseDateString(owner.birthdate!) : null,
+      initialBirthtime:
+          owner.birthtime != null ? parseTimeString(owner.birthtime!) : null,
       initialLocation: owner.location,
       initialLivingSituation: owner.livingSituation,
       initialActivityLevel: owner.activityLevel,
@@ -41,6 +43,9 @@ class UpdateOwnerScreen extends StatelessWidget {
       gender: formData['gender'],
       birthdate: formData['birthdate'] != null
           ? formatDate(formData['birthdate'])
+          : null,
+      birthtime: formData['birthtime'] != null
+          ? formatTime(formData['birthtime'])
           : null,
       location: formData['location'],
       livingSituation: formData['livingSituation'],

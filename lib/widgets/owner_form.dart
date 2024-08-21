@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../helpers/pet_form_utils.dart';
-import '../widgets/custom_datepicker.dart';
-import '../widgets/custom_underline_textfield.dart';
-import '../widgets/map_overlay.dart';
-import '../widgets/sendable_textfield.dart';
+import '../helpers/pet_owner_form_utils.dart';
+import 'custom_datepicker.dart';
+import 'custom_timepicker.dart';
+import 'custom_underline_textfield.dart';
+import 'map_overlay.dart';
+import 'sendable_textfield.dart';
 import '../config/theme.dart';
 import '../helpers/constants.dart';
 
@@ -12,6 +13,7 @@ class OwnerForm extends StatefulWidget {
   final String? initialName;
   final String? initialGender;
   final DateTime? initialBirthdate;
+  final TimeOfDay? initialBirthtime;
   final String? initialLocation;
   final String? initialLivingSituation;
   final int initialActivityLevel;
@@ -31,6 +33,7 @@ class OwnerForm extends StatefulWidget {
     this.initialName,
     this.initialGender,
     this.initialBirthdate,
+    this.initialBirthtime,
     this.initialLocation,
     this.initialLivingSituation,
     this.initialActivityLevel = 2,
@@ -53,10 +56,12 @@ class OwnerForm extends StatefulWidget {
 class _OwnerFormState extends State<OwnerForm> {
   late TextEditingController _nameController;
   late TextEditingController _birthdateController;
+  late TextEditingController _birthtimeController;
   late TextEditingController _locationController;
 
   String? _gender;
   DateTime? _birthdate;
+  TimeOfDay? _birthtime;
   String? _location;
   String? _livingSituation;
   late int _activityLevel;
@@ -79,10 +84,16 @@ class _OwnerFormState extends State<OwnerForm> {
           ? formatDate(widget.initialBirthdate!)
           : '',
     );
+    _birthtimeController = TextEditingController(
+      text: widget.initialBirthtime != null
+          ? formatTime(widget.initialBirthtime!)
+          : '',
+    );
     _locationController = TextEditingController(text: widget.initialLocation);
 
     _gender = widget.initialGender;
     _birthdate = widget.initialBirthdate;
+    _birthtime = widget.initialBirthtime;
     _location = widget.initialLocation;
     _livingSituation = widget.initialLivingSituation;
     _activityLevel = widget.initialActivityLevel;
@@ -98,6 +109,7 @@ class _OwnerFormState extends State<OwnerForm> {
   void dispose() {
     _nameController.dispose();
     _birthdateController.dispose();
+    _birthtimeController.dispose();
     _locationController.dispose();
     super.dispose();
   }
@@ -144,6 +156,8 @@ class _OwnerFormState extends State<OwnerForm> {
             _buildGenderSection(),
             const SizedBox(height: 8),
             _buildBirthdateSection(),
+            const SizedBox(height: 8),
+            _buildBirthtimeSection(),
             const SizedBox(height: 8),
             _buildLocationSection(),
             const SizedBox(height: 8),
@@ -309,7 +323,7 @@ class _OwnerFormState extends State<OwnerForm> {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              'Birthdate',
+              'Date of Birth',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontSize: 18,
@@ -335,6 +349,57 @@ class _OwnerFormState extends State<OwnerForm> {
                     setState(() {
                       _birthdate = date;
                       _birthdateController.text = formatDate(date);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBirthtimeSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.secondaryBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.alternateColor,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              'Time of Birth',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppTheme.primaryColor,
+                    fontSize: 18,
+                    letterSpacing: 0,
+                  ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomUnderlineTextField(
+                    controller: _birthtimeController,
+                    readOnly: true,
+                  ),
+                ),
+                CustomTimePicker(
+                  initialTime: _birthtime,
+                  onTimeSelected: (TimeOfDay time) {
+                    setState(() {
+                      _birthtime = time;
+                      _birthtimeController.text = formatTime(time);
                     });
                   },
                 ),
@@ -600,6 +665,7 @@ class _OwnerFormState extends State<OwnerForm> {
         'name': _nameController.text,
         'gender': _gender,
         'birthdate': _birthdate,
+        'birthtime': _birthtime,
         'location': _location,
         'livingSituation': _livingSituation,
         'activityLevel': _activityLevel,

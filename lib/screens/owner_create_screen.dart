@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../helpers/pet_form_utils.dart';
+import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import '../models/owner_model.dart';
@@ -24,6 +24,9 @@ class CreateOwnerScreen extends StatelessWidget {
       gender: formData['gender'],
       birthdate: formData['birthdate'] != null
           ? formatDate(formData['birthdate'])
+          : null,
+      birthtime: formData['birthtime'] != null
+          ? formatTime(formData['birthtime'])
           : null,
       location: formData['location'],
       livingSituation: formData['livingSituation'],
