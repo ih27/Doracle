@@ -1,10 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import '../config/dependency_injection.dart';
 import '../models/owner_model.dart';
 import '../models/pet_model.dart';
+import 'ai_prompt_generation_service.dart';
 import 'openai_service.dart';
 
 class CompatibilityGuesser {
   final OpenAIService openAIService;
+
+  final AIPromptGenerationService _aiPromptGenerationService =
+      getIt<AIPromptGenerationService>();
 
   CompatibilityGuesser(this.openAIService);
 
@@ -38,7 +45,7 @@ class CompatibilityGuesser {
     };
   }
 
-  Future<Map<String, dynamic>> getPetOwnerScores(Pet pet, Owner owner) async {
+  Map<String, dynamic> getPetOwnerScores(Pet pet, Owner owner) {
     double lifestyleMatchScore = _calculateLifestyleMatchScore(pet, owner);
     double careRequirementsScore = _calculateCareRequirementsScore(pet, owner);
     double temperamentCompatibilityScore =
@@ -49,9 +56,9 @@ class CompatibilityGuesser {
             temperamentCompatibilityScore) /
         3;
 
-    //String prompt = _generatePetOwnerPrompt(pet, owner, overallScore);
-    String prompt = _generatePrompt(pet, owner);
-    final response = await openAIService.getCompatibility(prompt);
+    //String prompt = _generatePetOwnerPrompt(pet, owner, PromptType.tenDayPlan);
+    //String prompt = _generatePrompt(pet, owner);
+    //final response = await openAIService.getCompatibility(prompt);
 
     return {
       'overall': overallScore,
@@ -61,7 +68,18 @@ class CompatibilityGuesser {
     };
   }
 
-  // MARK: - Pet-Pet Compatibility Calculations
+  Future<String?> getPetOwnerImprovementPlan(Pet pet, Owner owner) async {
+    String prompt = _generatePetOwnerPrompt(pet, owner, PromptType.tenDayPlan);
+    final response = await openAIService.getCompatibility(prompt);
+    debugPrint(response.choices.first.message.content?.first.text);
+    return response.choices.first.message.content?.first.text;
+  }
+
+  getRecommendations(entity1, entity2) {}
+
+  getAstrologyCompatibility(entity1, entity2) {}
+
+  // MARK: - Pet-Pet Compatibility Score Calculations
 
   double _calculateTemperamentScore(Pet pet1, Pet pet2) {
     // If temperament data is not available, return a neutral score
@@ -132,7 +150,7 @@ class CompatibilityGuesser {
     return 0.5; // Default for any other combination
   }
 
-  // MARK: - Pet-Owner Compatibility Calculations
+  // MARK: - Pet-Owner Compatibility Score Calculations
 
   double _calculateLifestyleMatchScore(Pet pet, Owner owner) {
     double exerciseCompatibility =
@@ -303,20 +321,12 @@ class CompatibilityGuesser {
     ''';
   }
 
-  String _generatePetOwnerPrompt(Pet pet, Owner owner, double overallScore) {
-    return '''
-    Generate a compatibility analysis for a pet and an owner:
-    Pet: ${pet.name} (${pet.species})
-    Owner: ${owner.name}
-    Overall Compatibility Score: ${(overallScore * 100).toStringAsFixed(2)}%
-
-    Please provide:
-    1. A short astrological compatibility statement (2-3 sentences)
-    2. 3-5 personalized recommendations for improving their relationship
-    3. A 10-day compatibility improvement plan with daily activities
-
-    Keep the tone light and fun, suitable for a fortune-telling app.
-    ''';
+  String _generatePetOwnerPrompt(Pet pet, Owner owner, PromptType promptType) {
+    return _aiPromptGenerationService.generatePrompt(
+      promptType,
+      pet: pet,
+      owner: owner,
+    );
   }
 
   String _generatePrompt(dynamic entity1, dynamic entity2) {

@@ -1,9 +1,11 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../repositories/compatibility_data_repository.dart';
 import '../repositories/firestore_fortune_content_repository.dart';
 import '../repositories/firestore_user_repository.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../repositories/user_repository.dart';
+import '../services/ai_prompt_generation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/compatibility_guesser_service.dart';
@@ -33,12 +35,16 @@ void setupDependencies() {
   getIt.registerLazySingleton<UserRepository>(
     () => FirestoreUserRepository(),
   );
+  getIt.registerLazySingleton<CompatibilityDataRepository>(
+      () => CompatibilityDataRepository());
 
   // Managers
   getIt.registerLazySingleton<PetManager>(() => PetManager());
   getIt.registerLazySingleton<OwnerManager>(() => OwnerManager());
 
   // Services
+  getIt.registerLazySingleton<AIPromptGenerationService>(
+      () => AIPromptGenerationService());
   getIt.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
   getIt.registerLazySingleton<AuthService>(
     () => AuthService(

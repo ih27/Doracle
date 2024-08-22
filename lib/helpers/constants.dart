@@ -118,14 +118,20 @@ class CompatibilityTexts {
   static const astrologyCardId = 'astrology';
   static const astrologyCardTitle = 'Astrological';
   static const astrologyCardSubtitle = 'Compatibility';
+  static const astrologyCardLoadingTitle = 'Predicting';
+  static const astrologyCardLoadingSubtitle = 'Compatibility...';
 
   static const recommendationCardId = 'recommendation';
   static const recommendationCardTitle = 'Personalized';
   static const recommendationCardSubtitle = 'Recommendations';
+  static const recommendationCardLoadingTitle = 'Cooking';
+  static const recommendationCardLoadingSubtitle = 'Ideas...';
 
   static const improvementCardId = 'improvement';
   static const improvementCardTitle = '10-Day Compatibility';
   static const improvementCardSubtitle = 'Improvement Plan';
+  static const improvementCardLoadingTitle = 'Generating';
+  static const improvementCardLoadingSubtitle = 'Plan...';
 }
 
 class HomeScreenTexts {

@@ -11,7 +11,7 @@ class OpenAIService {
   OpenAIService(this.apiKey, this.fortuneTellerInstructions,
       this.compatibilityGuesserInstructions) {
     OpenAI.apiKey = apiKey;
-    OpenAI.requestsTimeOut = const Duration(seconds: 20);
+    OpenAI.requestsTimeOut = const Duration(minutes: 3);
     _initializeFortuneTellerSystemMessage();
     _initializeCompatibilityGuesserSystemMessage();
   }
@@ -65,8 +65,10 @@ class OpenAIService {
     return await OpenAI.instance.chat.create(
       model: model,
       messages: [compatibilityGuesserSystemMessage, userMessage],
-      maxTokens: 500,
+      n: 1,
+      //maxTokens: 500,
       temperature: 0.75,
+      responseFormat: {"type": "json_object"},
     );
   }
 }
