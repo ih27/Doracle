@@ -17,7 +17,7 @@ class CompatibilityGuesser {
 
   // MARK: - Public Methods
 
-  Future<Map<String, dynamic>> getPetPetScores(Pet pet1, Pet pet2) async {
+  Map<String, dynamic> getPetPetScores(Pet pet1, Pet pet2) {
     // Calculate scores
     double temperamentScore = _calculateTemperamentScore(pet1, pet2);
     double playtimeScore = _calculatePlaytimeScore(pet1, pet2);
@@ -27,21 +27,11 @@ class CompatibilityGuesser {
     double overallScore =
         (temperamentScore + playtimeScore + treatSharingScore) / 3;
 
-    // Generate other compatibility information using OpenAI
-    // String prompt = _generatePetPrompt(pet1, pet2, overallScore);
-
-    String prompt = _generatePrompt(pet1, pet2);
-    final response = await openAIService.getCompatibility(prompt);
-
-    // Parse the response and extract additional information
-    // Map<String, dynamic> additionalInfo = _parseOpenAIResponse(response);
-
     return {
       'overall': overallScore,
       'temperament': temperamentScore,
       'playtime': playtimeScore,
       'treatSharing': treatSharingScore,
-      //...additionalInfo,
     };
   }
 
@@ -56,10 +46,6 @@ class CompatibilityGuesser {
             temperamentCompatibilityScore) /
         3;
 
-    //String prompt = _generatePetOwnerPrompt(pet, owner, PromptType.tenDayPlan);
-    //String prompt = _generatePrompt(pet, owner);
-    //final response = await openAIService.getCompatibility(prompt);
-
     return {
       'overall': overallScore,
       'temperament': temperamentCompatibilityScore,
@@ -68,16 +54,37 @@ class CompatibilityGuesser {
     };
   }
 
-  Future<String?> getPetOwnerImprovementPlan(Pet pet, Owner owner) async {
-    String prompt = _generatePetOwnerPrompt(pet, owner, PromptType.tenDayPlan);
+  Future<String?> getImprovementPlan(dynamic pet, dynamic entity) async {
+    String prompt = entity is Owner
+        ? _generatePetOwnerPrompt(pet as Pet, entity, PromptType.tenDayPlan)
+        : _generatePetPetPrompt(
+            pet as Pet, entity as Pet, PromptType.tenDayPlan);
     final response = await openAIService.getCompatibility(prompt);
     debugPrint(response.choices.first.message.content?.first.text);
     return response.choices.first.message.content?.first.text;
   }
 
-  getRecommendations(entity1, entity2) {}
+  Future<String?> getRecommendations(dynamic pet, dynamic entity) async {
+    String prompt = entity is Owner
+        ? _generatePetOwnerPrompt(
+            pet as Pet, entity, PromptType.personalizedRecommendations)
+        : _generatePetPetPrompt(
+            pet as Pet, entity as Pet, PromptType.personalizedRecommendations);
+    final response = await openAIService.getCompatibility(prompt);
+    debugPrint(response.choices.first.message.content?.first.text); // DELETE
+    return response.choices.first.message.content?.first.text;
+  }
 
-  getAstrologyCompatibility(entity1, entity2) {}
+  Future<String?> getAstrologyCompatibility(dynamic pet, dynamic entity) async {
+    String prompt = entity is Owner
+        ? _generatePetOwnerPrompt(
+            pet as Pet, entity, PromptType.astrologicalCompatibility)
+        : _generatePetPetPrompt(
+            pet as Pet, entity as Pet, PromptType.astrologicalCompatibility);
+    final response = await openAIService.getCompatibility(prompt);
+    debugPrint(response.choices.first.message.content?.first.text); // DELETE
+    return response.choices.first.message.content?.first.text;
+  }
 
   // MARK: - Pet-Pet Compatibility Score Calculations
 
@@ -305,22 +312,6 @@ class CompatibilityGuesser {
 
   // MARK: - OpenAI Integration
 
-  String _generatePetPetPrompt(Pet pet1, Pet pet2, double overallScore) {
-    return '''
-    Generate a compatibility analysis for two pets:
-    Pet 1: ${pet1.name} (${pet1.species})
-    Pet 2: ${pet2.name} (${pet2.species})
-    Overall Compatibility Score: ${(overallScore * 100).toStringAsFixed(2)}%
-
-    Please provide:
-    1. A short astrological compatibility statement (2-3 sentences)
-    2. 3-5 personalized recommendations for improving their relationship
-    3. A 10-day compatibility improvement plan with daily activities
-
-    Keep the tone light and fun, suitable for a fortune-telling app.
-    ''';
-  }
-
   String _generatePetOwnerPrompt(Pet pet, Owner owner, PromptType promptType) {
     return _aiPromptGenerationService.generatePrompt(
       promptType,
@@ -329,14 +320,22 @@ class CompatibilityGuesser {
     );
   }
 
-  String _generatePrompt(dynamic entity1, dynamic entity2) {
-    // Generate a prompt based on the entities' attributes
-    // This is a placeholder implementation
-    debugPrint("Entities: ${entity1.get('name')} and ${entity2.get('name')}");
-    return "someting";
+  String _generatePetPetPrompt(Pet pet1, Pet pet2, PromptType promptType) {
+    return _aiPromptGenerationService.generatePrompt(
+      promptType,
+      pet: pet1,
+      secondPet: pet2,
+    );
   }
 
   // MARK: - Helper Methods
+
+  // String _generatePrompt(dynamic entity1, dynamic entity2) {
+  //   // Generate a prompt based on the entities' attributes
+  //   // This is a placeholder implementation
+  //   debugPrint("Entities: ${entity1.get('name')} and ${entity2.get('name')}");
+  //   return "someting";
+  // }
 
   // Map<String, dynamic> _parseOpenAIResponse(
   //     OpenAIChatCompletionModel response) {

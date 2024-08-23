@@ -63,9 +63,16 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   Future<void> _checkLastCompatibilityCheck() async {
     final lastCheck = await _sharedPrefsService.loadLastCompatibilityCheck();
     if (lastCheck != null) {
-      String entity1Id = widget.entity1 is Pet ? (widget.entity1 as Pet).id : (widget.entity1 as Owner).id;
-      String entity2Id = widget.entity2 is Pet ? (widget.entity2 as Pet).id : (widget.entity2 as Owner).id;
-      if (lastCheck['entity1'] == entity1Id && lastCheck['entity2'] == entity2Id) {
+      String entity1Id = widget.entity1 is Pet
+          ? (widget.entity1 as Pet).id
+          : (widget.entity1 as Owner).id;
+      String entity2Id = widget.entity2 is Pet
+          ? (widget.entity2 as Pet).id
+          : (widget.entity2 as Owner).id;
+      if ((lastCheck['entity1'] == entity1Id &&
+              lastCheck['entity2'] == entity2Id) ||
+          (lastCheck['entity1'] == entity2Id &&
+              lastCheck['entity2'] == entity1Id)) {
         // The last check was for the same entities, load the saved data
         _loadSavedData();
       } else {
@@ -75,8 +82,12 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     }
     // Save the current check
     await _sharedPrefsService.saveLastCompatibilityCheck(
-      widget.entity1 is Pet ? (widget.entity1 as Pet).id : (widget.entity1 as Owner).id,
-      widget.entity2 is Pet ? (widget.entity2 as Pet).id : (widget.entity2 as Owner).id,
+      widget.entity1 is Pet
+          ? (widget.entity1 as Pet).id
+          : (widget.entity1 as Owner).id,
+      widget.entity2 is Pet
+          ? (widget.entity2 as Pet).id
+          : (widget.entity2 as Owner).id,
     );
   }
 
@@ -86,9 +97,12 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     final improvementPlan = await _sharedPrefsService.loadImprovementPlan();
 
     setState(() {
-      _isCardDataAvailable[CompatibilityTexts.astrologyCardId] = astrology != null;
-      _isCardDataAvailable[CompatibilityTexts.recommendationCardId] = recommendations != null;
-      _isCardDataAvailable[CompatibilityTexts.improvementCardId] = improvementPlan != null;
+      _isCardDataAvailable[CompatibilityTexts.astrologyCardId] =
+          astrology != null;
+      _isCardDataAvailable[CompatibilityTexts.recommendationCardId] =
+          recommendations != null;
+      _isCardDataAvailable[CompatibilityTexts.improvementCardId] =
+          improvementPlan != null;
     });
     await _saveCardAvailability();
   }
@@ -104,12 +118,12 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     await _sharedPrefsService.saveCardAvailability(_isCardDataAvailable);
   }
 
-  Future<void> _fetchScores() async {
+  void _fetchScores() {
     try {
       final result = widget.entity2 is Owner
           ? _compatibilityGuesser.getPetOwnerScores(
               widget.entity1 as Pet, widget.entity2 as Owner)
-          : await _compatibilityGuesser.getPetPetScores(
+          : _compatibilityGuesser.getPetPetScores(
               widget.entity1 as Pet, widget.entity2 as Pet);
       setState(() {
         _compatibilityResult = result;
@@ -129,7 +143,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
         widget.entity1,
         widget.entity2,
       );
-      await _sharedPrefsService.saveAstrology(result);
+      await _sharedPrefsService.saveAstrology(result as String);
       setState(() {
         _isCardDataAvailable[CompatibilityTexts.astrologyCardId] = true;
       });
@@ -145,7 +159,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
         widget.entity1,
         widget.entity2,
       );
-      await _sharedPrefsService.saveRecommendations(result);
+      await _sharedPrefsService.saveRecommendations(result as String);
       setState(() {
         _isCardDataAvailable[CompatibilityTexts.recommendationCardId] = true;
       });
@@ -157,13 +171,9 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
   Future<void> _fetchImprovementPlan() async {
     try {
-      final result = widget.entity2 is Owner
-          ? await _compatibilityGuesser.getPetOwnerImprovementPlan(
-              widget.entity1 as Pet, widget.entity2 as Owner)
-          : await _compatibilityGuesser.getPetPetScores(
-              widget.entity1 as Pet, widget.entity2 as Pet);
-      await _sharedPrefsService
-          .saveImprovementPlan(result as String); // TEMPORARY CAST
+      final result = await _compatibilityGuesser.getImprovementPlan(
+          widget.entity1, widget.entity2);
+      await _sharedPrefsService.saveImprovementPlan(result as String);
       setState(() {
         _isCardDataAvailable[CompatibilityTexts.improvementCardId] = true;
       });

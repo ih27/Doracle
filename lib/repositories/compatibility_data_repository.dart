@@ -22,9 +22,9 @@ class CompatibilityDataRepository {
     return null;
   }
 
-  Future<void> saveAstrology(Map<String, dynamic> astrology) async {
+  Future<void> saveAstrology(String astrology) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_astrologyKey, json.encode(astrology));
+    await prefs.setString(_astrologyKey, astrology);
   }
 
   Future<Map<String, dynamic>?> loadAstrology() async {
@@ -36,9 +36,9 @@ class CompatibilityDataRepository {
     return null;
   }
 
-  Future<void> saveRecommendations(Map<String, dynamic> recommendations) async {
+  Future<void> saveRecommendations(String recommendations) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_recommendationsKey, json.encode(recommendations));
+    await prefs.setString(_recommendationsKey, recommendations);
   }
 
   Future<Map<String, dynamic>?> loadRecommendations() async {
