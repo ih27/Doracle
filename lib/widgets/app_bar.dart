@@ -74,13 +74,6 @@ class CustomAppBarState extends State<CustomAppBar> {
             ),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(
-            Icons.home,
-            size: 24,
-          ),
-          onPressed: _data.navigateToHome,
-        ),
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 20, 0),
           child: IconButton(
