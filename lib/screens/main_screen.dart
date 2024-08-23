@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
+import '../widgets/nav_bar.dart';
+import 'home_screen.dart';
+import 'unified_fortune_screen.dart';
+import '../widgets/bond_buttons.dart';
+import 'assessment_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,26 +16,24 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  final GlobalKey<CustomAppBarState> _appBarKey =
-      GlobalKey<CustomAppBarState>();
+  final GlobalKey<CustomAppBarState> _appBarKey = GlobalKey<CustomAppBarState>();
+  int _selectedIndex = 0;
   bool _fromPurchase = false;
   bool _canPop = false;
   String _currentTitle = '';
   late final AppRouter _appRouter;
   late final CustomAppBar _appBar;
-  late final _MainScreenNavigatorObserver _navigatorObserver;
 
   @override
   void initState() {
     super.initState();
-    _navigatorObserver = _MainScreenNavigatorObserver(
-      updateCanPop: _updateCanPop,
-      updateTitle: _updateTitle,
-    );
     _appRouter = AppRouter(
       navigatorKey: _navigatorKey,
       onNavigate: _navigateTo,
-      observer: _navigatorObserver,
+      observer: _MainScreenNavigatorObserver(
+        updateCanPop: _updateCanPop,
+        updateTitle: _updateTitle,
+      ),
       fromPurchase: _fromPurchase,
     );
     _appBar = CustomAppBar(
@@ -55,17 +58,17 @@ class _MainScreenState extends State<MainScreen> {
 
   void _navigateToHome() {
     setState(() {
+      _selectedIndex = 0;
       _currentTitle = '';
       _updateCustomAppBar();
     });
-    _navigatorKey.currentState?.pushReplacementNamed('/fortune');
   }
 
   void _onPurchaseComplete() {
     setState(() {
       _fromPurchase = true;
+      _selectedIndex = 1; // Navigate to Oracle screen
     });
-    _navigateTo('/fortune');
   }
 
   void _updateCanPop() {
@@ -96,12 +99,53 @@ class _MainScreenState extends State<MainScreen> {
     ));
   }
 
+  Widget _getScreenForIndex(int index) {
+    switch (index) {
+      case 0:
+        return const HomeScreen();
+      case 1:
+        return UnifiedFortuneScreen(
+          onNavigate: _navigateTo,
+          fromPurchase: _fromPurchase,
+        );
+      case 2:
+        return BondButtons(onNavigate: _navigateTo);
+      case 3:
+        return const AssessmentScreen();
+      default:
+        return const HomeScreen();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: _appBar,
-      body: _appRouter,
+      body: Navigator(
+        key: _navigatorKey,
+        observers: [_appRouter.observer],
+        onGenerateRoute: (settings) {
+          if (_selectedIndex == 0 && settings.name == '/') {
+            return MaterialPageRoute(
+              builder: (_) => _getScreenForIndex(_selectedIndex),
+              settings: settings,
+            );
+          }
+          return _appRouter.onGenerateRoute(settings) ?? 
+               MaterialPageRoute(builder: (_) => const SizedBox.shrink());
+        },
+      ),
+      bottomNavigationBar: NavBar(
+        selectedIndex: _selectedIndex,
+        onItemSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+            _currentTitle = '';
+            _updateCustomAppBar();
+          });
+          _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+        },
+      ),
     );
   }
 }

@@ -9,17 +9,16 @@ import '../screens/owner_compatability_screen.dart';
 import '../screens/pet_compatability_screen.dart';
 import '../screens/pet_create_screen.dart';
 import '../helpers/constants.dart';
-import 'bond_buttons.dart';
+import '../widgets/bond_buttons.dart';
 import 'fade_page_route.dart';
 
-class AppRouter extends StatelessWidget {
+class AppRouter {
   final GlobalKey<NavigatorState> navigatorKey;
   final Function(String, {String? title}) onNavigate;
   final bool fromPurchase;
   final NavigatorObserver observer;
 
   AppRouter({
-    super.key,
     required this.navigatorKey,
     required this.onNavigate,
     required this.observer,
@@ -44,69 +43,56 @@ class AppRouter extends StatelessWidget {
     return _routeTitles[route] ?? '';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      initialRoute: '/',
-      observers: [observer],
-      onGenerateRoute: (RouteSettings settings) {
-        WidgetBuilder builder;
-        switch (settings.name) {
-          case '/':
-          case '/fortune':
-            builder = (BuildContext context) => UnifiedFortuneScreen(
-                  onNavigate: onNavigate,
-                  fromPurchase: fromPurchase,
-                );
-            break;
-          case '/bond':
-            builder =
-                (BuildContext context) => BondButtons(onNavigate: onNavigate);
-            break;
-          case '/pet/compatability':
-            builder = (BuildContext context) => const PetCompatabilityScreen();
-            break;
-          case '/pet/create':
-            builder = (BuildContext context) => const CreatePetScreen();
-            break;
-          case '/pet/edit':
-            final args = settings.arguments as Map<String, dynamic>;
-            builder =
-                (BuildContext context) => UpdatePetScreen(pet: args['pet']);
-            break;
-          case '/owner/compatability':
-            builder =
-                (BuildContext context) => const OwnerCompatabilityScreen();
-            break;
-          case '/owner/create':
-            builder = (BuildContext context) => const CreateOwnerScreen();
-            break;
-          case '/owner/edit':
-            final args = settings.arguments as Map<String, dynamic>;
-            builder = (BuildContext context) =>
-                UpdateOwnerScreen(owner: args['owner']);
-            break;
-          case '/result':
-            final args = settings.arguments as Map<String, dynamic>;
-            builder = (BuildContext context) => CompatibilityResultScreen(
-                  entity1: args['entity1'],
-                  entity2: args['entity2'],
-                );
-            break;
-          case '/result/card':
-            final args = settings.arguments as Map<String, dynamic>;
-            builder = (BuildContext context) =>
-                CompatibilityResultCardScreen(cardId: args['cardId']);
-            break;
-          default:
-            throw Exception('Invalid route: ${settings.name}');
-        }
-        return FadePageRoute(
-          page: builder(context),
-          settings: settings,
-        );
-      },
+  Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    WidgetBuilder builder;
+    switch (settings.name) {
+      case '/':
+      case '/fortune':
+        builder = (BuildContext context) => UnifiedFortuneScreen(
+              onNavigate: onNavigate,
+              fromPurchase: fromPurchase,
+            );
+        break;
+      case '/bond':
+        builder = (BuildContext context) => BondButtons(onNavigate: onNavigate);
+        break;
+      case '/pet/compatability':
+        builder = (BuildContext context) => const PetCompatabilityScreen();
+        break;
+      case '/pet/create':
+        builder = (BuildContext context) => const CreatePetScreen();
+        break;
+      case '/pet/edit':
+        final args = settings.arguments as Map<String, dynamic>;
+        builder = (BuildContext context) => UpdatePetScreen(pet: args['pet']);
+        break;
+      case '/owner/compatability':
+        builder = (BuildContext context) => const OwnerCompatabilityScreen();
+        break;
+      case '/owner/create':
+        builder = (BuildContext context) => const CreateOwnerScreen();
+        break;
+      case '/owner/edit':
+        final args = settings.arguments as Map<String, dynamic>;
+        builder = (BuildContext context) => UpdateOwnerScreen(owner: args['owner']);
+        break;
+      case '/result':
+        final args = settings.arguments as Map<String, dynamic>;
+        builder = (BuildContext context) => CompatibilityResultScreen(
+              entity1: args['entity1'],
+              entity2: args['entity2'],
+            );
+        break;
+      case '/result/card':
+        final args = settings.arguments as Map<String, dynamic>;
+        builder = (BuildContext context) => CompatibilityResultCardScreen(cardId: args['cardId']);
+        break;
+      default:
+        return null;
+    }
+    return FadePageRoute(
+      page: builder(navigatorKey.currentContext!),
+      settings: settings,
     );
   }
 }
