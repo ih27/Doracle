@@ -1,53 +1,137 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/owner_model.dart';
+import '../models/pet_model.dart';
+
 class CompatibilityDataRepository {
-  static const String _improvementPlanKey = 'improvement_plan';
+  static const String _improvementPlansKey = 'improvement_plans';
   static const String _astrologyKey = 'astrology';
   static const String _recommendationsKey = 'recommendations';
   static const String _cardAvailabilityKey = 'card_availability';
   static const String _lastCompatibilityCheckKey = 'last_compatibility_check';
+  static const int maxStoredResults = 10;
 
-  Future<void> saveImprovementPlan(String plan) async {
+  Future<void> saveImprovementPlan(
+      String planId, String plan, dynamic entity1, dynamic entity2) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_improvementPlanKey, plan);
-  }
 
-  Future<Map<String, dynamic>?> loadImprovementPlan() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? planJson = prefs.getString(_improvementPlanKey);
-    if (planJson != null) {
-      return json.decode(planJson) as Map<String, dynamic>;
+    Map<String, dynamic> plans =
+        json.decode(prefs.getString(_improvementPlansKey) ?? '{}');
+
+    plans[planId] = {
+      'plan': plan,
+      'entity1': _encodeEntity(entity1),
+      'entity2': _encodeEntity(entity2),
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    if (plans.length > maxStoredResults) {
+      var sortedKeys = plans.keys.toList(growable: false)
+        ..sort((k1, k2) =>
+            plans[k2]['timestamp'].compareTo(plans[k1]['timestamp']));
+      plans = Map.fromEntries(
+          sortedKeys.take(maxStoredResults).map((k) => MapEntry(k, plans[k])));
     }
-    return null;
+
+    await prefs.setString(_improvementPlansKey, json.encode(plans));
   }
 
-  Future<void> saveAstrology(String astrology) async {
+  // Load a specific plan
+  Future<Map<String, dynamic>> loadImprovementPlan(String planId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_astrologyKey, astrology);
-  }
-
-  Future<Map<String, dynamic>?> loadAstrology() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? astrologyJson = prefs.getString(_astrologyKey);
-    if (astrologyJson != null) {
-      return json.decode(astrologyJson) as Map<String, dynamic>;
+    Map<String, dynamic> plans =
+        json.decode(prefs.getString(_improvementPlansKey) ?? '{}');
+    if (plans.containsKey(planId)) {
+      var plan = plans[planId];
+      return {
+        'plan': plan['plan'],
+        'entity1': _decodeEntity(plan['entity1']),
+        'entity2': _decodeEntity(plan['entity2']),
+        'timestamp': DateTime.parse(plan['timestamp']),
+      };
     }
-    return null;
+    return {};
   }
 
-  Future<void> saveRecommendations(String recommendations) async {
+  Future<bool> planExists(String planId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_recommendationsKey, recommendations);
+    Map<String, dynamic> plans =
+        json.decode(prefs.getString(_improvementPlansKey) ?? '{}');
+    return plans.containsKey(planId);
   }
 
-  Future<Map<String, dynamic>?> loadRecommendations() async {
+  // Load all plans
+  Future<Map<String, Map<String, dynamic>>> loadImprovementPlans() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? recommendationsJson = prefs.getString(_recommendationsKey);
-    if (recommendationsJson != null) {
-      return json.decode(recommendationsJson) as Map<String, dynamic>;
+    final String? plansJson = prefs.getString(_improvementPlansKey);
+
+    if (plansJson != null) {
+      Map<String, dynamic> rawPlans = json.decode(plansJson);
+      return rawPlans.map((key, value) => MapEntry(key, {
+            'plan': value['plan'],
+            'entity1': _decodeEntity(value['entity1']),
+            'entity2': _decodeEntity(value['entity2']),
+            'timestamp': DateTime.parse(value['timestamp']),
+          }));
     }
-    return null;
+    return {};
+  }
+
+  String _encodeEntity(dynamic entity) {
+    if (entity is Pet) {
+      return json.encode({'type': 'pet', 'data': entity.toJson()});
+    } else if (entity is Owner) {
+      return json.encode({'type': 'owner', 'data': entity.toJson()});
+    }
+    throw ArgumentError('Unknown entity type');
+  }
+
+  dynamic _decodeEntity(String? encodedEntity) {
+    if (encodedEntity == null) return null;
+    final decoded = json.decode(encodedEntity);
+    if (decoded['type'] == 'pet') {
+      return Pet.fromJson(decoded['data']);
+    } else if (decoded['type'] == 'owner') {
+      return Owner.fromJson(decoded['data']);
+    }
+    throw ArgumentError('Unknown entity type');
+  }
+
+  Future<void> saveAstrology(String planId, String astrology) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, String> astrologyData = json
+        .decode(prefs.getString(_astrologyKey) ?? '{}')
+        .cast<String, String>();
+    astrologyData[planId] = astrology;
+    await prefs.setString(_astrologyKey, json.encode(astrologyData));
+  }
+
+  Future<String?> loadAstrology(String planId) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, String> astrologyData = json
+        .decode(prefs.getString(_astrologyKey) ?? '{}')
+        .cast<String, String>();
+    return astrologyData[planId];
+  }
+
+  Future<void> saveRecommendations(
+      String planId, String recommendations) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, String> recommendationsData = json
+        .decode(prefs.getString(_recommendationsKey) ?? '{}')
+        .cast<String, String>();
+    recommendationsData[planId] = recommendations;
+    await prefs.setString(
+        _recommendationsKey, json.encode(recommendationsData));
+  }
+
+  Future<String?> loadRecommendations(String planId) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, String> recommendationsData = json
+        .decode(prefs.getString(_recommendationsKey) ?? '{}')
+        .cast<String, String>();
+    return recommendationsData[planId];
   }
 
   Future<void> saveCardAvailability(Map<String, bool> availability) async {
@@ -65,30 +149,23 @@ class CompatibilityDataRepository {
     return {};
   }
 
-  Future<void> saveLastCompatibilityCheck(String entity1Id, String entity2Id) async {
+  Future<void> saveLastCompatibilityCheck(String planId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastCompatibilityCheckKey, json.encode({
-      'entity1': entity1Id,
-      'entity2': entity2Id,
-      'timestamp': DateTime.now().toIso8601String(),
-    }));
+    await prefs.setString(
+        _lastCompatibilityCheckKey,
+        json.encode({
+          'planId': planId,
+          'timestamp': DateTime.now().toIso8601String(),
+        }));
   }
 
-  Future<Map<String, dynamic>?> loadLastCompatibilityCheck() async {
+  Future<String?> loadLastCompatibilityCheck() async {
     final prefs = await SharedPreferences.getInstance();
     final String? checkJson = prefs.getString(_lastCompatibilityCheckKey);
     if (checkJson != null) {
-      return json.decode(checkJson) as Map<String, dynamic>;
+      final Map<String, dynamic> check = json.decode(checkJson);
+      return check['planId'] as String?;
     }
     return null;
-  }
-
-  Future<void> clearAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_improvementPlanKey);
-    await prefs.remove(_astrologyKey);
-    await prefs.remove(_recommendationsKey);
-    await prefs.remove(_cardAvailabilityKey);
-    await prefs.remove(_lastCompatibilityCheckKey);
   }
 }

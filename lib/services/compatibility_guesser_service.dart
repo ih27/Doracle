@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
@@ -54,25 +55,46 @@ class CompatibilityGuesser {
     };
   }
 
-  Future<String?> getImprovementPlan(dynamic pet, dynamic entity) async {
+  Future<Map<String, dynamic>> getImprovementPlan(
+      dynamic pet, dynamic entity) async {
     String prompt = entity is Owner
         ? _generatePetOwnerPrompt(pet as Pet, entity, PromptType.tenDayPlan)
         : _generatePetPetPrompt(
             pet as Pet, entity as Pet, PromptType.tenDayPlan);
     final response = await openAIService.getCompatibility(prompt);
+
     debugPrint(response.choices.first.message.content?.first.text);
-    return response.choices.first.message.content?.first.text;
+    String jsonString =
+        response.choices.first.message.content?.first.text ?? '{}';
+
+    try {
+      // Attempt to parse the JSON string
+      Map<String, dynamic> planMap = json.decode(jsonString);
+      return planMap;
+    } catch (e) {
+      debugPrint('Error parsing JSON: $e');
+      // If parsing fails, return a map with an error message
+      return {
+        'error': 'Failed to parse improvement plan',
+        'rawContent': jsonString
+      };
+    }
   }
 
-  Future<String?> getRecommendations(dynamic pet, dynamic entity) async {
+  Future<Map<String, dynamic>> getRecommendations(
+      dynamic pet, dynamic entity) async {
     String prompt = entity is Owner
         ? _generatePetOwnerPrompt(
             pet as Pet, entity, PromptType.personalizedRecommendations)
         : _generatePetPetPrompt(
             pet as Pet, entity as Pet, PromptType.personalizedRecommendations);
     final response = await openAIService.getCompatibility(prompt);
-    debugPrint(response.choices.first.message.content?.first.text); // DELETE
-    return response.choices.first.message.content?.first.text;
+
+    // Parse the content as JSON
+    final String jsonString =
+        response.choices.first.message.content?.first.text ?? '{}';
+    debugPrint(jsonString);
+    return json.decode(jsonString) as Map<String, dynamic>;
   }
 
   Future<String?> getAstrologyCompatibility(dynamic pet, dynamic entity) async {
@@ -327,45 +349,4 @@ class CompatibilityGuesser {
       secondPet: pet2,
     );
   }
-
-  // MARK: - Helper Methods
-
-  // String _generatePrompt(dynamic entity1, dynamic entity2) {
-  //   // Generate a prompt based on the entities' attributes
-  //   // This is a placeholder implementation
-  //   debugPrint("Entities: ${entity1.get('name')} and ${entity2.get('name')}");
-  //   return "someting";
-  // }
-
-  // Map<String, dynamic> _parseOpenAIResponse(
-  //     OpenAIChatCompletionModel response) {
-  //   // This is a placeholder implementation. You'll need to parse the actual response
-  //   // based on the structure of the OpenAI output.
-  //   String content = response.choices.first.message.content ?? '';
-  //   List<String> sections = content.split('\n\n');
-  //
-  //   return {
-  //     'astrology': sections.length > 0
-  //         ? sections[0]
-  //         : 'Astrological compatibility not available.',
-  //     'recommendations':
-  //         sections.length > 1 ? sections[1] : 'Recommendations not available.',
-  //     'improvementPlan':
-  //         sections.length > 2 ? sections[2] : 'Improvement plan not available.',
-  //   };
-  // }
-
-  // Future<Map<String, dynamic>> getCompatibility(
-  //     dynamic entity1, dynamic entity2) async {
-  //   String prompt = _generatePrompt(entity1, entity2);
-  //   final response = await openAIService.getCompatibility(prompt);
-  //   // Parse the response and extract compatibility scores
-  //   // This is a placeholder implementation
-  //   return {
-  //     'overall': 0.95,
-  //     'temperament': 0.7,
-  //     'exercise': 0.45,
-  //     'care': 0.25,
-  //   };
-  // }
 }

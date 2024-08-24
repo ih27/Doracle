@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
+import '../helpers/compatibility_utils.dart';
 import '../helpers/list_space_divider.dart';
 import '../helpers/constants.dart';
 import '../models/owner_model.dart';
@@ -29,11 +31,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   final CompatibilityGuesser _compatibilityGuesser =
       getIt<CompatibilityGuesser>();
 
-  final CompatibilityDataRepository _sharedPrefsService =
+  final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
   Map<String, dynamic> _compatibilityResult = {};
   bool _isLoading = true;
-  final _isCardDataAvailable = {
+  Map<String, bool> _isCardDataAvailable = {
     CompatibilityTexts.astrologyCardId: false,
     CompatibilityTexts.recommendationCardId: false,
     CompatibilityTexts.improvementCardId: false,
@@ -61,40 +63,39 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Future<void> _checkLastCompatibilityCheck() async {
-    final lastCheck = await _sharedPrefsService.loadLastCompatibilityCheck();
-    if (lastCheck != null) {
-      String entity1Id = widget.entity1 is Pet
-          ? (widget.entity1 as Pet).id
-          : (widget.entity1 as Owner).id;
-      String entity2Id = widget.entity2 is Pet
-          ? (widget.entity2 as Pet).id
-          : (widget.entity2 as Owner).id;
-      if ((lastCheck['entity1'] == entity1Id &&
-              lastCheck['entity2'] == entity2Id) ||
-          (lastCheck['entity1'] == entity2Id &&
-              lastCheck['entity2'] == entity1Id)) {
-        // The last check was for the same entities, load the saved data
-        _loadSavedData();
-      } else {
-        // Different entities, clear previous data
-        await _sharedPrefsService.clearAll();
-      }
+    String currentPlanId =
+        generateConsistentPlanId(widget.entity1, widget.entity2);
+
+    // Try to load existing data for the current check
+    final existingPlan =
+        await _compatibilityDataRepository.loadImprovementPlan(currentPlanId);
+
+    if (existingPlan.isNotEmpty) {
+      // Data exists for this check, load it
+      await _loadSavedData(currentPlanId);
+    } else {
+      // No existing data, reset the card availability
+      setState(() {
+        _isCardDataAvailable = {
+          CompatibilityTexts.astrologyCardId: false,
+          CompatibilityTexts.recommendationCardId: false,
+          CompatibilityTexts.improvementCardId: false,
+        };
+      });
+      await _saveCardAvailability();
     }
-    // Save the current check
-    await _sharedPrefsService.saveLastCompatibilityCheck(
-      widget.entity1 is Pet
-          ? (widget.entity1 as Pet).id
-          : (widget.entity1 as Owner).id,
-      widget.entity2 is Pet
-          ? (widget.entity2 as Pet).id
-          : (widget.entity2 as Owner).id,
-    );
+
+    // Save the current check as the last check
+    await _compatibilityDataRepository
+        .saveLastCompatibilityCheck(currentPlanId);
   }
 
-  Future<void> _loadSavedData() async {
-    final astrology = await _sharedPrefsService.loadAstrology();
-    final recommendations = await _sharedPrefsService.loadRecommendations();
-    final improvementPlan = await _sharedPrefsService.loadImprovementPlan();
+  Future<void> _loadSavedData(String planId) async {
+    final astrology = await _compatibilityDataRepository.loadAstrology(planId);
+    final recommendations =
+        await _compatibilityDataRepository.loadRecommendations(planId);
+    final improvementPlan =
+        await _compatibilityDataRepository.loadImprovementPlan(planId);
 
     setState(() {
       _isCardDataAvailable[CompatibilityTexts.astrologyCardId] =
@@ -102,20 +103,22 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       _isCardDataAvailable[CompatibilityTexts.recommendationCardId] =
           recommendations != null;
       _isCardDataAvailable[CompatibilityTexts.improvementCardId] =
-          improvementPlan != null;
+          improvementPlan.isNotEmpty;
     });
     await _saveCardAvailability();
   }
 
   Future<void> _loadCardAvailability() async {
-    final availability = await _sharedPrefsService.loadCardAvailability();
+    final availability =
+        await _compatibilityDataRepository.loadCardAvailability();
     setState(() {
       _isCardDataAvailable.addAll(availability);
     });
   }
 
   Future<void> _saveCardAvailability() async {
-    await _sharedPrefsService.saveCardAvailability(_isCardDataAvailable);
+    await _compatibilityDataRepository
+        .saveCardAvailability(_isCardDataAvailable);
   }
 
   void _fetchScores() {
@@ -138,12 +141,14 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Future<void> _fetchAstrology() async {
+    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     try {
       final result = await _compatibilityGuesser.getAstrologyCompatibility(
         widget.entity1,
         widget.entity2,
       );
-      await _sharedPrefsService.saveAstrology(result as String);
+      String astrologyJson = json.encode(result);
+      await _compatibilityDataRepository.saveAstrology(planId, astrologyJson);
       setState(() {
         _isCardDataAvailable[CompatibilityTexts.astrologyCardId] = true;
       });
@@ -154,12 +159,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Future<void> _fetchRecommendations() async {
+    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     try {
       final result = await _compatibilityGuesser.getRecommendations(
         widget.entity1,
         widget.entity2,
       );
-      await _sharedPrefsService.saveRecommendations(result as String);
+      String recommendationsJson = json.encode(result);
+      await _compatibilityDataRepository.saveRecommendations(
+          planId, recommendationsJson);
       setState(() {
         _isCardDataAvailable[CompatibilityTexts.recommendationCardId] = true;
       });
@@ -170,16 +178,27 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Future<void> _fetchImprovementPlan() async {
-    try {
-      final result = await _compatibilityGuesser.getImprovementPlan(
-          widget.entity1, widget.entity2);
-      await _sharedPrefsService.saveImprovementPlan(result as String);
+    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
+
+    // Check if the plan already exists
+    bool exists = await _compatibilityDataRepository.planExists(planId);
+
+    if (!exists) {
+      try {
+        final plan = await _compatibilityGuesser.getImprovementPlan(
+            widget.entity1, widget.entity2);
+        await _compatibilityDataRepository.saveImprovementPlan(
+            planId, json.encode(plan), widget.entity1, widget.entity2);
+        setState(() {
+          _isCardDataAvailable[CompatibilityTexts.improvementCardId] = true;
+        });
+      } catch (e) {
+        debugPrint('Error fetching improvement plan: $e');
+      }
+    } else {
       setState(() {
         _isCardDataAvailable[CompatibilityTexts.improvementCardId] = true;
       });
-      await _saveCardAvailability();
-    } catch (e) {
-      debugPrint('Error fetching improvement plan: $e');
     }
   }
 
@@ -227,7 +246,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
               lineWidth: 20,
               animation: true,
               animateFromLastPercent: true,
-              progressColor: _getColorFor(overallPercent),
+              progressColor: getColorFor(overallPercent),
               backgroundColor: AppTheme.alternateColor,
               center: Text(
                 '${(overallPercent * 100).toInt()}%',
@@ -239,7 +258,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
             ),
           ),
           Text(
-            _getLevelFor(overallPercent),
+            getLevelFor(overallPercent),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppTheme.primaryColor,
@@ -283,7 +302,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
             lineWidth: 15,
             animation: true,
             animateFromLastPercent: true,
-            progressColor: _getColorFor(percent),
+            progressColor: getColorFor(percent),
             backgroundColor: AppTheme.alternateColor,
             center: Text(
               '${(percent * 100).toInt()}%',
@@ -312,7 +331,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       String cardId, String title, String subtitle, String imagePath) {
     return GestureDetector(
       onTap: _isCardDataAvailable[cardId]!
-          ? () => _navigateToCardDetail(cardId)
+          ? () => navigateToCardDetail(context, cardId)
           : null,
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -429,41 +448,5 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle,
       'assets/images/owner_pet_04.png',
     );
-  }
-
-  void _navigateToCardDetail(String cardId) {
-    Navigator.pushNamed(
-      context,
-      '/result/card',
-      arguments: {'cardId': cardId},
-    );
-  }
-
-  Color _getColorFor(double percent) {
-    Color progressColor = AppTheme.tomato;
-    final percentInt = (percent * 100).toInt();
-    if (percentInt > 75) {
-      progressColor = AppTheme.secondaryColor;
-    } else if (percentInt > 50) {
-      progressColor = AppTheme.naplesYellow;
-    } else if (percentInt > 25) {
-      progressColor = AppTheme.sandyBrown;
-    }
-    return progressColor;
-  }
-
-  String _getLevelFor(double percent) {
-    String level = 'They\'re like oil and water!';
-    final percentInt = (percent * 100).toInt();
-    if (percentInt > 80) {
-      level = 'They\'re very harmonious!';
-    } else if (percentInt > 60) {
-      level = 'They\'re a promising pair!';
-    } else if (percentInt > 40) {
-      level = 'They\'re finding their rhythm.';
-    } else if (percentInt > 20) {
-      level = 'There\'s room for improvement.';
-    }
-    return level;
   }
 }

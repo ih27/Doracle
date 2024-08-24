@@ -128,9 +128,9 @@ The plan should:
     }
 
     common += '''
-Preface the plan with a brief, encouraging introduction (2-3 sentences) that motivates ${combination == EntityCombination.petOwner ? 'the owner' : 'the pet owners'} to commit to the 10-day journey.
+Preface the plan with a brief, encouraging introduction (1 sentence) that motivates ${combination == EntityCombination.petOwner ? 'the owner' : 'the pet owners'} to commit to the 10-day journey.
 
-After the 10-day plan, include a short conclusion (2-3 sentences) that encourages continuing the positive habits formed and celebrates the strengthened bond.
+After the 10-day plan, include a short conclusion (1 sentence) that encourages continuing the positive habits formed and celebrates the strengthened bond.
 ''';
 
     return common;
