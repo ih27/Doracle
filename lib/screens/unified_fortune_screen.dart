@@ -18,12 +18,12 @@ import '../helpers/show_snackbar.dart';
 import '../config/dependency_injection.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
-  final Function(String, {String? title}) onNavigate;
+  //final Function(String, {String? title}) onNavigate;
   final bool fromPurchase;
 
   const UnifiedFortuneScreen({
     super.key,
-    required this.onNavigate,
+    //required this.onNavigate,
     this.fromPurchase = false,
   });
 
@@ -235,8 +235,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     if (_viewModel.isHome) {
       return HomeContent(
         welcomeMessage: _viewModel.welcomeMessage,
-        onOraclePressed: _viewModel.leaveHome,
-        onBondPressed: () => widget.onNavigate('/bond'),
+        onContinuePressed: _viewModel.leaveHome,
       );
     } else if (_isFortuneInProgress || _isFortuneCompleted) {
       return FortuneContent(

@@ -105,7 +105,6 @@ class _MainScreenState extends State<MainScreen> {
         return const HomeScreen();
       case 1:
         return UnifiedFortuneScreen(
-          onNavigate: _navigateTo,
           fromPurchase: _fromPurchase,
         );
       case 2:

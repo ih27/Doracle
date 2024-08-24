@@ -49,7 +49,6 @@ class AppRouter {
       case '/':
       case '/fortune':
         builder = (BuildContext context) => UnifiedFortuneScreen(
-              onNavigate: onNavigate,
               fromPurchase: fromPurchase,
             );
         break;
