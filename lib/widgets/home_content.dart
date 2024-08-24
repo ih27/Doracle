@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 
-class HomeContent extends StatelessWidget {
+class OracleHomeContent extends StatelessWidget {
   final String welcomeMessage;
   final VoidCallback onContinuePressed;
 
-  const HomeContent({
+  const OracleHomeContent({
     super.key,
     required this.welcomeMessage,
     required this.onContinuePressed,

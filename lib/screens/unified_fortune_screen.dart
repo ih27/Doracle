@@ -233,7 +233,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   Widget _buildContent() {
     if (_viewModel.isHome) {
-      return HomeContent(
+      return OracleHomeContent(
         welcomeMessage: _viewModel.welcomeMessage,
         onContinuePressed: _viewModel.leaveHome,
       );
