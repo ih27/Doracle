@@ -441,7 +441,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       CompatibilityTexts.astrologyCardId,
       cardTitle,
       cardSubtitle,
-      'assets/images/owner_pet_02.png',
+      _getCompatibilityImage('01'),
     );
   }
 
@@ -456,7 +456,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       CompatibilityTexts.recommendationCardId,
       cardTitle,
       cardSubtitle,
-      'assets/images/owner_pet_03.png',
+      _getCompatibilityImage('02'),
     );
   }
 
@@ -472,12 +472,18 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       CompatibilityTexts.improvementCardId,
       cardTitle,
       cardSubtitle,
-      'assets/images/owner_pet_04.png',
+      _getCompatibilityImage('03'),
       customNavigation: (context) {
         String planId =
             generateConsistentPlanId(widget.entity1, widget.entity2);
         navigateToImprovementPlan(context, planId);
       },
     );
+  }
+
+  String _getCompatibilityImage(String baseImageName) {
+    return widget.entity2 is Owner
+        ? 'assets/images/owner_pet_$baseImageName.png'
+        : 'assets/images/pet_pet_$baseImageName.png';
   }
 }
