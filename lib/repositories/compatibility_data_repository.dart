@@ -4,6 +4,7 @@ import '../helpers/compatibility_utils.dart';
 
 class CompatibilityDataRepository {
   static const String _improvementPlansKey = 'improvement_plans';
+  static const String _checklistKey = 'improvement_plan_checklist';
   static const String _astrologyKey = 'astrology';
   static const String _recommendationsKey = 'recommendations';
   static const String _cardAvailabilityKey = 'card_availability';
@@ -82,6 +83,33 @@ class CompatibilityDataRepository {
           }));
     }
     return {};
+  }
+
+  Future<void> saveChecklistItem(
+      String planId, int dayNumber, bool isChecked) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic> checklistData =
+        json.decode(prefs.getString(_checklistKey) ?? '{}');
+
+    if (!checklistData.containsKey(planId)) {
+      checklistData[planId] = {};
+    }
+    checklistData[planId][dayNumber.toString()] = isChecked;
+
+    await prefs.setString(_checklistKey, json.encode(checklistData));
+  }
+
+  Future<Map<int, bool>> loadChecklist(String planId) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic> checklistData =
+        json.decode(prefs.getString(_checklistKey) ?? '{}');
+
+    if (!checklistData.containsKey(planId)) {
+      return {};
+    }
+
+    return checklistData[planId].map<int, bool>(
+        (key, value) => MapEntry(int.parse(key), value as bool));
   }
 
   Future<void> saveAstrology(String planId, String astrology) async {
