@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/compatibility_result_card_screen.dart';
 import '../screens/compatibility_result_screen.dart';
+import '../screens/improvement_plan_screen.dart';
 import '../screens/owner_create_screen.dart';
 import '../screens/owner_edit_screen.dart';
 import '../screens/pet_edit_screen.dart';
@@ -37,6 +38,7 @@ class AppRouter {
     '/owner/edit': CompatibilityTexts.updateOwner,
     '/result': CompatibilityTexts.resultTitle,
     '/result/card': '',
+    '/improvement_plan': '',
   };
 
   String getRouteTitle(String route) {
@@ -73,7 +75,8 @@ class AppRouter {
         break;
       case '/owner/edit':
         final args = settings.arguments as Map<String, dynamic>;
-        builder = (BuildContext context) => UpdateOwnerScreen(owner: args['owner']);
+        builder =
+            (BuildContext context) => UpdateOwnerScreen(owner: args['owner']);
         break;
       case '/result':
         final args = settings.arguments as Map<String, dynamic>;
@@ -84,7 +87,13 @@ class AppRouter {
         break;
       case '/result/card':
         final args = settings.arguments as Map<String, dynamic>;
-        builder = (BuildContext context) => CompatibilityResultCardScreen(cardId: args['cardId']);
+        builder = (BuildContext context) =>
+            CompatibilityResultCardScreen(cardId: args['cardId']);
+        break;
+      case '/improvement_plan':
+        final args = settings.arguments as Map<String, dynamic>;
+        builder = (BuildContext context) =>
+            ImprovementPlanScreen(planId: args['planId']);
         break;
       default:
         return null;

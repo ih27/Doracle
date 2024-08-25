@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../models/owner_model.dart';
-import '../models/pet_model.dart';
 import '../config/theme.dart';
+import '../helpers/compatibility_utils.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
 
@@ -94,45 +93,26 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     dynamic entity2 = planData['entity2'];
     String plan = planData['plan'];
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppTheme.primaryColor),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: AppTheme.alternateColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppTheme.primaryColor,
-                            width: 2,
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: Image.asset(
-                            _getEntityImage(entity1),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        child: Container(
+    return GestureDetector(
+      onTap: () => navigateToImprovementPlan(context, planId),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppTheme.primaryColor),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: Stack(
+                      children: [
+                        Container(
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
@@ -146,61 +126,59 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(30),
                             child: Image.asset(
-                              _getEntityImage(entity2),
+                              getEntityImage(entity1),
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    '${entity1.name} & ${entity2.name}',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
+                        Positioned(
+                          right: 0,
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: AppTheme.alternateColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppTheme.primaryColor,
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30),
+                              child: Image.asset(
+                                getEntityImage(entity2),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              json.decode(plan)['introduction'] ?? '',
-              style: Theme.of(context).textTheme.bodyMedium,
-              maxLines: 5,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      '${entity1.name} & ${entity2.name}',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                json.decode(plan)['introduction'] ?? '',
+                style: Theme.of(context).textTheme.bodyMedium,
+                maxLines: 5,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _getEntityImage(dynamic entity) {
-    if (entity is Pet) {
-      switch (entity.species.toLowerCase()) {
-        case 'dog':
-          return 'assets/images/dog.png';
-        case 'cat':
-          return 'assets/images/cat.png';
-        case 'bird':
-          return 'assets/images/bird.png';
-        default:
-          return 'assets/images/fish.png';
-      }
-    } else {
-      switch ((entity as Owner).gender.toLowerCase()) {
-        case 'male':
-          return 'assets/images/owner_he.png';
-        case 'female':
-          return 'assets/images/owner_she.png';
-        default:
-          return 'assets/images/owner_other.png';
-      }
-    }
   }
 }

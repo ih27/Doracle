@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../models/owner_model.dart';
@@ -29,6 +31,14 @@ void navigateToCardDetail(BuildContext context, String cardId) {
   );
 }
 
+void navigateToImprovementPlan(BuildContext context, String planId) {
+  Navigator.pushNamed(
+    context,
+    '/improvement_plan',
+    arguments: {'planId': planId},
+  );
+}
+
 Color getColorFor(double percent) {
   Color progressColor = AppTheme.tomato;
   final percentInt = (percent * 100).toInt();
@@ -55,4 +65,48 @@ String getLevelFor(double percent) {
     level = 'There\'s room for improvement.';
   }
   return level;
+}
+
+String getEntityImage(dynamic entity) {
+  if (entity is Pet) {
+    switch (entity.species.toLowerCase()) {
+      case 'dog':
+        return 'assets/images/dog.png';
+      case 'cat':
+        return 'assets/images/cat.png';
+      case 'bird':
+        return 'assets/images/bird.png';
+      default:
+        return 'assets/images/fish.png';
+    }
+  } else {
+    switch ((entity as Owner).gender.toLowerCase()) {
+      case 'male':
+        return 'assets/images/owner_he.png';
+      case 'female':
+        return 'assets/images/owner_she.png';
+      default:
+        return 'assets/images/owner_other.png';
+    }
+  }
+}
+
+String encodeEntity(dynamic entity) {
+  if (entity is Pet) {
+    return json.encode({'type': 'pet', 'data': entity.toJson()});
+  } else if (entity is Owner) {
+    return json.encode({'type': 'owner', 'data': entity.toJson()});
+  }
+  throw ArgumentError('Unknown entity type');
+}
+
+dynamic decodeEntity(String? encodedEntity) {
+  if (encodedEntity == null) return null;
+  final decoded = json.decode(encodedEntity);
+  if (decoded['type'] == 'pet') {
+    return Pet.fromJson(decoded['data']);
+  } else if (decoded['type'] == 'owner') {
+    return Owner.fromJson(decoded['data']);
+  }
+  throw ArgumentError('Unknown entity type');
 }

@@ -328,10 +328,21 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Widget _buildCompatibilitySection(
-      String cardId, String title, String subtitle, String imagePath) {
+    String cardId,
+    String title,
+    String subtitle,
+    String imagePath, {
+    Function(BuildContext)? customNavigation,
+  }) {
     return GestureDetector(
       onTap: _isCardDataAvailable[cardId]!
-          ? () => navigateToCardDetail(context, cardId)
+          ? () {
+              if (customNavigation != null) {
+                customNavigation(context);
+              } else {
+                navigateToCardDetail(context, cardId);
+              }
+            }
           : null,
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -447,6 +458,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardTitle,
       cardSubtitle,
       'assets/images/owner_pet_04.png',
+      customNavigation: (context) {
+        String planId =
+            generateConsistentPlanId(widget.entity1, widget.entity2);
+        navigateToImprovementPlan(context, planId);
+      },
     );
   }
 }

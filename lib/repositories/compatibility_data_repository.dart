@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../models/owner_model.dart';
-import '../models/pet_model.dart';
+import '../helpers/compatibility_utils.dart';
 
 class CompatibilityDataRepository {
   static const String _improvementPlansKey = 'improvement_plans';
@@ -11,6 +9,15 @@ class CompatibilityDataRepository {
   static const String _cardAvailabilityKey = 'card_availability';
   static const String _lastCompatibilityCheckKey = 'last_compatibility_check';
   static const int maxStoredResults = 10;
+
+  Future<void> clearAllData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_improvementPlansKey);
+    await prefs.remove(_astrologyKey);
+    await prefs.remove(_recommendationsKey);
+    await prefs.remove(_cardAvailabilityKey);
+    await prefs.remove(_lastCompatibilityCheckKey);
+  }
 
   Future<void> saveImprovementPlan(
       String planId, String plan, dynamic entity1, dynamic entity2) async {
@@ -21,8 +28,8 @@ class CompatibilityDataRepository {
 
     plans[planId] = {
       'plan': plan,
-      'entity1': _encodeEntity(entity1),
-      'entity2': _encodeEntity(entity2),
+      'entity1': encodeEntity(entity1),
+      'entity2': encodeEntity(entity2),
       'timestamp': DateTime.now().toIso8601String(),
     };
 
@@ -33,7 +40,6 @@ class CompatibilityDataRepository {
       plans = Map.fromEntries(
           sortedKeys.take(maxStoredResults).map((k) => MapEntry(k, plans[k])));
     }
-
     await prefs.setString(_improvementPlansKey, json.encode(plans));
   }
 
@@ -46,8 +52,8 @@ class CompatibilityDataRepository {
       var plan = plans[planId];
       return {
         'plan': plan['plan'],
-        'entity1': _decodeEntity(plan['entity1']),
-        'entity2': _decodeEntity(plan['entity2']),
+        'entity1': decodeEntity(plan['entity1']),
+        'entity2': decodeEntity(plan['entity2']),
         'timestamp': DateTime.parse(plan['timestamp']),
       };
     }
@@ -70,32 +76,12 @@ class CompatibilityDataRepository {
       Map<String, dynamic> rawPlans = json.decode(plansJson);
       return rawPlans.map((key, value) => MapEntry(key, {
             'plan': value['plan'],
-            'entity1': _decodeEntity(value['entity1']),
-            'entity2': _decodeEntity(value['entity2']),
+            'entity1': decodeEntity(value['entity1']),
+            'entity2': decodeEntity(value['entity2']),
             'timestamp': DateTime.parse(value['timestamp']),
           }));
     }
     return {};
-  }
-
-  String _encodeEntity(dynamic entity) {
-    if (entity is Pet) {
-      return json.encode({'type': 'pet', 'data': entity.toJson()});
-    } else if (entity is Owner) {
-      return json.encode({'type': 'owner', 'data': entity.toJson()});
-    }
-    throw ArgumentError('Unknown entity type');
-  }
-
-  dynamic _decodeEntity(String? encodedEntity) {
-    if (encodedEntity == null) return null;
-    final decoded = json.decode(encodedEntity);
-    if (decoded['type'] == 'pet') {
-      return Pet.fromJson(decoded['data']);
-    } else if (decoded['type'] == 'owner') {
-      return Owner.fromJson(decoded['data']);
-    }
-    throw ArgumentError('Unknown entity type');
   }
 
   Future<void> saveAstrology(String planId, String astrology) async {
