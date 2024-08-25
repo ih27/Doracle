@@ -13,19 +13,23 @@ enum EntityCombination {
 }
 
 class AIPromptGenerationService {
-
   // MARK: - Public methods
 
-  String generatePrompt(PromptType type, {required Pet pet, Owner? owner, Pet? secondPet}) {
-    final combination = owner != null ? EntityCombination.petOwner : EntityCombination.petPet;
-    return _generatePromptForType(type, combination, pet: pet, owner: owner, secondPet: secondPet);
+  String generatePrompt(PromptType type,
+      {required Pet pet, Owner? owner, Pet? secondPet}) {
+    final combination =
+        owner != null ? EntityCombination.petOwner : EntityCombination.petPet;
+    return _generatePromptForType(type, combination,
+        pet: pet, owner: owner, secondPet: secondPet);
   }
 
   // MARK: - Internal methods
 
-  String _generatePromptForType(PromptType type, EntityCombination combination, {required Pet pet, Owner? owner, Pet? secondPet}) {
+  String _generatePromptForType(PromptType type, EntityCombination combination,
+      {required Pet pet, Owner? owner, Pet? secondPet}) {
     final basePrompt = _getBasePrompt(type, combination);
-    final entityInfo = _getEntityInfo(combination, pet: pet, owner: owner, secondPet: secondPet);
+    final entityInfo = _getEntityInfo(combination,
+        pet: pet, owner: owner, secondPet: secondPet);
     final specificInstructions = _getSpecificInstructions(type, combination);
 
     return '''
@@ -48,7 +52,8 @@ $specificInstructions
     }
   }
 
-  String _getEntityInfo(EntityCombination combination, {required Pet pet, Owner? owner, Pet? secondPet}) {
+  String _getEntityInfo(EntityCombination combination,
+      {required Pet pet, Owner? owner, Pet? secondPet}) {
     String petInfo = _getPetInfo(pet);
     if (combination == EntityCombination.petOwner) {
       return '''
@@ -90,7 +95,8 @@ ${isPetB ? 'Pet B' : 'Pet'} Information:
 ''';
   }
 
-  String _getSpecificInstructions(PromptType type, EntityCombination combination) {
+  String _getSpecificInstructions(
+      PromptType type, EntityCombination combination) {
     switch (type) {
       case PromptType.tenDayPlan:
         return _getTenDayPlanInstructions(combination);
@@ -103,11 +109,28 @@ ${isPetB ? 'Pet B' : 'Pet'} Information:
 
   String _getTenDayPlanInstructions(EntityCombination combination) {
     String common = '''
-For each day, provide:
-1. Day Number and a catchy title for the day's theme
-2. A specific task or activity (1-2 sentences)
-3. The purpose or benefit of the activity (1 sentence)
-4. A quick tip for success (1 sentence)
+Generate a 10-day ${combination == EntityCombination.petOwner ? 'compatibility improvement plan for a pet and their owner' : 'action plan to improve the compatibility and relationship between two pets'} in the following JSON format:
+
+{
+  "introduction": "A brief, encouraging introduction (1 sentence) that motivates ${combination == EntityCombination.petOwner ? 'the owner' : 'the pet owners'} to commit to the 10-day journey.",
+  "compatibility_improvement_plan": [
+    {
+      "day": 1,
+      "title": "Catchy title for the day's theme",
+      "task": "A specific task or activity (1-2 sentences)",
+      "benefit": "The purpose or benefit of the activity (1 sentence)",
+      "tip": "A quick tip for success (1 sentence)"
+    },
+    // ... repeat for all 10 days
+  ],
+  "conclusion": "A short conclusion (1 sentence) that encourages continuing the positive habits formed and celebrates the strengthened bond."
+}
+
+For each day in the compatibility_improvement_plan:
+1. Provide a catchy title for the day's theme
+2. Describe a specific task or activity (1-2 sentences)
+3. Explain the purpose or benefit of the activity (1 sentence)
+4. Include a quick tip for success (1 sentence)
 
 The plan should:
 1. Address different aspects of ${combination == EntityCombination.petOwner ? 'pet care and bonding' : 'compatibility and relationship building'}
@@ -118,7 +141,8 @@ The plan should:
 ''';
 
     if (combination == EntityCombination.petOwner) {
-      common += "6. Incorporate activities that align with the owner's primary reason for having a pet\n";
+      common +=
+          "6. Incorporate activities that align with the owner's primary reason for having a pet\n";
     } else {
       common += '''
 6. Consider the potential challenges of the specific pet type combination when designing tasks
@@ -126,12 +150,6 @@ The plan should:
 8. Include tasks that involve the pet owners in facilitating positive interactions between the pets
 ''';
     }
-
-    common += '''
-Preface the plan with a brief, encouraging introduction (1 sentence) that motivates ${combination == EntityCombination.petOwner ? 'the owner' : 'the pet owners'} to commit to the 10-day journey.
-
-After the 10-day plan, include a short conclusion (1 sentence) that encourages continuing the positive habits formed and celebrates the strengthened bond.
-''';
 
     return common;
   }
@@ -214,47 +232,68 @@ Preface the recommendations with a brief, one-sentence introduction that sets a 
 
   String _getRequirementLevel(int level) {
     switch (level) {
-      case 1: return 'Low';
-      case 2: return 'Medium';
-      case 3: return 'High';
-      default: return 'Unknown';
+      case 1:
+        return 'Low';
+      case 2:
+        return 'Medium';
+      case 3:
+        return 'High';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getActivityLevel(int level) {
     switch (level) {
-      case 1: return 'Sedentary';
-      case 2: return 'Low active';
-      case 3: return 'Active';
-      case 4: return 'Very active';
-      default: return 'Unknown';
+      case 1:
+        return 'Sedentary';
+      case 2:
+        return 'Low active';
+      case 3:
+        return 'Active';
+      case 4:
+        return 'Very active';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getInteractionLevel(int level) {
     switch (level) {
-      case 1: return 'Low';
-      case 2: return 'Moderate';
-      case 3: return 'High';
-      default: return 'Unknown';
+      case 1:
+        return 'Low';
+      case 2:
+        return 'Moderate';
+      case 3:
+        return 'High';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getGroomingCommitment(int level) {
     switch (level) {
-      case 1: return 'Minimal';
-      case 2: return 'Normal';
-      case 3: return 'Extensive';
-      default: return 'Unknown';
+      case 1:
+        return 'Minimal';
+      case 2:
+        return 'Normal';
+      case 3:
+        return 'Extensive';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getNoiseToleranceLevel(int level) {
     switch (level) {
-      case 1: return 'Need quiet';
-      case 2: return 'Moderate noise ok';
-      case 3: return 'High tolerance';
-      default: return 'Unknown';
+      case 1:
+        return 'Need quiet';
+      case 2:
+        return 'Moderate noise ok';
+      case 3:
+        return 'High tolerance';
+      default:
+        return 'Unknown';
     }
   }
 }

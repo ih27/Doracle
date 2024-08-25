@@ -68,12 +68,14 @@ class CompatibilityGuesser {
         response.choices.first.message.content?.first.text ?? '{}';
 
     try {
-      // Attempt to parse the JSON string
       Map<String, dynamic> planMap = json.decode(jsonString);
+      // Validate the structure
+      if (!_isValidPlanStructure(planMap)) {
+        throw const FormatException('Invalid plan structure');
+      }
       return planMap;
     } catch (e) {
       debugPrint('Error parsing JSON: $e');
-      // If parsing fails, return a map with an error message
       return {
         'error': 'Failed to parse improvement plan',
         'rawContent': jsonString
@@ -333,6 +335,20 @@ class CompatibilityGuesser {
   }
 
   // MARK: - OpenAI Integration
+  bool _isValidPlanStructure(Map<String, dynamic> plan) {
+    return plan.containsKey('introduction') &&
+        plan.containsKey('compatibility_improvement_plan') &&
+        plan.containsKey('conclusion') &&
+        plan['compatibility_improvement_plan'] is List &&
+        (plan['compatibility_improvement_plan'] as List).length == 10 &&
+        (plan['compatibility_improvement_plan'] as List).every((day) =>
+            day is Map &&
+            day.containsKey('day') &&
+            day.containsKey('title') &&
+            day.containsKey('task') &&
+            day.containsKey('benefit') &&
+            day.containsKey('tip'));
+  }
 
   String _generatePetOwnerPrompt(Pet pet, Owner owner, PromptType promptType) {
     return _aiPromptGenerationService.generatePrompt(

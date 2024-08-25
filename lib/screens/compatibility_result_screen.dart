@@ -7,6 +7,7 @@ import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
 import '../helpers/list_space_divider.dart';
 import '../helpers/constants.dart';
+import '../helpers/show_snackbar.dart';
 import '../models/owner_model.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../services/compatibility_guesser_service.dart';
@@ -187,13 +188,27 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       try {
         final plan = await _compatibilityGuesser.getImprovementPlan(
             widget.entity1, widget.entity2);
-        await _compatibilityDataRepository.saveImprovementPlan(
-            planId, json.encode(plan), widget.entity1, widget.entity2);
-        setState(() {
-          _isCardDataAvailable[CompatibilityTexts.improvementCardId] = true;
-        });
+
+        if (!plan.containsKey('error')) {
+          await _compatibilityDataRepository.saveImprovementPlan(
+              planId, json.encode(plan), widget.entity1, widget.entity2);
+          setState(() {
+            _isCardDataAvailable[CompatibilityTexts.improvementCardId] = true;
+          });
+        } else {
+          // Handle the error case
+          debugPrint('Error in improvement plan: ${plan['error']}');
+          if (mounted) {
+            showErrorSnackBar(context,
+                'Failed to generate improvement plan. Please try again later.');
+          }
+        }
       } catch (e) {
         debugPrint('Error fetching improvement plan: $e');
+        if (mounted) {
+          showErrorSnackBar(context,
+              'An error occurred while generating the improvement plan.');
+        }
       }
     } else {
       setState(() {

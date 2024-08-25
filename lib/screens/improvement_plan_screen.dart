@@ -92,8 +92,10 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
     final plan = planData.plan;
     final entity1 = planData.entity1;
     final entity2 = planData.entity2;
-    final introduction = plan['introduction'] ?? '';
+    final introduction = plan['introduction'] as String? ?? 'Start your 10-day journey!';
     final days = plan['compatibility_improvement_plan'] as List<dynamic>;
+    final conclusion = plan['conclusion'] as String? ?? 'Congratulations on completing the plan!';
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(25.0),
@@ -129,7 +131,7 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              plan['conclusion'] ?? '',
+              conclusion,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppTheme.primaryColor,
                   ),
