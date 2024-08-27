@@ -23,11 +23,11 @@ String _getStableEntityIdentifier(dynamic entity) {
   }
 }
 
-void navigateToCardDetail(BuildContext context, String cardId) {
+void navigateToCardDetail(BuildContext context, String cardId, String planId) {
   Navigator.pushNamed(
     context,
     '/result/card',
-    arguments: {'cardId': cardId},
+    arguments: {'cardId': cardId, 'planId': planId},
   );
 }
 

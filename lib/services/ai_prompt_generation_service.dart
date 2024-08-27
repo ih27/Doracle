@@ -156,23 +156,27 @@ The plan should:
 
   String _getAstrologyInstructions(EntityCombination combination) {
     return '''
-First, determine the zodiac signs based on the birthdates provided. Then, create content for four cards:
+First, determine the zodiac signs based on the birthdates provided. Then, create output in the following JSON format:
 
-1. Elemental Harmony
-Title: [Create a catchy title related to the elements of both signs]
-Content: [About 50 words discussing how the elements of their signs interact. Include the determined sun signs.]
-
-2. Planetary Influence
-Title: [Create a title mentioning the ruling planets of both signs]
-Content: [About 50 words explaining how the planetary rulers influence their relationship. Include the determined sun signs and their ruling planets.]
-
-3. Sun Sign Compatibility
-Title: [Create a title highlighting the sun sign pairing]
-Content: [About 50 words describing how their sun signs complement or challenge each other. Explicitly state the determined sun signs.]
-
-4. Moon Sign Synergy
-Title: [Create a title about emotional connection]
-Content: [If birth hours are provided, determine the moon signs and write about 50 words on how their moon signs affect their emotional bond. If birth hours are not available, provide a general statement about emotional compatibility based on sun signs. Mention if this is based on sun or moon signs.]
+{
+  "introduction": "A brief note stating the determined zodiac signs",
+  "elementalHarmony": {
+    "title": "Catchy title related to elements",
+    "content": "About 50 words discussing how the elements of their signs interact. Include the determined sun signs."
+  },
+  "planetaryInfluence": {
+    "title": "Title mentioning ruling planets",
+    "content": "About 50 words explaining how the planetary rulers influence their relationship. Include the determined sun signs and their ruling planets."
+  },
+  "sunSignCompatibility": {
+    "title": "Title highlighting sun sign pairing",
+    "content": "About 50 words describing how their sun signs complement or challenge each other. Explicitly state the determined sun signs."
+  },
+  "moonSignSynergy": {
+    "title": "Title about emotional connection",
+    "content": "If birth hours are provided, determine the moon signs and write about 50 words on how their moon signs affect their emotional bond. If birth hours are not available, provide a general statement about emotional compatibility based on sun signs. Mention if this is based on sun or moon signs."
+  }
+}
 
 For each card:
 - The title should be catchy and relevant to the content.
@@ -189,7 +193,20 @@ Preface your response with a brief note stating the zodiac signs you've determin
 
   String _getRecommendationsInstructions(EntityCombination combination) {
     return '''
-Based on this information, create 5 practical recommendations and 1 astrological bonus tip. Each practical recommendation should:
+Based on this information, create 5 practical recommendations and 1 astrological bonus tip. Provide the response in the following JSON format:
+{
+  "introduction": "One-sentence introduction setting a playful tone",
+  "practicalRecommendations": [
+    "2-3 sentences for recommendation 1",
+    "2-3 sentences for recommendation 2",
+    "2-3 sentences for recommendation 3",
+    "2-3 sentences for recommendation 4",
+    "2-3 sentences for recommendation 5"
+  ],
+  "astrologicalBonusTip": "2-3 sentences for the astrological bonus tip"
+}
+  
+Each practical recommendation should:
 1. Be 2-3 sentences long.
 2. Focus on a practical ${combination == EntityCombination.petOwner ? 'pet care tip' : 'tip to improve compatibility between the two pets'} with a fun, engaging twist.
 3. Address a specific aspect of the ${combination == EntityCombination.petOwner ? 'pet-owner relationship or care routine' : 'pet-to-pet relationship or shared activities'}.

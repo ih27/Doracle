@@ -349,13 +349,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     String imagePath, {
     Function(BuildContext)? customNavigation,
   }) {
+    String planId =
+            generateConsistentPlanId(widget.entity1, widget.entity2);
     return GestureDetector(
       onTap: _isCardDataAvailable[cardId]!
           ? () {
               if (customNavigation != null) {
                 customNavigation(context);
               } else {
-                navigateToCardDetail(context, cardId);
+                navigateToCardDetail(context, cardId, planId);
               }
             }
           : null,

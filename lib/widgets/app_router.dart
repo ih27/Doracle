@@ -87,8 +87,8 @@ class AppRouter {
         break;
       case '/result/card':
         final args = settings.arguments as Map<String, dynamic>;
-        builder = (BuildContext context) =>
-            CompatibilityResultCardScreen(cardId: args['cardId']);
+        builder = (BuildContext context) => CompatibilityResultCardScreen(
+            cardId: args['cardId'], planId: args['planId']);
         break;
       case '/improvement_plan':
         final args = settings.arguments as Map<String, dynamic>;
