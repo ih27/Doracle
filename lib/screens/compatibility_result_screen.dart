@@ -9,9 +9,10 @@ import '../helpers/list_space_divider.dart';
 import '../helpers/constants.dart';
 import '../helpers/show_snackbar.dart';
 import '../models/owner_model.dart';
-import '../repositories/compatibility_data_repository.dart';
-import '../services/compatibility_guesser_service.dart';
 import '../models/pet_model.dart';
+import '../repositories/compatibility_data_repository.dart';
+import '../services/compatibility_content_service.dart';
+import '../services/compatibility_score_service.dart';
 
 class CompatibilityResultScreen extends StatefulWidget {
   final dynamic entity1;
@@ -29,11 +30,13 @@ class CompatibilityResultScreen extends StatefulWidget {
 }
 
 class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
-  final CompatibilityGuesser _compatibilityGuesser =
-      getIt<CompatibilityGuesser>();
-
+  final CompatibilityScoreService _compatibilityScoreService =
+      getIt<CompatibilityScoreService>();
+  final CompatibilityContentService _compatibilityContentService =
+      getIt<CompatibilityContentService>();
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
+
   Map<String, dynamic> _compatibilityResult = {};
   bool _isLoading = true;
   Map<String, bool> _isCardDataAvailable = {
@@ -122,17 +125,19 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
         .saveCardAvailability(_isCardDataAvailable);
   }
 
-  void _fetchScores() {
+  Future<void> _fetchScores() async {
     try {
       final result = widget.entity2 is Owner
-          ? _compatibilityGuesser.getPetOwnerScores(
+          ? _compatibilityScoreService.getPetOwnerScores(
               widget.entity1 as Pet, widget.entity2 as Owner)
-          : _compatibilityGuesser.getPetPetScores(
+          : _compatibilityScoreService.getPetPetScores(
               widget.entity1 as Pet, widget.entity2 as Pet);
       setState(() {
         _compatibilityResult = result;
         _isLoading = false;
       });
+      // Save the compatibility score
+      await _saveCompatibilityScore(result);
     } catch (e) {
       debugPrint('Error fetching scores: $e');
       setState(() {
@@ -141,10 +146,20 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     }
   }
 
+  Future<void> _saveCompatibilityScore(Map<String, dynamic> scores) async {
+    try {
+      await _compatibilityDataRepository.saveCompatibilityScore(
+          widget.entity1, widget.entity2, scores);
+    } catch (e) {
+      debugPrint('Error saving compatibility score: $e');
+    }
+  }
+
   Future<void> _fetchAstrology() async {
     String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     try {
-      final result = await _compatibilityGuesser.getAstrologyCompatibility(
+      final result =
+          await _compatibilityContentService.getAstrologyCompatibility(
         widget.entity1,
         widget.entity2,
       );
@@ -162,7 +177,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   Future<void> _fetchRecommendations() async {
     String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     try {
-      final result = await _compatibilityGuesser.getRecommendations(
+      final result = await _compatibilityContentService.getRecommendations(
         widget.entity1,
         widget.entity2,
       );
@@ -186,7 +201,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
     if (!exists) {
       try {
-        final plan = await _compatibilityGuesser.getImprovementPlan(
+        final plan = await _compatibilityContentService.getImprovementPlan(
             widget.entity1, widget.entity2);
 
         if (!plan.containsKey('error')) {
@@ -349,8 +364,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     String imagePath, {
     Function(BuildContext)? customNavigation,
   }) {
-    String planId =
-            generateConsistentPlanId(widget.entity1, widget.entity2);
+    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     return GestureDetector(
       onTap: _isCardDataAvailable[cardId]!
           ? () {

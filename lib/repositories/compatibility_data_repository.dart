@@ -9,7 +9,80 @@ class CompatibilityDataRepository {
   static const String _recommendationsKey = 'recommendations';
   static const String _cardAvailabilityKey = 'card_availability';
   static const String _lastCompatibilityCheckKey = 'last_compatibility_check';
+  static const String _compatibilityScoresKey = 'compatibility_scores';
   static const int maxStoredResults = 10;
+
+  Future<void> saveCompatibilityScore(
+      dynamic entity1Id, dynamic entity2Id, Map<String, dynamic> scores) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    Map<String, dynamic> allScores =
+        json.decode(prefs.getString(_compatibilityScoresKey) ?? '{}');
+
+    String pairId = generateConsistentPlanId(entity1Id, entity2Id);
+    String timestamp = DateTime.now().toIso8601String();
+    String scoreId = '$pairId|$timestamp';
+
+    allScores[scoreId] = {
+      'scores': scores,
+      'timestamp': timestamp,
+    };
+
+    // Sort all scores by timestamp and keep only the most recent maxStoredResults
+    var sortedScoreIds = allScores.keys.toList()
+      ..sort((a, b) =>
+          allScores[b]['timestamp'].compareTo(allScores[a]['timestamp']));
+
+    if (sortedScoreIds.length > maxStoredResults) {
+      sortedScoreIds = sortedScoreIds.take(maxStoredResults).toList();
+      allScores = Map.fromEntries(
+          sortedScoreIds.map((id) => MapEntry(id, allScores[id]!)));
+    }
+
+    await prefs.setString(_compatibilityScoresKey, json.encode(allScores));
+  }
+
+  Future<Map<String, dynamic>?> loadCompatibilityScore(
+      dynamic entity1Id, dynamic entity2Id,
+      {DateTime? timestamp}) async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic> allScores =
+        json.decode(prefs.getString(_compatibilityScoresKey) ?? '{}');
+
+    String pairId = generateConsistentPlanId(entity1Id, entity2Id);
+
+    if (timestamp != null) {
+      // If timestamp is provided, look for the exact match
+      String scoreId = '$pairId|${timestamp.toIso8601String()}';
+      return allScores[scoreId]?['scores'];
+    } else {
+      // If no timestamp is provided, find the most recent score for this pair
+      var matchingScores = allScores.entries
+          .where((entry) => entry.key.startsWith(pairId))
+          .toList()
+        ..sort((a, b) => b.value['timestamp'].compareTo(a.value['timestamp']));
+
+      return matchingScores.isNotEmpty
+          ? matchingScores.first.value['scores']
+          : null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> loadAllCompatibilityScores() async {
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic> allScores =
+        json.decode(prefs.getString(_compatibilityScoresKey) ?? '{}');
+
+    return allScores.entries.map((entry) {
+      var parts = entry.key.split('|');
+      return {
+        'pairId': parts[0],
+        'scores': entry.value['scores'],
+        'timestamp': DateTime.parse(entry.value['timestamp']),
+      };
+    }).toList()
+      ..sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
+  }
 
   Future<void> clearAllData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -18,6 +91,7 @@ class CompatibilityDataRepository {
     await prefs.remove(_recommendationsKey);
     await prefs.remove(_cardAvailabilityKey);
     await prefs.remove(_lastCompatibilityCheckKey);
+    await prefs.remove(_compatibilityScoresKey);
   }
 
   Future<void> saveImprovementPlan(
@@ -44,7 +118,6 @@ class CompatibilityDataRepository {
     await prefs.setString(_improvementPlansKey, json.encode(plans));
   }
 
-  // Load a specific plan
   Future<Map<String, dynamic>> loadImprovementPlan(String planId) async {
     final prefs = await SharedPreferences.getInstance();
     Map<String, dynamic> plans =
@@ -68,7 +141,6 @@ class CompatibilityDataRepository {
     return plans.containsKey(planId);
   }
 
-  // Load all plans
   Future<Map<String, Map<String, dynamic>>> loadImprovementPlans() async {
     final prefs = await SharedPreferences.getInstance();
     final String? plansJson = prefs.getString(_improvementPlansKey);

@@ -8,7 +8,8 @@ import '../repositories/user_repository.dart';
 import '../services/ai_prompt_generation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
-import '../services/compatibility_guesser_service.dart';
+import '../services/compatibility_content_service.dart';
+import '../services/compatibility_score_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
@@ -60,8 +61,10 @@ void setupDependencies() {
         '', // Initial empty persona name
         getIt<OpenAIService>(),
       ));
-  getIt.registerLazySingleton(
-      () => CompatibilityGuesser(getIt<OpenAIService>()));
+  getIt.registerLazySingleton<CompatibilityScoreService>(
+      () => CompatibilityScoreService());
+  getIt.registerLazySingleton(() => CompatibilityContentService(
+      getIt<OpenAIService>(), getIt<AIPromptGenerationService>()));
   getIt.registerLazySingleton<OpenAIService>(
     () => OpenAIService(
       dotenv.env['OPENAI_API_KEY']!,
