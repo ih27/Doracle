@@ -9,7 +9,7 @@ import '../mixins/shake_detector_mixin.dart';
 import '../helpers/constants.dart';
 import '../widgets/fortune_animation.dart';
 import '../widgets/fortune_content.dart';
-import '../widgets/home_content.dart';
+import '../widgets/oracle_home_content.dart';
 import '../widgets/question_carousel.dart';
 import '../widgets/question_input.dart';
 import '../widgets/out_of_questions_overlay.dart';
