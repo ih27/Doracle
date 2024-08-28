@@ -60,7 +60,7 @@ class GoDeeperOverlay extends StatelessWidget {
             children: [
               const SizedBox(width: 40),
               Text(
-                'Unlock all features',
+                'Unlock All Features',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),

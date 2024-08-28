@@ -9,6 +9,7 @@ import '../config/theme.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import 'feedthedog_screen.dart';
+import 'unlockallfeatures_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;
@@ -84,6 +85,25 @@ class _SettingsScreenState extends State<SettingsScreen>
         child: Column(
           children: [
             _buildSettingsItem(
+              icon: Icons.lock_open,
+              title: 'Unlock All Features',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UnlockAllFeaturesScreen(
+                      onPurchaseComplete: widget.onPurchaseComplete,
+                    ),
+                  ),
+                );
+              },
+              color: AppTheme.yaleBlue,
+              backgroundColor: AppTheme.naplesYellow,
+              fontWeight: FontWeight.bold,
+              arrowIcon: true,
+            ),
+            const SizedBox(height: 12),
+            _buildSettingsItem(
               icon: Icons.diamond_rounded,
               title: 'Feed the Dog',
               onTap: () {
@@ -96,8 +116,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ),
                 );
               },
-              color: AppTheme.getColorFromHex("#0d3b66"),
-              backgroundColor: AppTheme.getColorFromHex("#f4d35e"),
+              color: AppTheme.secondaryColor,
+              borderColor: AppTheme.secondaryColor,
               fontWeight: FontWeight.bold,
               arrowIcon: true,
             ),
@@ -114,6 +134,12 @@ class _SettingsScreenState extends State<SettingsScreen>
               icon: Icons.share,
               title: 'Share with Friends',
               onTap: _handleShare,
+            ),
+            const SizedBox(height: 12),
+            _buildSettingsItem(
+              icon: Icons.restore_rounded,
+              title: 'Restore Purchase',
+              onTap: _handleRestore,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -244,6 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     required VoidCallback onTap,
     Color? color,
     Color? backgroundColor,
+    Color? borderColor,
     FontWeight? fontWeight,
     bool arrowIcon = false,
   }) {
@@ -252,7 +279,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         color: backgroundColor ?? Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.getColorFromHex("#ede8df"),
+          color: borderColor ?? AppTheme.alternateColor,
           width: 2,
         ),
       ),
@@ -280,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.getColorFromHex("#ede8df"),
+          color: AppTheme.alternateColor,
           width: 2,
         ),
       ),
@@ -289,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           'Notifications',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
-        activeColor: AppTheme.getColorFromHex("#18aa99"),
+        activeColor: AppTheme.secondaryColor,
         dense: false,
         controlAffinity: ListTileControlAffinity.trailing,
         contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 0, 4, 0),
@@ -372,5 +399,9 @@ class _SettingsScreenState extends State<SettingsScreen>
   Future<void> _handleShare() async {
     await Share.share(SettingsScreenTexts.shareText,
         subject: SettingsScreenTexts.shareSubject);
+  }
+
+  Future<void> _handleRestore() async {
+    // Revenuecat iOS purchase restore
   }
 }
