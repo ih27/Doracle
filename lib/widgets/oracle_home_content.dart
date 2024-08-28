@@ -55,7 +55,7 @@ class OracleHomeContent extends StatelessWidget {
           ),
         ),
         child: Text(
-          'Continue',
+          'Ask Away',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: Colors.white,
                 letterSpacing: 0,
