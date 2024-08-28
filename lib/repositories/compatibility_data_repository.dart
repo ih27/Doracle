@@ -13,19 +13,21 @@ class CompatibilityDataRepository {
   static const int maxStoredResults = 10;
 
   Future<void> saveCompatibilityScore(
-      dynamic entity1Id, dynamic entity2Id, Map<String, dynamic> scores) async {
+      dynamic entity1, dynamic entity2, Map<String, dynamic> scores) async {
     final prefs = await SharedPreferences.getInstance();
 
     Map<String, dynamic> allScores =
         json.decode(prefs.getString(_compatibilityScoresKey) ?? '{}');
 
-    String pairId = generateConsistentPlanId(entity1Id, entity2Id);
+    String pairId = generateConsistentPlanId(entity1, entity2);
     String timestamp = DateTime.now().toIso8601String();
     String scoreId = '$pairId|$timestamp';
 
     allScores[scoreId] = {
       'scores': scores,
       'timestamp': timestamp,
+      'entity1': encodeEntity(entity1),
+      'entity2': encodeEntity(entity2),
     };
 
     // Sort all scores by timestamp and keep only the most recent maxStoredResults
@@ -79,6 +81,8 @@ class CompatibilityDataRepository {
         'pairId': parts[0],
         'scores': entry.value['scores'],
         'timestamp': DateTime.parse(entry.value['timestamp']),
+        'entity1': decodeEntity(entry.value['entity1']),
+        'entity2': decodeEntity(entry.value['entity2']),
       };
     }).toList()
       ..sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
