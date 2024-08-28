@@ -36,7 +36,8 @@ You are a knowledgeable oracle providing brief, witty insights on future-oriente
 }
 
 class CompatibilityTexts {
-  static const genericTitle = 'Compatibility Check';
+  static const checkTitle = 'Compatibility Check';
+  static const compatibilityTitle = 'Compatibility';
   static const createPet = 'Create Pet';
   static const updatePet = 'Update Pet';
   static const deletePet = 'Delete Pet';
