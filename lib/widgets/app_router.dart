@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../screens/compatibility_result_card_screen.dart';
 import '../screens/compatibility_result_screen.dart';
+import '../screens/assessment_screen.dart';
+import '../screens/home_screen.dart';
 import '../screens/improvement_plan_screen.dart';
+import '../screens/last_results_screen.dart';
 import '../screens/owner_create_screen.dart';
 import '../screens/owner_edit_screen.dart';
 import '../screens/pet_edit_screen.dart';
@@ -27,9 +30,10 @@ class AppRouter {
   });
 
   final Map<String, String> _routeTitles = {
-    '/': '',
-    '/fortune': '',
+    '/': CompatibilityTexts.noTitle,
+    '/fortune': CompatibilityTexts.noTitle,
     '/bond': CompatibilityTexts.compatibilityTitle,
+    '/assessment': CompatibilityTexts.noTitle,
     '/pet/compatability': CompatibilityTexts.checkTitle,
     '/pet/create': CompatibilityTexts.createPet,
     '/pet/edit': CompatibilityTexts.updatePet,
@@ -37,8 +41,9 @@ class AppRouter {
     '/owner/create': CompatibilityTexts.createOwner,
     '/owner/edit': CompatibilityTexts.updateOwner,
     '/result': CompatibilityTexts.resultTitle,
-    '/result/card': '',
-    '/improvement_plan': '',
+    '/result/card': CompatibilityTexts.noTitle,
+    '/last_results': CompatibilityTexts.noTitle,
+    '/improvement_plan': CompatibilityTexts.noTitle,
   };
 
   String getRouteTitle(String route) {
@@ -49,6 +54,8 @@ class AppRouter {
     WidgetBuilder builder;
     switch (settings.name) {
       case '/':
+        builder = (BuildContext context) => const HomeScreen();
+        break;
       case '/fortune':
         builder = (BuildContext context) => UnifiedFortuneScreen(
               fromPurchase: fromPurchase,
@@ -56,6 +63,9 @@ class AppRouter {
         break;
       case '/bond':
         builder = (BuildContext context) => BondButtons(onNavigate: onNavigate);
+        break;
+      case '/assessment':
+        builder = (BuildContext context) => const AssessmentScreen();
         break;
       case '/pet/compatability':
         builder = (BuildContext context) => const PetCompatabilityScreen();
@@ -89,6 +99,9 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>;
         builder = (BuildContext context) => CompatibilityResultCardScreen(
             cardId: args['cardId'], planId: args['planId']);
+        break;
+      case '/last_results':
+        builder = (BuildContext context) => const LastResultsScreen();
         break;
       case '/improvement_plan':
         final args = settings.arguments as Map<String, dynamic>;

@@ -5,14 +5,12 @@ import 'slide_right_route.dart';
 class CustomAppBarData {
   bool canPop;
   String currentTitle;
-  VoidCallback navigateToHome;
   VoidCallback onPurchaseComplete;
   VoidCallback onBackPressed;
 
   CustomAppBarData({
     required this.canPop,
     required this.currentTitle,
-    required this.navigateToHome,
     required this.onPurchaseComplete,
     required this.onBackPressed,
   });

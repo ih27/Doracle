@@ -27,7 +27,7 @@ class BondButtons extends StatelessWidget {
                       color: Theme.of(context).primaryColor,
                       size: 24,
                     ),
-                    onPressed: () => print('Last Result pressed ...'),
+                    onPressed: () => onNavigate('/last_results'),
                     iconSize: 50,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(

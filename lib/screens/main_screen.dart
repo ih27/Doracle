@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
 import '../widgets/nav_bar.dart';
-import 'home_screen.dart';
-import 'unified_fortune_screen.dart';
-import '../widgets/bond_buttons.dart';
-import 'assessment_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,7 +12,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  final GlobalKey<CustomAppBarState> _appBarKey = GlobalKey<CustomAppBarState>();
+  final GlobalKey<CustomAppBarState> _appBarKey =
+      GlobalKey<CustomAppBarState>();
   int _selectedIndex = 0;
   bool _fromPurchase = false;
   bool _canPop = false;
@@ -41,7 +38,6 @@ class _MainScreenState extends State<MainScreen> {
       data: CustomAppBarData(
         canPop: _canPop,
         currentTitle: _currentTitle,
-        navigateToHome: _navigateToHome,
         onPurchaseComplete: _onPurchaseComplete,
         onBackPressed: () => _navigatorKey.currentState?.pop(),
       ),
@@ -54,14 +50,6 @@ class _MainScreenState extends State<MainScreen> {
       _updateCustomAppBar();
     });
     _navigatorKey.currentState?.pushNamed(route);
-  }
-
-  void _navigateToHome() {
-    setState(() {
-      _selectedIndex = 0;
-      _currentTitle = '';
-      _updateCustomAppBar();
-    });
   }
 
   void _onPurchaseComplete() {
@@ -93,26 +81,23 @@ class _MainScreenState extends State<MainScreen> {
     _appBarKey.currentState?.update(CustomAppBarData(
       canPop: _canPop,
       currentTitle: _currentTitle,
-      navigateToHome: _navigateToHome,
       onPurchaseComplete: _onPurchaseComplete,
       onBackPressed: () => _navigatorKey.currentState?.pop(),
     ));
   }
 
-  Widget _getScreenForIndex(int index) {
+  String _getRouteForIndex(int index) {
     switch (index) {
       case 0:
-        return const HomeScreen();
+        return '/';
       case 1:
-        return UnifiedFortuneScreen(
-          fromPurchase: _fromPurchase,
-        );
+        return '/fortune';
       case 2:
-        return BondButtons(onNavigate: _navigateTo);
+        return '/bond';
       case 3:
-        return const AssessmentScreen();
+        return '/assessment';
       default:
-        return const HomeScreen();
+        return '/';
     }
   }
 
@@ -123,26 +108,20 @@ class _MainScreenState extends State<MainScreen> {
       body: Navigator(
         key: _navigatorKey,
         observers: [_appRouter.observer],
-        onGenerateRoute: (settings) {
-          if (_selectedIndex == 0 && settings.name == '/') {
-            return MaterialPageRoute(
-              builder: (_) => _getScreenForIndex(_selectedIndex),
-              settings: settings,
-            );
-          }
-          return _appRouter.onGenerateRoute(settings) ?? 
-               MaterialPageRoute(builder: (_) => const SizedBox.shrink());
-        },
+        onGenerateRoute: _appRouter.onGenerateRoute,
       ),
       bottomNavigationBar: NavBar(
         selectedIndex: _selectedIndex,
         onItemSelected: (index) {
           setState(() {
             _selectedIndex = index;
-            _currentTitle = '';
+            _currentTitle = _appRouter.getRouteTitle(_getRouteForIndex(index));
             _updateCustomAppBar();
           });
-          _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            _getRouteForIndex(index),
+            (route) => false,
+          );
         },
       ),
     );
@@ -153,10 +132,8 @@ class _MainScreenNavigatorObserver extends NavigatorObserver {
   final VoidCallback updateCanPop;
   final Function(Route<dynamic>) updateTitle;
 
-  _MainScreenNavigatorObserver({
-    required this.updateCanPop,
-    required this.updateTitle,
-  });
+  _MainScreenNavigatorObserver(
+      {required this.updateCanPop, required this.updateTitle});
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
@@ -166,14 +143,6 @@ class _MainScreenNavigatorObserver extends NavigatorObserver {
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    updateCanPop();
-    if (previousRoute != null) {
-      updateTitle(previousRoute);
-    }
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     updateCanPop();
     if (previousRoute != null) {
       updateTitle(previousRoute);
