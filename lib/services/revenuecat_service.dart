@@ -66,6 +66,8 @@ class RevenueCatService {
           _cachedSubscriptions[subscriptionType]!);
       if (customerInfo.entitlements.active.isNotEmpty) {
         _isEntitled = true;
+      } else {
+        _isEntitled = false;
       }
       return _isEntitled;
     } catch (e) {
@@ -81,6 +83,8 @@ class RevenueCatService {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       if (customerInfo.entitlements.active.isNotEmpty) {
         _isEntitled = true;
+      } else {
+        _isEntitled = false;
       }
       return _isEntitled;
     } catch (e) {
