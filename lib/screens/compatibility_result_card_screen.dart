@@ -34,12 +34,14 @@ class _CompatibilityResultCardScreenState
   final UserService _userService = getIt<UserService>();
   late List<bool> _isExpanded;
   Map<String, String> _cachedPrices = {};
+  bool _isEntitled = false;
 
   @override
   void initState() {
     super.initState();
     _isExpanded = List.generate(4, (_) => false);
     _fetchPricesIfNeeded();
+    _isEntitled = _purchaseService.isEntitled;
   }
 
   @override
@@ -71,19 +73,19 @@ class _CompatibilityResultCardScreenState
                 padding: const EdgeInsets.fromLTRB(25, 10, 25, 0),
                 child: CustomExpansionPanelList(
                   expansionCallback: (int index, bool isExpanded) {
-                    if (_purchaseService.isEntitled) {
+                    if (_isEntitled) {
                       setState(() {
                         _isExpanded[index] = !_isExpanded[index];
                       });
                     }
                   },
                   onNonExpandableTap:
-                      _purchaseService.isEntitled ? null : _showIAPOverlay,
+                      _isEntitled ? null : _showIAPOverlay,
                   children: expansionPanels,
                 ),
               ),
               const SizedBox(height: 25),
-              if (!_purchaseService.isEntitled)
+              if (!_isEntitled)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
                   child: SizedBox(
@@ -320,6 +322,9 @@ class _CompatibilityResultCardScreenState
 
     if (mounted) {
       if (success) {
+        setState(() {
+          _isEntitled = true;
+        });
         showDialog(
           context: context,
           builder: (BuildContext buildContext) {
