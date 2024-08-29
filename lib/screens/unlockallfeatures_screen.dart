@@ -1,5 +1,7 @@
+import 'package:doracle/helpers/string_extensions.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
+import '../config/theme.dart';
 import '../helpers/purchase_utils.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
@@ -22,6 +24,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
 
   bool _isLoading = false;
   Map<String, String> _prices = {};
+  String _selectedPlan = 'annual';
 
   @override
   void initState() {
@@ -81,7 +84,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
 
   Widget _buildHeaderImage() {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.4,
+      height: MediaQuery.of(context).size.height * 0.27,
       child: Image.asset(
         'assets/images/subscribe_plan.png',
         fit: BoxFit.contain,
@@ -119,16 +122,17 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           _buildSubscriptionCard(
             context,
-            'Annual\nPlan',
+            'annual',
             convertAnnualToMonthly(_prices['\$rc_annual']) ?? '\$2.49',
             true,
           ),
           _buildSubscriptionCard(
             context,
-            'Monthly\nPlan',
+            'monthly',
             _prices['\$rc_monthly'] ?? '\$2.99',
             false,
           ),
@@ -138,78 +142,118 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   }
 
   Widget _buildSubscriptionCard(
-      BuildContext context, String title, String price, bool isBestOffer) {
-    return Container(
-      width: 150,
-      height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-        gradient: isBestOffer
-            ? LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.secondary,
-                  Theme.of(context).primaryColor
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              )
-            : null,
-      ),
-      child: Column(
-        children: [
-          if (isBestOffer)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(18)),
-              ),
-              child: Text(
-                'Best Offer',
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(color: Colors.white),
-              ),
-            ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        price,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                              color: Theme.of(context).colorScheme.secondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      Text(
-                        '/month',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+      BuildContext context, String planType, String price, bool isBestOffer) {
+    bool isSelected = _selectedPlan == planType;
+    double cardWidth = 150;
+    double cardHeight = 200;
+    double bestOfferHeight = 30;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedPlan = planType;
+        });
+      },
+      child: SizedBox(
+        width: cardWidth,
+        height: isBestOffer ? cardHeight + bestOfferHeight : cardHeight,
+        child: Column(
+          children: [
+            if (isBestOffer)
+              Container(
+                width: cardWidth,
+                height: bestOfferHeight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.secondary,
+                      Theme.of(context).primaryColor
                     ],
+                    stops: const [0, 1],
+                    begin: const AlignmentDirectional(0, -1),
+                    end: const AlignmentDirectional(0, 1),
                   ),
-                ],
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Best Offer',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
+            Container(
+              width: cardWidth,
+              height: cardHeight,
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [AppTheme.lemonChiffon, AppTheme.naplesYellow],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )
+                    : null,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(isBestOffer ? 0 : 20),
+                  topRight: Radius.circular(isBestOffer ? 0 : 20),
+                  bottomLeft: const Radius.circular(20),
+                  bottomRight: const Radius.circular(20),
+                ),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      '${planType.capitalize()}\nPlan',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 22,
+                          ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Text(
+                          price,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.copyWith(
+                                color: AppTheme.success,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        Text(
+                          '/month',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
