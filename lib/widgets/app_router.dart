@@ -93,6 +93,7 @@ class AppRouter {
         builder = (BuildContext context) => CompatibilityResultScreen(
               entity1: args['entity1'],
               entity2: args['entity2'],
+              scores: args['scores'],
             );
         break;
       case '/result/card':

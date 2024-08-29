@@ -17,11 +17,13 @@ import '../services/compatibility_score_service.dart';
 class CompatibilityResultScreen extends StatefulWidget {
   final dynamic entity1;
   final dynamic entity2;
+  final Map<String, dynamic>? scores;
 
   const CompatibilityResultScreen({
     super.key,
     required this.entity1,
     required this.entity2,
+    this.scores,
   });
 
   @override
@@ -52,7 +54,14 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   }
 
   Future<void> _initializeData() async {
-    _fetchScores();
+    if (widget.scores != null) {
+      setState(() {
+        _compatibilityResult = widget.scores!;
+        _isLoading = false;
+      });
+    } else {
+      _fetchScores();
+    }
     await _checkLastCompatibilityCheck();
     await _loadCardAvailability();
     if (!_isCardDataAvailable[CompatibilityTexts.astrologyCardId]!) {

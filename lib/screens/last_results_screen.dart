@@ -12,7 +12,8 @@ class LastResultsScreen extends StatefulWidget {
 }
 
 class _LastResultsScreenState extends State<LastResultsScreen> {
-  final CompatibilityDataRepository _compatibilityDataRepository = getIt<CompatibilityDataRepository>();
+  final CompatibilityDataRepository _compatibilityDataRepository =
+      getIt<CompatibilityDataRepository>();
   List<Map<String, dynamic>> _compatibilityScores = [];
 
   @override
@@ -22,7 +23,8 @@ class _LastResultsScreenState extends State<LastResultsScreen> {
   }
 
   Future<void> _loadCompatibilityScores() async {
-    final scores = await _compatibilityDataRepository.loadAllCompatibilityScores();
+    final scores =
+        await _compatibilityDataRepository.loadAllCompatibilityScores();
     setState(() {
       _compatibilityScores = scores;
     });
@@ -48,12 +50,13 @@ class _LastResultsScreenState extends State<LastResultsScreen> {
                       child: Text(
                         'Latest Compatibility Results',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          color: AppTheme.primaryColor,
-                          fontSize: 22,
-                          letterSpacing: 0,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.displayMedium?.copyWith(
+                                  color: AppTheme.primaryColor,
+                                  fontSize: 22,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                     const SizedBox(height: 25),
@@ -61,7 +64,8 @@ class _LastResultsScreenState extends State<LastResultsScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _compatibilityScores.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 15),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 15),
                       itemBuilder: (context, index) {
                         final score = _compatibilityScores[index];
                         return _buildCompatibilityResultCard(score);
@@ -83,23 +87,36 @@ class _LastResultsScreenState extends State<LastResultsScreen> {
     final entity1 = score['entity1'];
     final entity2 = score['entity2'];
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: AppTheme.primaryColor,
-          width: 2,
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/result',
+          arguments: {
+            'entity1': entity1,
+            'entity2': entity2,
+            'scores': score['scores'],
+          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: AppTheme.primaryColor,
+            width: 2,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildEntityAvatar(entity1),
-            _buildScoreContainer(overallScore, timestamp),
-            _buildEntityAvatar(entity2),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildEntityAvatar(entity1),
+              _buildScoreContainer(overallScore, timestamp),
+              _buildEntityAvatar(entity2),
+            ],
+          ),
         ),
       ),
     );
@@ -132,10 +149,10 @@ class _LastResultsScreenState extends State<LastResultsScreen> {
             entity.name,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppTheme.primaryColor,
-              letterSpacing: 0,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: AppTheme.primaryColor,
+                  letterSpacing: 0,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
@@ -159,17 +176,17 @@ class _LastResultsScreenState extends State<LastResultsScreen> {
           Text(
             '${timestamp.day}/${timestamp.month}/${timestamp.year}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              letterSpacing: 0,
-            ),
+                  letterSpacing: 0,
+                ),
           ),
           Text(
             '$overallScore%',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: getColorFor(overallScore / 100),
-              fontSize: 35,
-              letterSpacing: 0,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: getColorFor(overallScore / 100),
+                  fontSize: 35,
+                  letterSpacing: 0,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
