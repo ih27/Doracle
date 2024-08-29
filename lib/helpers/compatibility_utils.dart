@@ -39,6 +39,13 @@ void navigateToImprovementPlan(BuildContext context, String planId) {
   );
 }
 
+void navigateToHome(BuildContext context) {
+  Navigator.pushNamed(
+    context,
+    '/',
+  );
+}
+
 Color getColorFor(double percent) {
   Color progressColor = AppTheme.tomato;
   final percentInt = (percent * 100).toInt();

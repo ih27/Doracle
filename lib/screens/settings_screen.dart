@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import '../config/dependency_injection.dart';
 import '../services/auth_service.dart';
+import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../config/theme.dart';
 import '../helpers/show_snackbar.dart';
@@ -27,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     with WidgetsBindingObserver {
   final UserService userService = getIt<UserService>();
   final AuthService authService = getIt<AuthService>();
+  final RevenueCatService purchaseService = getIt<RevenueCatService>();
   bool _notificationsEnabled = false;
 
   @override
@@ -91,9 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => UnlockAllFeaturesScreen(
-                      onPurchaseComplete: widget.onPurchaseComplete,
-                    ),
+                    builder: (context) => const UnlockAllFeaturesScreen(),
                   ),
                 );
               },
@@ -135,12 +137,17 @@ class _SettingsScreenState extends State<SettingsScreen>
               title: 'Share with Friends',
               onTap: _handleShare,
             ),
-            const SizedBox(height: 12),
-            _buildSettingsItem(
-              icon: Icons.restore_rounded,
-              title: 'Restore Purchase',
-              onTap: _handleRestore,
-            ),
+            if (Platform.isIOS)
+              Column(
+                children: [
+                  const SizedBox(height: 12),
+                  _buildSettingsItem(
+                    icon: Icons.restore_rounded,
+                    title: 'Restore Purchase',
+                    onTap: _handleRestore,
+                  ),
+                ],
+              ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _handleSignOut,
@@ -402,6 +409,14 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Future<void> _handleRestore() async {
-    // Revenuecat iOS purchase restore
+    if (await purchaseService.restorePurchase()) {
+      debugPrint('Successfully restored a subscription from settings screen');
+      if (!mounted) return;
+      showInfoSnackBar(context, 'Subscription restored successfully.');
+    } else {
+      debugPrint('Restore  subscription failed in settings screen');
+      if (!mounted) return;
+      showErrorSnackBar(context, 'Subscription restore failed.');
+    }
   }
 }

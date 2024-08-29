@@ -2,16 +2,16 @@ import 'package:doracle/helpers/string_extensions.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
+import '../helpers/compatibility_utils.dart';
 import '../helpers/purchase_utils.dart';
+import '../helpers/show_snackbar.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
+import '../widgets/subscribe_success_popup.dart';
 
 class UnlockAllFeaturesScreen extends StatefulWidget {
-  final VoidCallback onPurchaseComplete;
-
   const UnlockAllFeaturesScreen({
     super.key,
-    required this.onPurchaseComplete,
   });
 
   @override
@@ -25,11 +25,20 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   bool _isLoading = false;
   Map<String, String> _prices = {};
   String _selectedPlan = 'annual';
+  bool _isEntitled = false;
 
   @override
   void initState() {
     super.initState();
     _loadPrices();
+    _checkEntitlement();
+  }
+
+  void _checkEntitlement() {
+    bool isEntitled = _purchaseService.isEntitled;
+    setState(() {
+      _isEntitled = isEntitled;
+    });
   }
 
   Future<void> _loadPrices() async {
@@ -43,6 +52,46 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _handlePurchase(String subscriptionType) async {
+    if (_isEntitled) return;
+
+    bool success = await _purchase(subscriptionType);
+
+    if (mounted) {
+      if (success) {
+        showDialog(
+          context: context,
+          builder: (BuildContext buildContext) {
+            return SubscribeSuccessPopup(
+              subscriptionType: subscriptionType,
+              onContinue: () {
+                Navigator.of(buildContext).pop();
+                navigateToHome(buildContext);
+              },
+            );
+          },
+        );
+      } else {
+        showErrorSnackBar(context, 'Purchase failed. Please try again.');
+      }
+    }
+  }
+
+  Future<bool> _purchase(String subscriptionType) async {
+    try {
+      await _purchaseService.ensureInitialized();
+      if (!await _purchaseService.buySubscription(subscriptionType)) {
+        return false;
+      }
+      await _userService.updateSubscriptionHistory(subscriptionType);
+      _checkEntitlement();
+      return true;
+    } catch (e) {
+      debugPrint('Purchase error: $e');
+      return false;
     }
   }
 
@@ -70,7 +119,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                 _buildFeaturesList(context),
                 _buildSubscriptionOptions(context),
                 _buildSecurityInfo(context),
-                _buildSubscribeButton(context),
+                _buildSubscribeButton(context, _selectedPlan),
                 _buildFooterInfo(context),
                 const SizedBox(height: 24),
               ],
@@ -272,19 +321,17 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     );
   }
 
-  Widget _buildSubscribeButton(BuildContext context) {
+  Widget _buildSubscribeButton(BuildContext context, String subscriptionType) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: ElevatedButton(
-        onPressed: () {
-          // Implement subscription logic here
-        },
+        onPressed: _isEntitled ? null : () => _handlePurchase(subscriptionType),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(320, 50),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: _isEntitled ? Colors.grey : null,
         ),
-        child: const Text('Subscribe'),
+        child: Text(_isEntitled ? 'Subscribed' : 'Subscribe'),
       ),
     );
   }

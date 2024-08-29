@@ -74,6 +74,21 @@ class RevenueCatService {
     }
   }
 
+  Future<bool> restorePurchase() async {
+    debugPrint('Trying to restore purchase...');
+    try {
+      await ensureInitialized();
+      CustomerInfo customerInfo = await Purchases.restorePurchases();
+      if (customerInfo.entitlements.active.isNotEmpty) {
+        _isEntitled = true;
+      }
+      return _isEntitled;
+    } catch (e) {
+      debugPrint("Restore subscription error: $e");
+      return _isEntitled;
+    }
+  }
+
   Future<Map<String, String>> fetchPrices() async {
     try {
       await ensureInitialized();
