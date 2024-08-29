@@ -5,6 +5,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
+import '../helpers/iap_utils.dart';
 import '../helpers/list_space_divider.dart';
 import '../helpers/constants.dart';
 import '../helpers/show_snackbar.dart';
@@ -13,6 +14,8 @@ import '../models/pet_model.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../services/compatibility_content_service.dart';
 import '../services/compatibility_score_service.dart';
+import '../services/revenuecat_service.dart';
+import '../services/user_service.dart';
 
 class CompatibilityResultScreen extends StatefulWidget {
   final dynamic entity1;
@@ -38,9 +41,13 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       getIt<CompatibilityContentService>();
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  final UserService _userService = getIt<UserService>();
 
   Map<String, dynamic> _compatibilityResult = {};
   bool _isLoading = true;
+  Map<String, String> _cachedPrices = {};
+  bool _isEntitled = false;
   Map<String, bool> _isCardDataAvailable = {
     CompatibilityTexts.astrologyCardId: false,
     CompatibilityTexts.recommendationCardId: false,
@@ -51,6 +58,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   void initState() {
     super.initState();
     _initializeData();
+    _fetchPricesIfNeeded();
+    _isEntitled = _purchaseService.isEntitled;
   }
 
   Future<void> _initializeData() async {
@@ -499,11 +508,36 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle,
       _getCompatibilityImage('03'),
       customNavigation: (context) {
-        String planId =
-            generateConsistentPlanId(widget.entity1, widget.entity2);
-        navigateToImprovementPlan(context, planId);
+        if (!_isEntitled) {
+          _showIAPOverlay(context);
+        } else {
+          String planId =
+              generateConsistentPlanId(widget.entity1, widget.entity2);
+          navigateToImprovementPlan(context, planId);
+        }
       },
     );
+  }
+
+  Future<void> _fetchPricesIfNeeded() async {
+    final updatedPrices = await IAPUtils.fetchSubscriptionPrices(_cachedPrices);
+    setState(() {
+      _cachedPrices = updatedPrices;
+    });
+  }
+
+  void _showIAPOverlay(BuildContext overlayContext) {
+    IAPUtils.showIAPOverlay(overlayContext, _cachedPrices, _handlePurchase);
+  }
+
+  Future<void> _handlePurchase(String subscriptionType) async {
+    bool success = await IAPUtils.handlePurchase(context, subscriptionType);
+    if (success) {
+      await _userService.updateSubscriptionHistory(subscriptionType);
+      setState(() {
+        _isEntitled = true;
+      });
+    }
   }
 
   String _getCompatibilityImage(String baseImageName) {

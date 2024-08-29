@@ -2,17 +2,14 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import '../helpers/constants.dart';
+import '../helpers/iap_utils.dart';
 import '../repositories/compatibility_data_repository.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
-import '../helpers/purchase_utils.dart';
-import '../helpers/show_snackbar.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../widgets/custom_expansion_panel_list.dart';
-import '../widgets/go_deeper_overlay.dart';
-import '../widgets/subscribe_success_popup.dart';
 
 class CompatibilityResultCardScreen extends StatefulWidget {
   final String cardId;
@@ -29,9 +26,9 @@ class CompatibilityResultCardScreen extends StatefulWidget {
 class _CompatibilityResultCardScreenState
     extends State<CompatibilityResultCardScreen> {
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  final UserService _userService = getIt<UserService>();
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
-  final UserService _userService = getIt<UserService>();
   late List<bool> _isExpanded;
   Map<String, String> _cachedPrices = {};
   bool _isEntitled = false;
@@ -79,8 +76,7 @@ class _CompatibilityResultCardScreenState
                       });
                     }
                   },
-                  onNonExpandableTap:
-                      _isEntitled ? null : _showIAPOverlay,
+                  onNonExpandableTap: _isEntitled ? null : _showIAPOverlay,
                   children: expansionPanels,
                 ),
               ),
@@ -291,68 +287,23 @@ class _CompatibilityResultCardScreenState
   }
 
   Future<void> _fetchPricesIfNeeded() async {
-    // _compatibilityDataRepository.clearAllData();
-    if (_cachedPrices.isEmpty) {
-      try {
-        await _purchaseService.ensureInitialized();
-        _cachedPrices = await _purchaseService.fetchSubscriptionPrices();
-      } catch (e) {
-        debugPrint('Error loading prices: $e');
-      }
-    }
+    final updatedPrices = await IAPUtils.fetchSubscriptionPrices(_cachedPrices);
+    setState(() {
+      _cachedPrices = updatedPrices;
+    });
   }
 
   void _showIAPOverlay() {
-    showCustomOverlay<String>(
-      context: context,
-      heightFactor: 0.55,
-      overlayBuilder: (dialogContext, close) => GoDeeperOverlay(
-        onClose: close,
-        onPurchase: (String subscriptionType) {
-          close();
-          _handlePurchase(subscriptionType);
-        },
-        prices: _cachedPrices,
-      ),
-    );
+    IAPUtils.showIAPOverlay(context, _cachedPrices, _handlePurchase);
   }
 
   Future<void> _handlePurchase(String subscriptionType) async {
-    bool success = await _purchase(subscriptionType);
-
-    if (mounted) {
-      if (success) {
-        setState(() {
-          _isEntitled = true;
-        });
-        showDialog(
-          context: context,
-          builder: (BuildContext buildContext) {
-            return SubscribeSuccessPopup(
-              subscriptionType: subscriptionType,
-              onContinue: () {
-                Navigator.of(buildContext).pop();
-              },
-            );
-          },
-        );
-      } else {
-        showErrorSnackBar(context, 'Purchase failed. Please try again.');
-      }
-    }
-  }
-
-  Future<bool> _purchase(String subscriptionType) async {
-    try {
-      await _purchaseService.ensureInitialized();
-      if (!await _purchaseService.buySubscription(subscriptionType)) {
-        return false;
-      }
+    bool success = await IAPUtils.handlePurchase(context, subscriptionType);
+    if (success) {
       await _userService.updateSubscriptionHistory(subscriptionType);
-      return true;
-    } catch (e) {
-      debugPrint('Purchase error: $e');
-      return false;
+      setState(() {
+        _isEntitled = true;
+      });
     }
   }
 }
