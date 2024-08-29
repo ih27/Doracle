@@ -55,8 +55,9 @@ class _MainScreenState extends State<MainScreen> {
   void _onPurchaseComplete() {
     setState(() {
       _fromPurchase = true;
-      _selectedIndex = 1; // Navigate to Oracle screen
+      _selectedIndex = 1;
     });
+    _navigateTo('/oracle');
   }
 
   void _updateCanPop() {
@@ -91,7 +92,7 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return '/';
       case 1:
-        return '/fortune';
+        return '/oracle';
       case 2:
         return '/bond';
       case 3:

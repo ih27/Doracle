@@ -31,7 +31,7 @@ class AppRouter {
 
   final Map<String, String> _routeTitles = {
     '/': CompatibilityTexts.noTitle,
-    '/fortune': CompatibilityTexts.noTitle,
+    '/oracle': CompatibilityTexts.noTitle,
     '/bond': CompatibilityTexts.compatibilityTitle,
     '/assessment': CompatibilityTexts.noTitle,
     '/pet/compatability': CompatibilityTexts.checkTitle,
@@ -56,7 +56,7 @@ class AppRouter {
       case '/':
         builder = (BuildContext context) => const HomeScreen();
         break;
-      case '/fortune':
+      case '/oracle':
         builder = (BuildContext context) => UnifiedFortuneScreen(
               fromPurchase: fromPurchase,
             );
