@@ -10,6 +10,7 @@ class CompatibilityDataRepository {
   static const String _cardAvailabilityKey = 'card_availability';
   static const String _lastCompatibilityCheckKey = 'last_compatibility_check';
   static const String _compatibilityScoresKey = 'compatibility_scores';
+  static const String _openedPlansKey = 'opened_improvement_plans';
   static const int maxStoredResults = 10;
 
   Future<void> saveCompatibilityScore(
@@ -159,6 +160,21 @@ class CompatibilityDataRepository {
           }));
     }
     return {};
+  }
+
+  Future<void> markPlanAsOpened(String planId) async {
+    final prefs = await SharedPreferences.getInstance();
+    Set<String> openedPlans =
+        prefs.getStringList(_openedPlansKey)?.toSet() ?? {};
+    openedPlans.add(planId);
+    await prefs.setStringList(_openedPlansKey, openedPlans.toList());
+  }
+
+  Future<bool> planWasOpened(String planId) async {
+    final prefs = await SharedPreferences.getInstance();
+    Set<String> openedPlans =
+        prefs.getStringList(_openedPlansKey)?.toSet() ?? {};
+    return openedPlans.contains(planId);
   }
 
   Future<void> saveChecklistItem(

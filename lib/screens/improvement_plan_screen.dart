@@ -5,6 +5,7 @@ import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/compatibility_utils.dart';
 import '../helpers/show_snackbar.dart';
+import '../services/revenuecat_service.dart';
 
 class ImprovementPlanScreen extends StatefulWidget {
   final String planId;
@@ -18,6 +19,10 @@ class ImprovementPlanScreen extends StatefulWidget {
 class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
   final CompatibilityDataRepository _repository =
       getIt<CompatibilityDataRepository>();
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  bool _isEntitled = false;
+  bool _planWasOpenedBefore = false;
+  bool _isInitialized = false;
 
   late Future<PlanData> _planFuture;
   late Map<int, bool> _checklist;
@@ -25,7 +30,21 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
   @override
   void initState() {
     super.initState();
-    _planFuture = _loadPlanAndChecklist();
+    _checkEntitlementAndPlanStatus();
+  }
+
+  Future<void> _checkEntitlementAndPlanStatus() async {
+    _isEntitled = _purchaseService.isEntitled;
+    _planWasOpenedBefore = await _repository.planWasOpened(widget.planId);
+    if (_isEntitled || _planWasOpenedBefore) {
+      _planFuture = _loadPlanAndChecklist();
+      setState(() {
+        _isInitialized = true;
+      });
+    } else {
+      // Navigate back if the user is not entitled and the plan wasn't opened before
+      if (mounted) Navigator.of(context).pop();
+    }
   }
 
   Future<PlanData> _loadPlanAndChecklist() async {
@@ -43,6 +62,10 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return FutureBuilder<PlanData>(
       future: _planFuture,
       builder: (context, snapshot) {
@@ -92,9 +115,11 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
     final plan = planData.plan;
     final entity1 = planData.entity1;
     final entity2 = planData.entity2;
-    final introduction = plan['introduction'] as String? ?? 'Start your 10-day journey!';
+    final introduction =
+        plan['introduction'] as String? ?? 'Start your 10-day journey!';
     final days = plan['compatibility_improvement_plan'] as List<dynamic>;
-    final conclusion = plan['conclusion'] as String? ?? 'Congratulations on completing the plan!';
+    final conclusion = plan['conclusion'] as String? ??
+        'Congratulations on completing the plan!';
 
     return SingleChildScrollView(
       child: Padding(
@@ -327,20 +352,20 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
     }
   }
 
-  void _resetChecklist() async {
-    setState(() {
-      _checklist.clear();
-    });
-    try {
-      for (int i = 1; i <= 10; i++) {
-        await _repository.saveChecklistItem(widget.planId, i, false);
-      }
-    } catch (e) {
-      if (mounted) {
-        showErrorSnackBar(context, 'Failed to reset progress.');
-      }
-    }
-  }
+  // void _resetChecklist() async {
+  //   setState(() {
+  //     _checklist.clear();
+  //   });
+  //   try {
+  //     for (int i = 1; i <= 10; i++) {
+  //       await _repository.saveChecklistItem(widget.planId, i, false);
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       showErrorSnackBar(context, 'Failed to reset progress.');
+  //     }
+  //   }
+  // }
 }
 
 class PlanData {

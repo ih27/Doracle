@@ -48,6 +48,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   bool _isLoading = true;
   Map<String, String> _cachedPrices = {};
   bool _isEntitled = false;
+  bool _planWasOpenedBefore = false;
   Map<String, bool> _isCardDataAvailable = {
     CompatibilityTexts.astrologyCardId: false,
     CompatibilityTexts.recommendationCardId: false,
@@ -59,7 +60,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     super.initState();
     _initializeData();
     _fetchPricesIfNeeded();
+    _checkEntitlementAndPlanStatus();
+  }
+
+  Future<void> _checkEntitlementAndPlanStatus() async {
     _isEntitled = _purchaseService.isEntitled;
+    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
+    _planWasOpenedBefore =
+        await _compatibilityDataRepository.planWasOpened(planId);
+    setState(() {});
   }
 
   Future<void> _initializeData() async {
@@ -508,11 +517,12 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle,
       _getCompatibilityImage('03'),
       customNavigation: (context) {
-        if (!_isEntitled) {
+        if (!_isEntitled && !_planWasOpenedBefore) {
           _showIAPOverlay(context);
         } else {
           String planId =
               generateConsistentPlanId(widget.entity1, widget.entity2);
+          _compatibilityDataRepository.markPlanAsOpened(planId);
           navigateToImprovementPlan(context, planId);
         }
       },
@@ -537,6 +547,12 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       setState(() {
         _isEntitled = true;
       });
+    }
+    // Navigate to the improvement plan after successful purchase
+    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
+    _compatibilityDataRepository.markPlanAsOpened(planId);
+    if (mounted) {
+      navigateToImprovementPlan(context, planId);
     }
   }
 

@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
+import '../helpers/iap_utils.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
+import '../services/revenuecat_service.dart';
+import '../services/user_service.dart';
 
 class AssessmentScreen extends StatefulWidget {
   const AssessmentScreen({super.key});
@@ -15,12 +18,18 @@ class AssessmentScreen extends StatefulWidget {
 class _AssessmentScreenState extends State<AssessmentScreen> {
   final CompatibilityDataRepository _repository =
       getIt<CompatibilityDataRepository>();
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  final UserService _userService = getIt<UserService>();
   Map<String, Map<String, dynamic>> _improvementPlans = {};
+  Map<String, String> _cachedPrices = {};
+  bool _isEntitled = false;
 
   @override
   void initState() {
     super.initState();
     _loadImprovementPlans();
+    _fetchPricesIfNeeded();
+    _checkEntitlement();
   }
 
   Future<void> _loadImprovementPlans() async {
@@ -29,6 +38,55 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       _improvementPlans = plans;
     });
   }
+
+  Future<void> _fetchPricesIfNeeded() async {
+    final updatedPrices = await IAPUtils.fetchSubscriptionPrices(_cachedPrices);
+    setState(() {
+      _cachedPrices = updatedPrices;
+    });
+  }
+
+  void _checkEntitlement() {
+    bool isEntitled = _purchaseService.isEntitled;
+    setState(() {
+      _isEntitled = isEntitled;
+    });
+  }
+
+  void _navigateToImprovementPlan(String planId) async {
+  final canAccess = _isEntitled || await _repository.planWasOpened(planId);
+  if (mounted) {
+    if (canAccess) {
+      navigateToImprovementPlan(context, planId);
+    } else {
+      _showIAPOverlay(context, planId);
+    }
+  }
+}
+
+  void _showIAPOverlay(BuildContext overlayContext, String planId) {
+  IAPUtils.showIAPOverlay(
+    overlayContext, 
+    _cachedPrices, 
+    (subscriptionType) => _handlePurchase(subscriptionType, planId)
+  );
+}
+
+  Future<void> _handlePurchase(String subscriptionType, String planId) async {
+  bool success = await IAPUtils.handlePurchase(context, subscriptionType);
+  if (success) {
+    await _userService.updateSubscriptionHistory(subscriptionType);
+    setState(() {
+      _isEntitled = true;
+    });
+    
+    // Mark the plan as opened and navigate to it
+    await _repository.markPlanAsOpened(planId);
+    if (mounted) {
+      navigateToImprovementPlan(context, planId);
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -93,92 +151,102 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     dynamic entity2 = planData['entity2'];
     String plan = planData['plan'];
 
-    return GestureDetector(
-      onTap: () => navigateToImprovementPlan(context, planId),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppTheme.primaryColor),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return FutureBuilder<bool>(
+      future: _repository.planWasOpened(planId),
+      builder: (context, snapshot) {
+        bool canAccess = _isEntitled || (snapshot.data ?? false);
+
+        return GestureDetector(
+          onTap: () => _navigateToImprovementPlan(planId),
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppTheme.primaryColor),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 100,
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: AppTheme.alternateColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppTheme.primaryColor,
-                              width: 2,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30),
-                            child: Image.asset(
-                              getEntityImage(entity1),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 0,
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: AppTheme.alternateColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppTheme.primaryColor,
-                                width: 2,
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: AppTheme.alternateColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppTheme.primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(30),
+                                child: Image.asset(
+                                  getEntityImage(entity1),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: Image.asset(
-                                getEntityImage(entity2),
-                                fit: BoxFit.cover,
+                            Positioned(
+                              right: 0,
+                              child: Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.alternateColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppTheme.primaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: Image.asset(
+                                    getEntityImage(entity2),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          '${entity1.name} & ${entity2.name}',
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: AppTheme.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ),
+                      if (!canAccess)
+                        const Icon(Icons.lock, color: AppTheme.primaryColor),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      '${entity1.name} & ${entity2.name}',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    json.decode(plan)['introduction'] ?? '',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                json.decode(plan)['introduction'] ?? '',
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: 5,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
