@@ -18,8 +18,8 @@ class _PetCompatabilityScreenState extends State<PetCompatabilityScreen> {
   final PetManager _petManager = getIt<PetManager>();
   Pet? selectedPet1;
   Pet? selectedPet2;
-  final CarouselController _carouselController1 = CarouselController();
-  final CarouselController _carouselController2 = CarouselController();
+  final CarouselSliderController _carouselController1 = CarouselSliderController();
+  final CarouselSliderController _carouselController2 = CarouselSliderController();
 
   bool get isCompatibilityCheckEnabled =>
       selectedPet1 != null &&

@@ -11,7 +11,7 @@ class EntityCarousel<T> extends StatelessWidget {
   final Function(T) onEditEntity;
   final Function(int)? onPageChanged;
   final bool isPet;
-  final CarouselController carouselController;
+  final CarouselSliderController carouselController;
   final int initialPage;
 
   const EntityCarousel({

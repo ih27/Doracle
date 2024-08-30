@@ -21,8 +21,8 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
   final OwnerManager _ownerManager = getIt<OwnerManager>();
   Pet? selectedPet;
   Owner? selectedOwner;
-  final CarouselController _petCarouselController = CarouselController();
-  final CarouselController _ownerCarouselController = CarouselController();
+  final CarouselSliderController _petCarouselController = CarouselSliderController();
+  final CarouselSliderController _ownerCarouselController = CarouselSliderController();
 
   bool get isCompatibilityCheckEnabled =>
       selectedPet != null && selectedOwner != null;
