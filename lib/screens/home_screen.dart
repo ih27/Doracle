@@ -5,6 +5,7 @@ import '../helpers/compatibility_utils.dart';
 import '../models/owner_model.dart';
 import '../models/pet_model.dart';
 import '../config/dependency_injection.dart';
+import '../services/daily_horoscope_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,12 +17,28 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final PetManager _petManager = getIt<PetManager>();
   final OwnerManager _ownerManager = getIt<OwnerManager>();
+  final DailyHoroscopeService _horoscopeService = getIt<DailyHoroscopeService>();
   late Future<void> _dataLoadingFuture;
 
   @override
   void initState() {
     super.initState();
     _dataLoadingFuture = _loadData();
+    _petManager.addListener(_onPetManagerUpdate);
+  }
+
+  @override
+  void dispose() {
+    _petManager.removeListener(_onPetManagerUpdate);
+    super.dispose();
+  }
+
+  void _onPetManagerUpdate() {
+    if (mounted) {
+      setState(() {
+        // This will trigger a rebuild of the pet sections
+      });
+    }
   }
 
   Future<void> _loadData() async {
@@ -49,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Align(
                 alignment: AlignmentDirectional.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(25, 50, 25, 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
@@ -60,25 +77,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               dayName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                    color: AppTheme.primaryColor,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: AppTheme.primaryColor,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                             Text(
                               date,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                    color: AppTheme.primaryColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.normal,
-                                  ),
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: AppTheme.primaryColor,
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                              ),
                             ),
                           ],
                         ),
@@ -101,103 +112,115 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCurrentUserSection() {
     Owner? currentUser = _ownerManager.entities.firstOrNull;
     currentUser ??= Owner(
-        id: 'default',
-        name: 'Default User',
-        gender: 'Other',
-        activityLevel: 2,
-        interactionLevel: 2,
-        groomingCommitment: 2,
-        noiseTolerance: 2,
-      );
+      id: 'default',
+      name: 'Default User',
+      gender: 'Other',
+      activityLevel: 2,
+      interactionLevel: 2,
+      groomingCommitment: 2,
+      noiseTolerance: 2,
+    );
     return _buildOwnerSection(currentUser);
   }
 
   Widget _buildOwnerSection(Owner owner) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 150,
-          height: 150,
-          decoration: BoxDecoration(
-            color: AppTheme.alternateColor,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: AppTheme.primaryColor,
-              width: 5,
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(75),
-            child: Image.asset(
-              getEntityImage(owner),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'You',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppTheme.primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Your horoscope placeholder text...',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppTheme.primaryColor,
-              ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPetSection(Pet pet) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return FutureBuilder<String>(
+      future: _horoscopeService.getHoroscopeForOwner(owner, _petManager.entities),
+      builder: (context, snapshot) {
+        final horoscope = snapshot.data ?? 'Loading daily vibe...';
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: 150,
+              height: 150,
               decoration: BoxDecoration(
                 color: AppTheme.alternateColor,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: AppTheme.primaryColor,
-                  width: 2,
+                  width: 5,
                 ),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(50),
+                borderRadius: BorderRadius.circular(75),
                 child: Image.asset(
-                  getEntityImage(pet),
+                  getEntityImage(owner),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(height: 10),
             Text(
-              pet.name,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              'You',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: AppTheme.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              horoscope,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPetSection(Pet pet) {
+    return FutureBuilder<String>(
+      future: _horoscopeService.getHoroscopeForPet(pet),
+      builder: (context, snapshot) {
+        final horoscope = snapshot.data ?? 'Loading daily vibe...';
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppTheme.alternateColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Image.asset(
+                      getEntityImage(pet),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Text(
+                  pet.name,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Pet horoscope placeholder text...',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            const SizedBox(height: 8),
+            Text(
+              horoscope,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: AppTheme.primaryColor,
               ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 

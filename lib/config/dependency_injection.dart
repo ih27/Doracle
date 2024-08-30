@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../repositories/compatibility_data_repository.dart';
+import '../repositories/daily_horoscope_repository.dart';
 import '../repositories/firestore_fortune_content_repository.dart';
 import '../repositories/firestore_user_repository.dart';
 import '../repositories/fortune_content_repository.dart';
@@ -10,6 +11,7 @@ import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/compatibility_content_service.dart';
 import '../services/compatibility_score_service.dart';
+import '../services/daily_horoscope_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
@@ -30,6 +32,9 @@ void setupDependencies() {
       ));
 
   // Repositories
+  getIt.registerLazySingleton<DailyHoroscopeRepository>(
+    () => DailyHoroscopeRepository(),
+  );
   getIt.registerLazySingleton<FortuneContentRepository>(
     () => FirestoreFortuneContentRepository(),
   );
@@ -56,6 +61,8 @@ void setupDependencies() {
   getIt.registerLazySingleton<RevenueCatService>(() => RevenueCatService(
         getIt<AuthService>(),
       ));
+  getIt.registerLazySingleton<DailyHoroscopeService>(
+      () => DailyHoroscopeService());
   getIt.registerLazySingleton<FortuneTeller>(() => FortuneTeller(
         getIt<UserService>(),
         '', // Initial empty persona name
@@ -68,6 +75,7 @@ void setupDependencies() {
   getIt.registerLazySingleton<OpenAIService>(
     () => OpenAIService(
       dotenv.env['OPENAI_API_KEY']!,
+      '',
       '',
       '', // Empty strings as placeholder, will be set when creating an instance
     ),

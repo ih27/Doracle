@@ -5,31 +5,51 @@ enum PromptType {
   tenDayPlan,
   astrologicalCompatibility,
   personalizedRecommendations,
+  dailyHoroscope,
 }
 
 enum EntityCombination {
   petOwner,
   petPet,
+  ownerPets,
+  singlePet,
 }
 
 class AIPromptGenerationService {
   // MARK: - Public methods
 
   String generatePrompt(PromptType type,
-      {required Pet pet, Owner? owner, Pet? secondPet}) {
+      {Pet? pet, Owner? owner, Pet? secondPet, List<Pet>? pets}) {
     final combination =
-        owner != null ? EntityCombination.petOwner : EntityCombination.petPet;
+        _determineEntityCombination(pet, owner, secondPet, pets);
     return _generatePromptForType(type, combination,
-        pet: pet, owner: owner, secondPet: secondPet);
+        pet: pet, owner: owner, secondPet: secondPet, pets: pets);
+  }
+
+  EntityCombination _determineEntityCombination(
+      Pet? pet, Owner? owner, Pet? secondPet, List<Pet>? pets) {
+    if (owner != null && pet != null) {
+      return EntityCombination.petOwner;
+    }
+    if (pet != null && secondPet != null) {
+      return EntityCombination.petPet;
+    }
+    if (owner != null && pets != null) {
+      return EntityCombination.ownerPets;
+    }
+    if (pet != null) {
+      return EntityCombination.singlePet;
+    }
+    throw ArgumentError('Invalid entity combination');
   }
 
   // MARK: - Internal methods
 
   String _generatePromptForType(PromptType type, EntityCombination combination,
-      {required Pet pet, Owner? owner, Pet? secondPet}) {
+      {Pet? pet, Owner? owner, Pet? secondPet, List<Pet>? pets}) {
     final basePrompt = _getBasePrompt(type, combination);
     final entityInfo = _getEntityInfo(combination,
-        pet: pet, owner: owner, secondPet: secondPet);
+        pet: pet, owner: owner, secondPet: secondPet, pets: pets);
     final specificInstructions = _getSpecificInstructions(type, combination);
 
     return '''
@@ -49,18 +69,72 @@ $specificInstructions
         return "Generate an astrological compatibility analysis for ${combination == EntityCombination.petOwner ? 'a pet and their owner' : 'two pets'}, divided into four specific categories in json.";
       case PromptType.personalizedRecommendations:
         return "Generate fun and practical ${combination == EntityCombination.petOwner ? 'pet care recommendations for a pet and their owner' : 'pet-to-pet compatibility recommendations'} in json.";
+      case PromptType.dailyHoroscope:
+        return "Generate a concise daily horoscope paragraph for ${_getDailyHoroscopeSubject(combination)} in json.";
+    }
+  }
+
+  String _getDailyHoroscopeSubject(EntityCombination combination) {
+    switch (combination) {
+      case EntityCombination.ownerPets:
+        return 'a pet owner and their pet(s)';
+      case EntityCombination.singlePet:
+        return 'a pet';
+      default:
+        return 'the specified entities';
     }
   }
 
   String _getEntityInfo(EntityCombination combination,
-      {required Pet pet, Owner? owner, Pet? secondPet}) {
-    String petInfo = _getPetInfo(pet);
-    if (combination == EntityCombination.petOwner) {
-      return '''
-$petInfo
+      {Pet? pet, Owner? owner, Pet? secondPet, List<Pet>? pets}) {
+    switch (combination) {
+      case EntityCombination.petOwner:
+        return '''
+${_getPetInfo(pet!)}
 
 Owner Information:
-- Name: ${owner!.name}
+${_getOwnerInfo(owner!)}
+''';
+      case EntityCombination.petPet:
+        return '''
+${_getPetInfo(pet!)}
+
+Pet B Information:
+${_getPetInfo(secondPet!, isPetB: true)}
+''';
+      case EntityCombination.ownerPets:
+        return '''
+Owner Information:
+${_getOwnerInfo(owner!)}
+
+Pets Information:
+${pets!.map((p) => _getPetInfo(p, isShort: true)).join('\n')}
+''';
+      case EntityCombination.singlePet:
+        return _getPetInfo(pet!);
+    }
+  }
+
+  String _getPetInfo(Pet pet, {bool isPetB = false, bool isShort = false}) {
+    if (isShort) {
+      return "- ${pet.name}: ${pet.species}, Born: ${pet.birthdate}, Zodiac Sign: ${_getZodiacSign(pet.birthdate)}";
+    }
+    return '''
+${isPetB ? 'Pet B' : 'Pet'} Information:
+- Name: ${pet.name}
+- Type: ${pet.species}
+- Date of Birth: ${pet.birthdate}
+- Time of Birth: ${pet.birthtime ?? 'Unavailable'}
+- Temperament: ${pet.temperament.join(', ')}
+- Exercise Requirement: ${_getRequirementLevel(pet.exerciseRequirement)}
+- Social Needs: ${_getRequirementLevel(pet.socializationNeed)}
+- Zodiac Sign: ${_getZodiacSign(pet.birthdate)}
+''';
+  }
+
+  String _getOwnerInfo(Owner owner) {
+    return '''
+- Name: ${owner.name}
 - Date of Birth: ${owner.birthdate}
 - Time of Birth: ${owner.birthtime ?? 'Unavailable'}
 - Living Situation: ${owner.livingSituation ?? 'Unknown'}
@@ -71,27 +145,7 @@ Owner Information:
 - Grooming Commitment: ${_getGroomingCommitment(owner.groomingCommitment)}
 - Noise Tolerance: ${_getNoiseToleranceLevel(owner.noiseTolerance)}
 - Primary Reason for Pet: ${owner.petReason ?? 'Unknown'}
-''';
-    } else {
-      return '''
-$petInfo
-
-Pet B Information:
-${_getPetInfo(secondPet!, isPetB: true)}
-''';
-    }
-  }
-
-  String _getPetInfo(Pet pet, {bool isPetB = false}) {
-    return '''
-${isPetB ? 'Pet B' : 'Pet'} Information:
-- Name: ${pet.name}
-- Type: ${pet.species}
-- Date of Birth: ${pet.birthdate}
-- Time of Birth: ${pet.birthtime ?? 'Unavailable'}
-- Temperament: ${pet.temperament.join(', ')}
-- Exercise Requirement: ${_getRequirementLevel(pet.exerciseRequirement)}
-- Social Needs: ${_getRequirementLevel(pet.socializationNeed)}
+- Zodiac Sign: ${_getZodiacSign(owner.birthdate)}
 ''';
   }
 
@@ -104,6 +158,8 @@ ${isPetB ? 'Pet B' : 'Pet'} Information:
         return _getAstrologyInstructions(combination);
       case PromptType.personalizedRecommendations:
         return _getRecommendationsInstructions(combination);
+      case PromptType.dailyHoroscope:
+        return _getDailyHoroscopeInstructions(combination);
     }
   }
 
@@ -245,6 +301,24 @@ Preface the recommendations with a brief, one-sentence introduction that sets a 
 ''';
   }
 
+  String _getDailyHoroscopeInstructions(EntityCombination combination) {
+    return '''
+Based on the zodiac signs and information provided, create a concise daily horoscope paragraph ${combination == EntityCombination.ownerPets ? 'for the owner and their pets' : 'for the pet'}. Include the following elements:
+
+1. General mood and energy for the day
+2. Potential challenges or opportunities
+3. Advice for harmonious interactions ${combination == EntityCombination.ownerPets ? 'between the owner and pets' : 'with humans or other animals'}
+4. A practical tip for well-being
+
+Provide the response in the following JSON format:
+{
+  "horoscope": "Your concise horoscope paragraph here."
+}
+
+Keep the horoscope to a single paragraph of about 3-5 sentences. Use a friendly and encouraging tone, while still acknowledging potential challenges. Make the horoscope specific to ${combination == EntityCombination.ownerPets ? 'the dynamic between the owner and their pets' : 'the pet\'s needs and characteristics'}.
+''';
+  }
+
   // MARK: - Helper methods
 
   String _getRequirementLevel(int level) {
@@ -311,6 +385,50 @@ Preface the recommendations with a brief, one-sentence introduction that sets a 
         return 'High tolerance';
       default:
         return 'Unknown';
+    }
+  }
+
+  String _getZodiacSign(String? birthdate) {
+    if (birthdate == null) return "Unknown";
+
+    List<String> parts = birthdate.split('/');
+    if (parts.length != 3) return "Unknown";
+
+    int day, month;
+    try {
+      day = int.parse(parts[0]);
+      month = int.parse(parts[1]);
+    } catch (e) {
+      return "Unknown";
+    }
+
+    switch (month) {
+      case 1: // January
+        return (day <= 19) ? "Capricorn" : "Aquarius";
+      case 2: // February
+        return (day <= 18) ? "Aquarius" : "Pisces";
+      case 3: // March
+        return (day <= 20) ? "Pisces" : "Aries";
+      case 4: // April
+        return (day <= 19) ? "Aries" : "Taurus";
+      case 5: // May
+        return (day <= 20) ? "Taurus" : "Gemini";
+      case 6: // June
+        return (day <= 20) ? "Gemini" : "Cancer";
+      case 7: // July
+        return (day <= 22) ? "Cancer" : "Leo";
+      case 8: // August
+        return (day <= 22) ? "Leo" : "Virgo";
+      case 9: // September
+        return (day <= 22) ? "Virgo" : "Libra";
+      case 10: // October
+        return (day <= 22) ? "Libra" : "Scorpio";
+      case 11: // November
+        return (day <= 21) ? "Scorpio" : "Sagittarius";
+      case 12: // December
+        return (day <= 21) ? "Sagittarius" : "Capricorn";
+      default:
+        return "Unknown";
     }
   }
 }
