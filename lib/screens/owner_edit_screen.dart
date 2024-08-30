@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../config/theme.dart';
 import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
@@ -31,8 +30,6 @@ class UpdateOwnerScreen extends StatelessWidget {
       initialPetReason: owner.petReason,
       onSubmit: (formData) => _updateOwner(context, formData),
       submitButtonName: CompatibilityTexts.updateOwner,
-      deleteAvailable: true,
-      onDelete: () => _showDeleteOwnerConfirmation(context),
     );
   }
 
@@ -60,34 +57,5 @@ class UpdateOwnerScreen extends StatelessWidget {
 
     Navigator.of(context).pop(updatedOwner);
     showInfoSnackBar(context, CompatibilityTexts.updateOwnerSuccess);
-  }
-
-  void _showDeleteOwnerConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text('Delete ${owner.name}?'),
-          backgroundColor: AppTheme.primaryBackground,
-          content: const Text(CompatibilityTexts.deleteConfirmation),
-          actions: [
-            TextButton(
-              child: const Text('Cancel',
-                  style: TextStyle(color: AppTheme.primaryColor)),
-              onPressed: () => Navigator.of(dialogContext).pop(),
-            ),
-            TextButton(
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                Navigator.of(context).pop('delete');
-                showInfoSnackBar(
-                    context, CompatibilityTexts.deleteOwnerSuccess);
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }

@@ -7,7 +7,9 @@ import '../models/owner_model.dart';
 import '../widgets/owner_form.dart';
 
 class CreateOwnerScreen extends StatelessWidget {
-  const CreateOwnerScreen({super.key});
+  final bool isInitialCreation;
+
+  const CreateOwnerScreen({super.key, this.isInitialCreation = false});
 
   @override
   Widget build(BuildContext context) {

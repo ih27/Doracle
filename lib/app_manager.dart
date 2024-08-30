@@ -3,10 +3,13 @@ import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'config/dependency_injection.dart';
+import 'entities/entity_manager.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
+import 'models/owner_model.dart';
 import 'screens/main_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/owner_create_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/tutorial_screen.dart';
@@ -19,6 +22,7 @@ import 'services/user_service.dart';
 class AppManager extends StatelessWidget {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
+  final OwnerManager _ownerManager = getIt<OwnerManager>();
   final AnalyticsService _analytics = getIt<AnalyticsService>();
   final RevenueCatService _revenueCatService = getIt<RevenueCatService>();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -49,7 +53,24 @@ class AppManager extends StatelessWidget {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else {
-                    return const SafeArea(child: MainScreen());
+                    return FutureBuilder<bool>(
+                      future: _checkOwnerExists(),
+                      builder: (context, ownerSnapshot) {
+                        if (ownerSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (ownerSnapshot.data == true) {
+                          return const SafeArea(child: MainScreen());
+                        } else {
+                          return FutureBuilder(
+                            future: _handleInitialOwnerCreation(context),
+                            builder: (context, _) => const Center(
+                                child: CircularProgressIndicator()),
+                          );
+                        }
+                      },
+                    );
                   }
                 },
               );
@@ -107,6 +128,28 @@ class AppManager extends StatelessWidget {
 
   Future<void> _navigateToSignUp() =>
       navigatorKey.currentState!.pushNamed('/register');
+
+  Future<bool> _checkOwnerExists() async {
+    await _ownerManager.loadEntities();
+    return _ownerManager.entities.isNotEmpty;
+  }
+
+  Future<void> _handleInitialOwnerCreation(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateOwnerScreen(isInitialCreation: true),
+      ),
+    );
+
+    if (result is Owner) {
+      await _ownerManager.addEntity(result);
+      if (context.mounted) {
+        showInfoSnackBar(context, CompatibilityTexts.createOwnerSuccess);
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    }
+  }
 
   Future<void> _loadUser(String userId) async {
     await _userService.loadCurrentUser(userId);
