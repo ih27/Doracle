@@ -390,6 +390,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     String subtitle,
     String imagePath, {
     Function(BuildContext)? customNavigation,
+    bool? locked,
   }) {
     String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     return GestureDetector(
@@ -406,67 +407,89 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
         padding: const EdgeInsets.all(10),
         child: Opacity(
           opacity: _isCardDataAvailable[cardId]! ? 1.0 : 0.5,
-          child: Container(
-            height: 190,
-            decoration: BoxDecoration(
-              color: AppTheme.alternateColor,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: AppTheme.accent1,
-                width: 2,
-              ),
-            ),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AutoSizeText(
-                        title,
-                        minFontSize: 20,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontSize: 25,
-                                  color: AppTheme.primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      AutoSizeText(
-                        subtitle,
-                        minFontSize: 20,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontSize: 25,
-                                  color: AppTheme.primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                    ],
+          child: Stack(
+            children: [
+              Container(
+                height: 190,
+                decoration: BoxDecoration(
+                  color: AppTheme.alternateColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.accent1,
+                    width: 2,
                   ),
                 ),
-                Align(
-                  alignment: AlignmentDirectional.bottomEnd,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      height: 180,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          fit: BoxFit.contain,
-                          alignment: AlignmentDirectional.bottomCenter,
-                          image: AssetImage(imagePath),
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AutoSizeText(
+                            title,
+                            minFontSize: 20,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontSize: 25,
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          AutoSizeText(
+                            subtitle,
+                            minFontSize: 20,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontSize: 25,
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional.bottomEnd,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              fit: BoxFit.contain,
+                              alignment: AlignmentDirectional.bottomCenter,
+                              image: AssetImage(imagePath),
+                            ),
+                          ),
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              if (locked != null && locked)
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.alternateColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.lock,
+                        color: AppTheme.primaryColor, size: 20),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
@@ -511,13 +534,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle = CompatibilityTexts.improvementCardLoadingSubtitle;
     }
 
+    final locked = !_isEntitled && !_planWasOpenedBefore;
+
     return _buildCompatibilitySection(
       CompatibilityTexts.improvementCardId,
       cardTitle,
       cardSubtitle,
       _getCompatibilityImage('03'),
       customNavigation: (context) {
-        if (!_isEntitled && !_planWasOpenedBefore) {
+        if (locked) {
           _showIAPOverlay(context);
         } else {
           String planId =
@@ -526,6 +551,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
           navigateToImprovementPlan(context, planId);
         }
       },
+      locked: locked,
     );
   }
 
