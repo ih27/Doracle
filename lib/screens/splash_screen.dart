@@ -15,7 +15,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -38,7 +39,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
 
     _animationController.forward();
   }
@@ -90,9 +92,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(44, 8, 44, 0),
                           child: Text(
-                            'Ever wished you could peer into the future? Well, now you can—with a twist! Doracle is your go-to \ncanine oracle. Let\'s get started!',
+                            'Elevate your pet parenting!',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.labelMedium,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(fontSize: 18),
                           ),
                         ),
                       ),
@@ -103,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 44),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 72),
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Row(
@@ -115,7 +120,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       child: ElevatedButton(
                         onPressed: onSignIn,
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                          foregroundColor:
+                              Theme.of(context).textTheme.bodyLarge?.color,
                           backgroundColor: Colors.white,
                           minimumSize: const Size(230, 52),
                           elevation: 0,
@@ -140,7 +146,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       child: ElevatedButton(
                         onPressed: onSignUp,
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Theme.of(context).textTheme.titleSmall?.color,
+                          foregroundColor:
+                              Theme.of(context).textTheme.titleSmall?.color,
                           backgroundColor: Theme.of(context).primaryColor,
                           minimumSize: const Size(230, 52),
                           elevation: 3,
@@ -150,9 +157,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                         child: Text(
                           'Sign Up',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            letterSpacing: 0,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    letterSpacing: 0,
+                                  ),
                         ),
                       ),
                     ),

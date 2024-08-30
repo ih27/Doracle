@@ -41,6 +41,8 @@ dependencies:
   uuid: ^4.4.2
   geocoding: ^3.0.0
   percent_indicator: ^4.2.3
+  smooth_page_indicator: ^1.2.0+3
+  flutter_animate: ^4.5.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0

@@ -9,8 +9,10 @@ import 'screens/main_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/tutorial_screen.dart';
 import 'services/analytics_service.dart';
 import 'services/auth_service.dart';
+import 'services/first_launch_service.dart';
 import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
 
@@ -25,54 +27,80 @@ class AppManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: _authService.authStateChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return FutureBuilder<bool>(
+      future: FirstLaunchService.isFirstLaunch(),
+      builder: (context, firstLaunchSnapshot) {
+        if (firstLaunchSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasData) {
-          debugPrint('Auth userId: ${snapshot.data!.uid}');
-          return FutureBuilder(
-            future: _loadUser(snapshot.data!.uid),
-            builder: (context, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else {
-                return const SafeArea(child: MainScreen());
-              }
-            },
-          );
-        } else {
-          return Navigator(
-            key: navigatorKey,
-            onGenerateRoute: (settings) {
-              Widget page;
-              if (settings.name == '/login') {
-                page = LoginScreen(
-                  onLogin: _handleLogin,
-                  onPasswordRecovery: _handlePasswordRecovery,
-                  onPlatformSignIn: _handlePlatformSignIn,
-                  onNavigateToSignUp: _navigateToSignUp,
-                );
-              } else if (settings.name == '/register') {
-                page = RegisterScreen(
-                  onRegister: _handleRegister,
-                  onPlatformSignIn: _handlePlatformSignIn,
-                  onNavigateToSignIn: _navigateToSignIn,
-                );
-              } else {
-                page = SplashScreen(
-                  onSignIn: _navigateToSignIn,
-                  onSignUp: _navigateToSignUp,
-                );
-              }
-              return MaterialPageRoute(builder: (_) => page);
-            },
-          );
         }
+
+        final isFirstLaunch = firstLaunchSnapshot.data ?? true;
+
+        return StreamBuilder<User?>(
+          stream: _authService.authStateChanges,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasData) {
+              debugPrint('Auth userId: ${snapshot.data!.uid}');
+              return FutureBuilder(
+                future: _loadUser(snapshot.data!.uid),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return const SafeArea(child: MainScreen());
+                  }
+                },
+              );
+            } else {
+              return Navigator(
+                key: navigatorKey,
+                initialRoute: isFirstLaunch ? '/tutorial' : '/splash',
+                onGenerateRoute: (settings) {
+                  Widget page;
+                  switch (settings.name) {
+                    case '/tutorial':
+                      page = TutorialScreen(
+                        onComplete: _completeTutorial,
+                      );
+                      break;
+                    case '/splash':
+                      page = SplashScreen(
+                        onSignIn: _navigateToSignIn,
+                        onSignUp: _navigateToSignUp,
+                      );
+                      break;
+                    case '/login':
+                      page = LoginScreen(
+                        onLogin: _handleLogin,
+                        onPasswordRecovery: _handlePasswordRecovery,
+                        onPlatformSignIn: _handlePlatformSignIn,
+                        onNavigateToSignUp: _navigateToSignUp,
+                      );
+                      break;
+                    case '/register':
+                      page = RegisterScreen(
+                        onRegister: _handleRegister,
+                        onPlatformSignIn: _handlePlatformSignIn,
+                        onNavigateToSignIn: _navigateToSignIn,
+                      );
+                      break;
+                    default:
+                      page = const SizedBox.shrink();
+                  }
+                  return MaterialPageRoute(builder: (_) => page);
+                },
+              );
+            }
+          },
+        );
       },
     );
   }
+
+  Future<void> _completeTutorial() =>
+      FirstLaunchService.setFirstLaunchComplete();
 
   Future<void> _navigateToSignIn() =>
       navigatorKey.currentState!.pushNamed('/login');
