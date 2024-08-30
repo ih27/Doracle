@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
                   color: Theme.of(context).scaffoldBackgroundColor,
                   image: const DecorationImage(
                     fit: BoxFit.cover,
-                    image: AssetImage('assets/images/doracle2.png'),
+                    image: AssetImage('assets/images/doracle2_new.png'),
                   ),
                 ),
                 child: Column(

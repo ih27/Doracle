@@ -9,7 +9,6 @@ import 'helpers/show_snackbar.dart';
 import 'models/owner_model.dart';
 import 'screens/main_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/owner_create_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/tutorial_screen.dart';
@@ -18,6 +17,7 @@ import 'services/auth_service.dart';
 import 'services/first_launch_service.dart';
 import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
+import 'widgets/initial_owner_create.dart';
 
 class AppManager extends StatelessWidget {
   final AuthService _authService = getIt<AuthService>();
@@ -37,7 +37,7 @@ class AppManager extends StatelessWidget {
         if (firstLaunchSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-
+        
         final isFirstLaunch = firstLaunchSnapshot.data ?? true;
 
         return StreamBuilder<User?>(
@@ -63,11 +63,12 @@ class AppManager extends StatelessWidget {
                         } else if (ownerSnapshot.data == true) {
                           return const SafeArea(child: MainScreen());
                         } else {
-                          return FutureBuilder(
-                            future: _handleInitialOwnerCreation(context),
-                            builder: (context, _) => const Center(
-                                child: CircularProgressIndicator()),
-                          );
+                          // Use a post-frame callback to navigate
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _handleInitialOwnerCreation(context);
+                          });
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                       },
                     );
@@ -135,10 +136,9 @@ class AppManager extends StatelessWidget {
   }
 
   Future<void> _handleInitialOwnerCreation(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const CreateOwnerScreen(isInitialCreation: true),
+        builder: (context) => const InitialOwnerCreationScreen(),
       ),
     );
 
@@ -146,7 +146,12 @@ class AppManager extends StatelessWidget {
       await _ownerManager.addEntity(result);
       if (context.mounted) {
         showInfoSnackBar(context, CompatibilityTexts.createOwnerSuccess);
-        Navigator.pushReplacementNamed(context, '/main');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+                builder: (_) => const SafeArea(child: MainScreen())),
+          );
+        });
       }
     }
   }
