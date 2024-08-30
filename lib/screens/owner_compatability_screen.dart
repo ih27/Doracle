@@ -274,7 +274,7 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
                   decoration: const BoxDecoration(),
                   child: EntityCarousel<Owner>(
                     entities: _ownerManager.entities,
-                    maxEntities: 5,
+                    maxEntities: 1,
                     onAddEntity: _addNewOwner,
                     onEditEntity: _editOwner,
                     isPet: false,

@@ -30,7 +30,7 @@ class AppRouter {
   });
 
   final Map<String, String> _routeTitles = {
-    '/': CompatibilityTexts.noTitle,
+    '/': CompatibilityTexts.homeTitle,
     '/oracle': CompatibilityTexts.noTitle,
     '/bond': CompatibilityTexts.compatibilityTitle,
     '/assessment': CompatibilityTexts.noTitle,
