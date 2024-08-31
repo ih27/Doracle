@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../global_key.dart';
+import '../helpers/constants.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
 import '../widgets/nav_bar.dart';
@@ -19,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   bool _fromPurchase = false;
   bool _canPop = false;
-  String _currentTitle = '';
+  String _currentTitle = CompatibilityTexts.homeTitle;
   late final AppRouter _appRouter;
   late final PageController _pageController;
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
@@ -75,11 +76,23 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _updateTitle(Route<dynamic> route) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        _currentTitle = _appRouter.getRouteTitle(route.settings.name ?? '');
+    if (route.settings.name != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _currentTitle = _appRouter.getRouteTitle(route.settings.name!);
+          });
+        }
       });
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _currentTitle = _getTitleForIndex(index);
     });
+    _pageController.jumpToPage(index);
   }
 
   @override
@@ -106,15 +119,18 @@ class _MainScreenState extends State<MainScreen> {
         onPageChanged: (index) {
           setState(() {
             _selectedIndex = index;
-            _currentTitle = _appRouter.getRouteTitle(_getRouteForIndex(index));
+            _currentTitle = _getTitleForIndex(index);
           });
         },
       ),
-      bottomNavigationBar: NavBar(
-        selectedIndex: _selectedIndex,
-        onItemSelected: (index) {
-          _pageController.jumpToPage(index);
-        },
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 8, top: 1),
+        child: SafeArea(
+          child: NavBar(
+            selectedIndex: _selectedIndex,
+            onItemSelected: _onItemTapped,
+          ),
+        ),
       ),
     );
   }
@@ -123,13 +139,20 @@ class _MainScreenState extends State<MainScreen> {
     return Navigator(
       key: _navigatorKeys[index],
       onGenerateRoute: (settings) {
-        if (settings.name == '/') {
-          return MaterialPageRoute(builder: (_) => child);
+        if (settings.name == '/' || settings.name == null) {
+          return MaterialPageRoute(
+            builder: (_) => child,
+            settings: RouteSettings(name: _getRouteForIndex(index)),
+          );
         }
         return _appRouter.onGenerateRoute(settings);
       },
       observers: [_appRouter.observer],
     );
+  }
+
+  String _getTitleForIndex(int index) {
+    return _appRouter.getRouteTitle(_getRouteForIndex(index));
   }
 
   String _getRouteForIndex(int index) {
@@ -160,13 +183,15 @@ class _MainScreenNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     updateCanPop();
-    updateTitle(route);
+    if (route.settings.name != null) {
+      updateTitle(route);
+    }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     updateCanPop();
-    if (previousRoute != null) {
+    if (previousRoute != null && previousRoute.settings.name != null) {
       updateTitle(previousRoute);
     }
   }
@@ -174,7 +199,7 @@ class _MainScreenNavigatorObserver extends NavigatorObserver {
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     updateCanPop();
-    if (newRoute != null) {
+    if (newRoute != null && newRoute.settings.name != null) {
       updateTitle(newRoute);
     }
   }

@@ -1,10 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import '../config/dependency_injection.dart';
+import '../global_key.dart';
 import '../services/auth_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
@@ -339,7 +339,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     try {
       await authService.signOut();
       if (!mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
     } catch (e) {
       if (!mounted) return;
       showErrorSnackBar(context, 'Error signing out. Please try again.');
@@ -350,8 +350,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     try {
       await authService.deleteUser();
       if (!mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      showInfoSnackBar(context, 'Your account has been deleted successfully.');
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
+      showInfoSnackBar(navigatorKey.currentContext!,
+          'Your account has been deleted successfully.');
     } on NeedsReauthenticationException catch (e) {
       if (e.provider == 'password') {
         String? password = await _promptForPassword();
@@ -367,8 +368,9 @@ class _SettingsScreenState extends State<SettingsScreen>
         await authService.reauthenticateAndDelete(e.provider);
       }
       if (!mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      showInfoSnackBar(context, 'Your account has been deleted successfully.');
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
+      showInfoSnackBar(navigatorKey.currentContext!,
+          'Your account has been deleted successfully.');
     } catch (e) {
       showErrorSnackBar(context, 'Error deleting account.');
     }
