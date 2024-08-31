@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import '../global_key.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
 import '../widgets/nav_bar.dart';
+import '../screens/home_screen.dart';
+import '../screens/unified_fortune_screen.dart';
+import '../widgets/bond_buttons.dart';
+import '../screens/assessment_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,21 +16,25 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  final GlobalKey<CustomAppBarState> _appBarKey =
-      GlobalKey<CustomAppBarState>();
   int _selectedIndex = 0;
   bool _fromPurchase = false;
   bool _canPop = false;
   String _currentTitle = '';
   late final AppRouter _appRouter;
-  late final CustomAppBar _appBar;
+  late final PageController _pageController;
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _appRouter = AppRouter(
-      navigatorKey: _navigatorKey,
+      navigatorKey: navigatorKey,
       onNavigate: _navigateTo,
       observer: _MainScreenNavigatorObserver(
         updateCanPop: _updateCanPop,
@@ -33,23 +42,19 @@ class _MainScreenState extends State<MainScreen> {
       ),
       fromPurchase: _fromPurchase,
     );
-    _appBar = CustomAppBar(
-      key: _appBarKey,
-      data: CustomAppBarData(
-        canPop: _canPop,
-        currentTitle: _currentTitle,
-        onPurchaseComplete: _onPurchaseComplete,
-        onBackPressed: () => _navigatorKey.currentState?.pop(),
-      ),
-    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _navigateTo(String route, {String? title}) {
     setState(() {
       _currentTitle = title ?? _appRouter.getRouteTitle(route);
-      _updateCustomAppBar();
     });
-    _navigatorKey.currentState?.pushNamed(route);
+    _navigatorKeys[_selectedIndex].currentState?.pushNamed(route);
   }
 
   void _onPurchaseComplete() {
@@ -57,14 +62,14 @@ class _MainScreenState extends State<MainScreen> {
       _fromPurchase = true;
       _selectedIndex = 1;
     });
-    _navigateTo('/oracle');
+    _pageController.jumpToPage(1);
   }
 
   void _updateCanPop() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        _canPop = _navigatorKey.currentState?.canPop() ?? false;
-        _updateCustomAppBar();
+        _canPop =
+            _navigatorKeys[_selectedIndex].currentState?.canPop() ?? false;
       });
     });
   }
@@ -73,18 +78,58 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _currentTitle = _appRouter.getRouteTitle(route.settings.name ?? '');
-        _updateCustomAppBar();
       });
     });
   }
 
-  void _updateCustomAppBar() {
-    _appBarKey.currentState?.update(CustomAppBarData(
-      canPop: _canPop,
-      currentTitle: _currentTitle,
-      onPurchaseComplete: _onPurchaseComplete,
-      onBackPressed: () => _navigatorKey.currentState?.pop(),
-    ));
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: CustomAppBar(
+        data: CustomAppBarData(
+          canPop: _canPop,
+          currentTitle: _currentTitle,
+          onPurchaseComplete: _onPurchaseComplete,
+          onBackPressed: () =>
+              _navigatorKeys[_selectedIndex].currentState?.pop(),
+        ),
+      ),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          _buildNavigator(0, const HomeScreen()),
+          _buildNavigator(1, UnifiedFortuneScreen(fromPurchase: _fromPurchase)),
+          _buildNavigator(2, BondButtons(onNavigate: _navigateTo)),
+          _buildNavigator(3, const AssessmentScreen()),
+        ],
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+            _currentTitle = _appRouter.getRouteTitle(_getRouteForIndex(index));
+          });
+        },
+      ),
+      bottomNavigationBar: NavBar(
+        selectedIndex: _selectedIndex,
+        onItemSelected: (index) {
+          _pageController.jumpToPage(index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildNavigator(int index, Widget child) {
+    return Navigator(
+      key: _navigatorKeys[index],
+      onGenerateRoute: (settings) {
+        if (settings.name == '/') {
+          return MaterialPageRoute(builder: (_) => child);
+        }
+        return _appRouter.onGenerateRoute(settings);
+      },
+      observers: [_appRouter.observer],
+    );
   }
 
   String _getRouteForIndex(int index) {
@@ -101,40 +146,16 @@ class _MainScreenState extends State<MainScreen> {
         return '/';
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar,
-      body: Navigator(
-        key: _navigatorKey,
-        observers: [_appRouter.observer],
-        onGenerateRoute: _appRouter.onGenerateRoute,
-      ),
-      bottomNavigationBar: NavBar(
-        selectedIndex: _selectedIndex,
-        onItemSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-            _currentTitle = _appRouter.getRouteTitle(_getRouteForIndex(index));
-            _updateCustomAppBar();
-          });
-          _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-            _getRouteForIndex(index),
-            (route) => false,
-          );
-        },
-      ),
-    );
-  }
 }
 
 class _MainScreenNavigatorObserver extends NavigatorObserver {
   final VoidCallback updateCanPop;
   final Function(Route<dynamic>) updateTitle;
 
-  _MainScreenNavigatorObserver(
-      {required this.updateCanPop, required this.updateTitle});
+  _MainScreenNavigatorObserver({
+    required this.updateCanPop,
+    required this.updateTitle,
+  });
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {

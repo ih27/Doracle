@@ -11,6 +11,7 @@ import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
 import 'config/theme.dart';
 import 'app_manager.dart';
+import 'global_key.dart';
 import 'services/analytics_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
@@ -77,11 +78,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Doracle',
       theme: AppTheme.lightTheme,
       home: Container(
         color: AppTheme.primaryBackground,
-        child: AppManager(),
+        child: const AppManager(),
       ),
     );
   }

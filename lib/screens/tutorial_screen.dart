@@ -8,8 +8,14 @@ import 'splash_screen.dart';
 
 class TutorialScreen extends StatefulWidget {
   final VoidCallback onComplete;
+  final VoidCallback onSignIn;
+  final VoidCallback onSignUp;
 
-  const TutorialScreen({super.key, required this.onComplete});
+  const TutorialScreen(
+      {super.key,
+      required this.onComplete,
+      required this.onSignIn,
+      required this.onSignUp});
 
   @override
   _TutorialScreenState createState() => _TutorialScreenState();
@@ -18,7 +24,6 @@ class TutorialScreen extends StatefulWidget {
 class _TutorialScreenState extends State<TutorialScreen>
     with TickerProviderStateMixin {
   late TutorialScreenModel _model;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<TutorialPageData> _pageData = [
     TutorialPageData(
@@ -64,7 +69,6 @@ class _TutorialScreenState extends State<TutorialScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        key: scaffoldKey,
         backgroundColor: AppTheme.primaryBackground,
         body: SizedBox(
           width: double.infinity,
@@ -124,14 +128,8 @@ class _TutorialScreenState extends State<TutorialScreen>
 
   Widget _buildFinalPage() {
     return SplashScreen(
-      onSignIn: () {
-        widget.onComplete();
-        Navigator.of(context).pushReplacementNamed('/login');
-      },
-      onSignUp: () {
-        widget.onComplete();
-        Navigator.of(context).pushReplacementNamed('/register');
-      },
+      onSignIn: widget.onSignIn,
+      onSignUp: widget.onSignUp,
     );
   }
 }

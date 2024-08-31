@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'config/dependency_injection.dart';
 import 'entities/entity_manager.dart';
+import 'global_key.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
 import 'models/owner_model.dart';
@@ -19,116 +20,141 @@ import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
 import 'widgets/initial_owner_create.dart';
 
-class AppManager extends StatelessWidget {
+class AppManager extends StatefulWidget {
+  const AppManager({super.key});
+
+  @override
+  State<AppManager> createState() => _AppManagerState();
+}
+
+class _AppManagerState extends State<AppManager> {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
   final OwnerManager _ownerManager = getIt<OwnerManager>();
   final AnalyticsService _analytics = getIt<AnalyticsService>();
   final RevenueCatService _revenueCatService = getIt<RevenueCatService>();
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  AppManager({super.key});
+  bool _isFirstLaunch = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLaunch();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    // DEBUG
+    // await _authService.signOut();
+    // await FirstLaunchService.resetFirstLaunch();
+    // await _ownerManager.removeEntities();
+    // DEBUG END
+    final isFirstLaunch = await FirstLaunchService.isFirstLaunch();
+    setState(() {
+      _isFirstLaunch = isFirstLaunch;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: FirstLaunchService.isFirstLaunch(),
-      builder: (context, firstLaunchSnapshot) {
-        if (firstLaunchSnapshot.connectionState == ConnectionState.waiting) {
+    return StreamBuilder<User?>(
+      stream: _authService.authStateChanges,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          debugPrint('Auth userId: ${snapshot.data!.uid}');
+          return FutureBuilder(
+            future: _loadUser(snapshot.data!.uid),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return FutureBuilder<bool>(
+                  future: _checkOwnerExists(),
+                  builder: (context, ownerSnapshot) {
+                    if (ownerSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (ownerSnapshot.data == true) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        navigatorKey.currentState?.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const MainScreen()),
+                          (route) => false,
+                        );
+                      });
+                      return const SizedBox.shrink();
+                    } else {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _handleInitialOwnerCreation(context);
+                      });
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  },
+                );
+              }
+            },
+          );
+        } else {
+          if (_isFirstLaunch) {
+            return TutorialScreen(
+              onComplete: _completeTutorial,
+              onSignIn: () => _navigateToSignIn(context, isFromTutorial: true),
+              onSignUp: () => _navigateToSignUp(context, isFromTutorial: true),
+            );
+          } else {
+            return SplashScreen(
+              onSignIn: () => _navigateToSignIn(context, isFromTutorial: false),
+              onSignUp: () => _navigateToSignUp(context, isFromTutorial: false),
+            );
+          }
         }
-        
-        final isFirstLaunch = firstLaunchSnapshot.data ?? true;
-
-        return StreamBuilder<User?>(
-          stream: _authService.authStateChanges,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasData) {
-              debugPrint('Auth userId: ${snapshot.data!.uid}');
-              return FutureBuilder(
-                future: _loadUser(snapshot.data!.uid),
-                builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else {
-                    return FutureBuilder<bool>(
-                      future: _checkOwnerExists(),
-                      builder: (context, ownerSnapshot) {
-                        if (ownerSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (ownerSnapshot.data == true) {
-                          return const SafeArea(child: MainScreen());
-                        } else {
-                          // Use a post-frame callback to navigate
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _handleInitialOwnerCreation(context);
-                          });
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                      },
-                    );
-                  }
-                },
-              );
-            } else {
-              return Navigator(
-                key: navigatorKey,
-                initialRoute: isFirstLaunch ? '/tutorial' : '/splash',
-                onGenerateRoute: (settings) {
-                  Widget page;
-                  switch (settings.name) {
-                    case '/tutorial':
-                      page = TutorialScreen(
-                        onComplete: _completeTutorial,
-                      );
-                      break;
-                    case '/splash':
-                      page = SplashScreen(
-                        onSignIn: _navigateToSignIn,
-                        onSignUp: _navigateToSignUp,
-                      );
-                      break;
-                    case '/login':
-                      page = LoginScreen(
-                        onLogin: _handleLogin,
-                        onPasswordRecovery: _handlePasswordRecovery,
-                        onPlatformSignIn: _handlePlatformSignIn,
-                        onNavigateToSignUp: _navigateToSignUp,
-                      );
-                      break;
-                    case '/register':
-                      page = RegisterScreen(
-                        onRegister: _handleRegister,
-                        onPlatformSignIn: _handlePlatformSignIn,
-                        onNavigateToSignIn: _navigateToSignIn,
-                      );
-                      break;
-                    default:
-                      page = const SizedBox.shrink();
-                  }
-                  return MaterialPageRoute(builder: (_) => page);
-                },
-              );
-            }
-          },
-        );
       },
     );
   }
 
-  Future<void> _completeTutorial() =>
-      FirstLaunchService.setFirstLaunchComplete();
+  Future<void> _completeTutorial() async {
+    await FirstLaunchService.setFirstLaunchComplete();
+    setState(() {
+      _isFirstLaunch = false;
+    });
+  }
 
-  Future<void> _navigateToSignIn() =>
-      navigatorKey.currentState!.pushNamed('/login');
+  Future<void> _navigateToSignIn(BuildContext context,
+      {required bool isFromTutorial}) async {
+    if (isFromTutorial) {
+      await _completeTutorial();
+    }
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(
+          onLogin: (email, password) => _handleLogin(context, email, password),
+          onPasswordRecovery: (email) =>
+              _handlePasswordRecovery(context, email),
+          onPlatformSignIn: () => _handlePlatformSignIn(context),
+          onNavigateToSignUp: () =>
+              _navigateToSignUp(context, isFromTutorial: false),
+        ),
+      ),
+    );
+  }
 
-  Future<void> _navigateToSignUp() =>
-      navigatorKey.currentState!.pushNamed('/register');
+  Future<void> _navigateToSignUp(BuildContext context,
+      {required bool isFromTutorial}) async {
+    if (isFromTutorial) {
+      await _completeTutorial();
+    }
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => RegisterScreen(
+          onRegister: (email, password) =>
+              _handleRegister(context, email, password),
+          onPlatformSignIn: () => _handlePlatformSignIn(context),
+          onNavigateToSignIn: () =>
+              _navigateToSignIn(context, isFromTutorial: false),
+        ),
+      ),
+    );
+  }
 
   Future<bool> _checkOwnerExists() async {
     await _ownerManager.loadEntities();
@@ -136,7 +162,7 @@ class AppManager extends StatelessWidget {
   }
 
   Future<void> _handleInitialOwnerCreation(BuildContext context) async {
-    final result = await Navigator.of(context).push(
+    final result = await navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (context) => const InitialOwnerCreationScreen(),
       ),
@@ -144,15 +170,10 @@ class AppManager extends StatelessWidget {
 
     if (result is Owner) {
       await _ownerManager.addEntity(result);
-      if (context.mounted) {
-        showInfoSnackBar(context, CompatibilityTexts.createOwnerSuccess);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-                builder: (_) => const SafeArea(child: MainScreen())),
-          );
-        });
-      }
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+        (route) => false,
+      );
     }
   }
 
@@ -184,34 +205,34 @@ class AppManager extends StatelessWidget {
     attemptInitialization();
   }
 
-  Future<void> _handleLogin(String? email, String? password) async {
+  Future<void> _handleLogin(
+      BuildContext context, String? email, String? password) async {
     if (email == null || password == null) return;
     try {
       await _authService.signInWithEmailAndPassword(email, password);
       _analytics.logLogin(loginMethod: 'email');
     } catch (e) {
-      BuildContext context = navigatorKey.currentContext!;
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.loginFailure);
       }
     }
   }
 
-  Future<void> _handleRegister(String? email, String? password) async {
+  Future<void> _handleRegister(
+      BuildContext context, String? email, String? password) async {
     if (email == null || password == null) return;
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
       _analytics.logSignUp(signUpMethod: 'email');
     } catch (e) {
-      BuildContext context = navigatorKey.currentContext!;
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);
       }
     }
   }
 
-  Future<void> _handlePasswordRecovery(String? email) async {
-    BuildContext context = navigatorKey.currentContext!;
+  Future<void> _handlePasswordRecovery(
+      BuildContext context, String? email) async {
     if (email == null || email.trim().isEmpty) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.invalidEmailAddress);
@@ -231,13 +252,11 @@ class AppManager extends StatelessWidget {
     }
   }
 
-  Future<void> _handlePlatformSignIn() async {
-    BuildContext context = navigatorKey.currentContext!;
+  Future<void> _handlePlatformSignIn(BuildContext context) async {
     try {
       UserCredential? userCredential =
           await _authService.handlePlatformSignIn();
 
-      // Check if the user is new
       if (userCredential?.additionalUserInfo?.isNewUser ?? false) {
         _analytics.logSignUp(signUpMethod: Platform.isIOS ? 'apple' : 'google');
       } else {
