@@ -3,10 +3,12 @@ import 'haptic_service.dart';
 import '../config/dependency_injection.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
+import 'revenuecat_service.dart';
 
 class UserService extends ValueNotifier<AppUser?> {
   final UserRepository _userRepository;
   final HapticService _hapticService = getIt<HapticService>();
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
 
   UserService(this._userRepository) : super(null);
 
@@ -54,6 +56,9 @@ class UserService extends ValueNotifier<AppUser?> {
         'persona': persona,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
+      if (!_purchaseService.isEntitled) {
+        value!.remainingQuestionsCount--;
+      }
       await _userRepository.updateUser(value!.id, value!.toMap());
       notifyListeners();
     }

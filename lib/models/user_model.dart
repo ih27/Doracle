@@ -52,7 +52,6 @@ class AppUser extends ChangeNotifier {
   void addQuestionToHistory(Map<String, dynamic> question) {
     questionHistory.add(question);
     totalQuestionsAsked++;
-    remainingQuestionsCount--;
     lastQuestionTimestamp = FieldValue.serverTimestamp();
     notifyListeners();
   }

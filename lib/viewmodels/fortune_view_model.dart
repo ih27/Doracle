@@ -57,7 +57,7 @@ class FortuneViewModel extends ChangeNotifier {
   }
 
   Stream<String> getFortune(String question) {
-    if (getRemainingQuestionsCount() <= 0) {
+    if (!canAskQuestion()) {
       _hapticService.warning();
       return Stream.value('');
     }
