@@ -64,6 +64,13 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = 1;
     });
     _pageController.jumpToPage(1);
+    // Force a rebuild of UnifiedFortuneScreen
+    _navigatorKeys[_selectedIndex].currentState?.pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => UnifiedFortuneScreen(fromPurchase: _fromPurchase),
+        settings: RouteSettings(name: _getRouteForIndex(_selectedIndex)),
+      ),
+    );
   }
 
   void _updateCanPop() {

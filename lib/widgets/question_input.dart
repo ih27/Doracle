@@ -7,7 +7,8 @@ class QuestionInput extends StatelessWidget {
   final FocusNode focusNode;
   final Function(String) onSubmitted;
   final int remainingQuestions;
-  final VoidCallback onShowOutOfQuestions;
+  final bool isSubscribed;
+  final VoidCallback? onShowOutOfQuestions;
 
   const QuestionInput({
     super.key,
@@ -15,7 +16,8 @@ class QuestionInput extends StatelessWidget {
     required this.focusNode,
     required this.onSubmitted,
     required this.remainingQuestions,
-    required this.onShowOutOfQuestions,
+    required this.isSubscribed,
+    this.onShowOutOfQuestions,
   });
 
   @override
@@ -29,7 +31,7 @@ class QuestionInput extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: remainingQuestions == 0 ? onShowOutOfQuestions : null,
+              onTap: onShowOutOfQuestions,
               child: Container(
                 width: 35,
                 height: 35,
@@ -40,7 +42,7 @@ class QuestionInput extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    '$remainingQuestions',
+                    isSubscribed ? '∞' : remainingQuestions.toString(),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,

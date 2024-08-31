@@ -119,7 +119,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Future<void> _handleQuestionSubmission(String question) async {
-    if (_viewModel.getRemainingQuestionsCount() <= 0) {
+    if (!_viewModel.canAskQuestion()) {
       _showIAPOverlay();
       return;
     }
@@ -294,7 +294,9 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
                 focusNode: _questionFocusNode,
                 onSubmitted: _onQuestionSubmitted,
                 remainingQuestions: _viewModel.getRemainingQuestionsCount(),
-                onShowOutOfQuestions: _showIAPOverlay,
+                isSubscribed: _viewModel.isSubscribed,
+                onShowOutOfQuestions:
+                    _viewModel.isSubscribed ? null : _showIAPOverlay,
               ),
             ),
           ],

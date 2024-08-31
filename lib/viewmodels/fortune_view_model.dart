@@ -11,12 +11,15 @@ class FortuneViewModel extends ChangeNotifier {
   final UserService _userService;
   final HapticService _hapticService;
   final RevenueCatService _purchaseService;
+  bool get isSubscribed => _purchaseService.isEntitled;
   final FortuneTeller _fortuneTeller;
 
   bool isHome = true;
   String welcomeMessage = '';
   List<String> randomQuestions = [];
   Map<String, String> cachedPrices = {};
+  int _remainingQuestionsCount = 0;
+  int get remainingQuestionsCount => _remainingQuestionsCount;
 
   FortuneViewModel(
     this._fortuneContentRepository,
@@ -24,7 +27,9 @@ class FortuneViewModel extends ChangeNotifier {
     this._hapticService,
     this._purchaseService,
     this._fortuneTeller,
-  );
+  ) {
+    _remainingQuestionsCount = _userService.getRemainingQuestionsCount();
+  }
 
   Future<void> initialize() async {
     await Future.wait([
@@ -71,7 +76,14 @@ class FortuneViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  int getRemainingQuestionsCount() => _userService.getRemainingQuestionsCount();
+  int getRemainingQuestionsCount() {
+    _remainingQuestionsCount = _userService.getRemainingQuestionsCount();
+    return _remainingQuestionsCount;
+  }
+
+  bool canAskQuestion() {
+    return isSubscribed || getRemainingQuestionsCount() > 0;
+  }
 
   bool _hasRunOutOfQuestions() => _userService.hasRunOutOfQuestions();
 
@@ -94,6 +106,7 @@ class FortuneViewModel extends ChangeNotifier {
         return false;
       }
       await _userService.updatePurchaseHistory(questionCount);
+      _remainingQuestionsCount = getRemainingQuestionsCount();
       cachedPrices.clear();
       notifyListeners();
       return true;
