@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../global_key.dart';
-import '../helpers/constants.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
 import '../widgets/nav_bar.dart';
@@ -19,8 +18,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   bool _fromPurchase = false;
-  bool _canPop = false;
-  String _currentTitle = CompatibilityTexts.homeTitle;
+  final Map<int, String> _lastTitles = {};
+  final Map<int, bool> _canPopStates = {};
   late final AppRouter _appRouter;
   late final PageController _pageController;
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
@@ -30,16 +29,49 @@ class _MainScreenState extends State<MainScreen> {
     GlobalKey<NavigatorState>(),
   ];
 
+  void _updateAppBarState(Route<dynamic> route) {
+    if (route.settings.name != null) {
+      setState(() {
+        _lastTitles[_selectedIndex] =
+            _appRouter.getRouteTitle(route.settings.name!);
+        _canPopStates[_selectedIndex] =
+            _navigatorKeys[_selectedIndex].currentState?.canPop() ?? false;
+      });
+    }
+  }
+
+  void _handleNavBarLongPress(int index) {
+    _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    setState(() {
+      _lastTitles[index] = _appRouter.getRouteTitle(_getRouteForIndex(index));
+      _canPopStates[index] = false;
+    });
+    if (_selectedIndex != index) {
+      _onItemTapped(index);
+    }
+  }
+
+  void _initializeTabState(int index) {
+    if (!_lastTitles.containsKey(index)) {
+      _lastTitles[index] = _appRouter.getRouteTitle(_getRouteForIndex(index));
+    }
+    if (!_canPopStates.containsKey(index)) {
+      _canPopStates[index] = false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    for (int i = 0; i < 4; i++) {
+      _initializeTabState(i);
+    }
     _pageController = PageController();
     _appRouter = AppRouter(
       navigatorKey: navigatorKey,
       onNavigate: _navigateTo,
       observer: _MainScreenNavigatorObserver(
-        updateCanPop: _updateCanPop,
-        updateTitle: _updateTitle,
+        updateAppBarState: _updateAppBarState,
       ),
       fromPurchase: _fromPurchase,
     );
@@ -53,7 +85,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _navigateTo(String route, {String? title}) {
     setState(() {
-      _currentTitle = title ?? _appRouter.getRouteTitle(route);
+      _lastTitles[_selectedIndex] = title ?? _appRouter.getRouteTitle(route);
     });
     _navigatorKeys[_selectedIndex].currentState?.pushNamed(route);
   }
@@ -66,49 +98,31 @@ class _MainScreenState extends State<MainScreen> {
     _pageController.jumpToPage(1);
     // Force a rebuild of UnifiedFortuneScreen
     _navigatorKeys[_selectedIndex].currentState?.pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => UnifiedFortuneScreen(fromPurchase: _fromPurchase),
-        settings: RouteSettings(name: _getRouteForIndex(_selectedIndex)),
-      ),
-    );
-  }
-
-  void _updateCanPop() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        _canPop =
-            _navigatorKeys[_selectedIndex].currentState?.canPop() ?? false;
-      });
-    });
-  }
-
-  void _updateTitle(Route<dynamic> route) {
-    if (route.settings.name != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _currentTitle = _appRouter.getRouteTitle(route.settings.name!);
-          });
-        }
-      });
-    }
+          MaterialPageRoute(
+            builder: (_) => UnifiedFortuneScreen(fromPurchase: _fromPurchase),
+            settings: RouteSettings(name: _getRouteForIndex(_selectedIndex)),
+          ),
+        );
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      _currentTitle = _getTitleForIndex(index);
     });
     _pageController.jumpToPage(index);
   }
 
   @override
   Widget build(BuildContext context) {
+    String currentTitle = _lastTitles[_selectedIndex] ??
+        _appRouter.getRouteTitle(_getRouteForIndex(_selectedIndex));
+    bool canPop = _canPopStates[_selectedIndex] ?? false;
+
     return Scaffold(
       appBar: CustomAppBar(
         data: CustomAppBarData(
-          canPop: _canPop,
-          currentTitle: _currentTitle,
+          canPop: canPop,
+          currentTitle: currentTitle,
           onPurchaseComplete: _onPurchaseComplete,
           onBackPressed: () =>
               _navigatorKeys[_selectedIndex].currentState?.pop(),
@@ -126,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
         onPageChanged: (index) {
           setState(() {
             _selectedIndex = index;
-            _currentTitle = _getTitleForIndex(index);
+            _lastTitles[_selectedIndex] = _getTitleForIndex(index);
           });
         },
       ),
@@ -136,6 +150,7 @@ class _MainScreenState extends State<MainScreen> {
           child: NavBar(
             selectedIndex: _selectedIndex,
             onItemSelected: _onItemTapped,
+            onItemLongPressed: _handleNavBarLongPress,
           ),
         ),
       ),
@@ -179,35 +194,26 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class _MainScreenNavigatorObserver extends NavigatorObserver {
-  final VoidCallback updateCanPop;
-  final Function(Route<dynamic>) updateTitle;
+  final Function(Route<dynamic>) updateAppBarState;
 
-  _MainScreenNavigatorObserver({
-    required this.updateCanPop,
-    required this.updateTitle,
-  });
+  _MainScreenNavigatorObserver({required this.updateAppBarState});
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    updateCanPop();
-    if (route.settings.name != null) {
-      updateTitle(route);
-    }
+    updateAppBarState(route);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    updateCanPop();
-    if (previousRoute != null && previousRoute.settings.name != null) {
-      updateTitle(previousRoute);
+    if (previousRoute != null) {
+      updateAppBarState(previousRoute);
     }
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    updateCanPop();
-    if (newRoute != null && newRoute.settings.name != null) {
-      updateTitle(newRoute);
+    if (newRoute != null) {
+      updateAppBarState(newRoute);
     }
   }
 }

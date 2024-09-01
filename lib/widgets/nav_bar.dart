@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class NavBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
+  final Function(int) onItemLongPressed;
 
   const NavBar({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
+    required this.onItemLongPressed,
   });
 
   @override
@@ -47,6 +49,7 @@ class NavBar extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => onItemSelected(index),
+      onLongPress: () => onItemLongPressed(index),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Container(
