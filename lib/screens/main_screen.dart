@@ -66,11 +66,11 @@ class _MainScreenState extends State<MainScreen> {
     _pageController.jumpToPage(1);
     // Force a rebuild of UnifiedFortuneScreen
     _navigatorKeys[_selectedIndex].currentState?.pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => UnifiedFortuneScreen(fromPurchase: _fromPurchase),
-        settings: RouteSettings(name: _getRouteForIndex(_selectedIndex)),
-      ),
-    );
+          MaterialPageRoute(
+            builder: (_) => UnifiedFortuneScreen(fromPurchase: _fromPurchase),
+            settings: RouteSettings(name: _getRouteForIndex(_selectedIndex)),
+          ),
+        );
   }
 
   void _updateCanPop() {
@@ -100,6 +100,8 @@ class _MainScreenState extends State<MainScreen> {
       _currentTitle = _getTitleForIndex(index);
     });
     _pageController.jumpToPage(index);
+    // Reset the navigation stack for the selected tab
+    _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
   }
 
   @override
