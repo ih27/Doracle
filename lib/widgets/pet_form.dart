@@ -59,6 +59,8 @@ class _PetFormState extends State<PetForm> {
 
   String? _nameError;
   String? _speciesError;
+  String? _birthdateError;
+  String? _birthtimeError;
   String? _temperamentError;
 
   @override
@@ -265,12 +267,21 @@ class _PetFormState extends State<PetForm> {
                     setState(() {
                       _birthdate = date;
                       _birthdateController.text = formatDate(date);
+                      _birthdateError = null;
                     });
                   },
                 ),
               ],
             ),
           ),
+          if (_birthdateError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8),
+              child: Text(
+                _birthdateError!,
+                style: const TextStyle(color: AppTheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -316,12 +327,21 @@ class _PetFormState extends State<PetForm> {
                     setState(() {
                       _birthtime = time;
                       _birthtimeController.text = formatTime(time);
+                      _birthtimeError = null;
                     });
                   },
                 ),
               ],
             ),
           ),
+          if (_birthtimeError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8),
+              child: Text(
+                _birthtimeError!,
+                style: const TextStyle(color: AppTheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -603,7 +623,7 @@ class _PetFormState extends State<PetForm> {
         'exerciseRequirement': _exerciseRequirement,
         'socializationNeed': _socializationNeed,
       });
-    }  else {
+    } else {
       showErrorSnackBar(context, CompatibilityTexts.requiredFieldsError);
     }
   }
@@ -621,6 +641,21 @@ class _PetFormState extends State<PetForm> {
     if (_species == null) {
       setState(() {
         _speciesError = CompatibilityTexts.petSpeciesError;
+      });
+      isValid = false;
+    }
+
+    // New checks
+    if (_birthdate == null) {
+      setState(() {
+        _birthdateError = CompatibilityTexts.petBirthdateError;
+      });
+      isValid = false;
+    }
+
+    if (_birthtime == null) {
+      setState(() {
+        _birthtimeError = CompatibilityTexts.petBirthtimeError;
       });
       isValid = false;
     }

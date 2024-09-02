@@ -22,12 +22,8 @@ class CreatePetScreen extends StatelessWidget {
       id: const Uuid().v4(),
       name: formData['name'],
       species: formData['species'],
-      birthdate: formData['birthdate'] != null
-          ? formatDate(formData['birthdate'])
-          : null,
-      birthtime: formData['birthtime'] != null
-          ? formatTime(formData['birthtime'])
-          : null,
+      birthdate: formatDate(formData['birthdate']),
+      birthtime: formatTime(formData['birthtime']),
       //location: formData['location'],
       temperament: formData['temperament'],
       exerciseRequirement: formData['exerciseRequirement'],

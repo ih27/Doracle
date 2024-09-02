@@ -59,6 +59,8 @@ class CompatibilityTexts {
 
   static const petNameError = 'Please enter a name for your pet';
   static const petSpeciesError = 'Please select a species for your pet';
+  static const petBirthdateError = 'Please select a birth date for your pet';
+  static const petBirthtimeError = 'Please select a birth time for your pet';
   static const petTemperamentError =
       'Please select at least one trait for your pet';
 

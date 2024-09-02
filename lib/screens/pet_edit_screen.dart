@@ -16,10 +16,8 @@ class UpdatePetScreen extends StatelessWidget {
     return PetForm(
       initialName: pet.name,
       initialSpecies: pet.species,
-      initialBirthdate:
-          pet.birthdate != null ? parseDateString(pet.birthdate!) : null,
-      initialBirthtime:
-          pet.birthtime != null ? parseTimeString(pet.birthtime!) : null,
+      initialBirthdate: parseDateString(pet.birthdate),
+      initialBirthtime: parseTimeString(pet.birthtime),
       //initialLocation: pet.location,
       initialTemperament: pet.temperament,
       initialExerciseRequirement: pet.exerciseRequirement,
@@ -36,12 +34,8 @@ class UpdatePetScreen extends StatelessWidget {
       id: pet.id,
       name: formData['name'],
       species: formData['species'],
-      birthdate: formData['birthdate'] != null
-          ? formatDate(formData['birthdate'])
-          : null,
-      birthtime: formData['birthtime'] != null
-          ? formatTime(formData['birthtime'])
-          : null,
+      birthdate: formatDate(formData['birthdate']),
+      birthtime: formatTime(formData['birthtime']),
       //location: formData['location'],
       temperament: formData['temperament'],
       exerciseRequirement: formData['exerciseRequirement'],

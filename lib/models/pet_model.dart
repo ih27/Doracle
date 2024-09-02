@@ -5,8 +5,8 @@ class Pet implements Entity {
   final String id;
   final String name;
   final String species;
-  final String? birthdate;
-  final String? birthtime;
+  final String birthdate;
+  final String birthtime;
   //final String? location;
   final List<String> temperament;
   final int exerciseRequirement;
@@ -16,8 +16,8 @@ class Pet implements Entity {
     required this.id,
     required this.name,
     required this.species,
-    this.birthdate,
-    this.birthtime,
+    required this.birthdate,
+    required this.birthtime,
     //this.location,
     required this.temperament,
     required this.exerciseRequirement,

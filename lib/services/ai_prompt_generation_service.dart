@@ -124,7 +124,7 @@ ${isPetB ? 'Pet B' : 'Pet'} Information:
 - Name: ${pet.name}
 - Type: ${pet.species}
 - Date of Birth: ${pet.birthdate}
-- Time of Birth: ${pet.birthtime ?? 'Unavailable'}
+- Time of Birth: ${pet.birthtime}
 - Temperament: ${pet.temperament.join(', ')}
 - Exercise Requirement: ${_getRequirementLevel(pet.exerciseRequirement)}
 - Social Needs: ${_getRequirementLevel(pet.socializationNeed)}
