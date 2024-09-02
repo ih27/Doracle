@@ -20,7 +20,7 @@ String? convertPrice(String? originalPrice) {
     double price = double.parse(numericPart);
     double convertedPrice = price * 5;
 
-    int wholeUnits = (convertedPrice ~/ 10) * 10; // Round down to nearest 10
+    int wholeUnits = convertedPrice.toInt();
     int fractionalUnits = 99; // Always .99
 
     // Format the price using the original decimal separator

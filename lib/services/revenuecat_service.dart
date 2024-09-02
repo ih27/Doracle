@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../helpers/constants.dart';
 import 'auth_service.dart';
 
 class RevenueCatService with ChangeNotifier {
   final AuthService _authService;
   final String _lastUserIdKey = 'last_revenue_cat_user_id';
   final Map<int, String> _productsHash = {
-    10: 'small_treat',
-    30: 'medium_treat',
-    50: 'large_treat'
+    PurchaseTexts.smallTreatQuestionCount: PurchaseTexts.smallTreatPackageId,
+    PurchaseTexts.mediumTreatQuestionCount: PurchaseTexts.mediumTreatPackageId,
+    PurchaseTexts.largeTreatQuestionCount: PurchaseTexts.largeTreatPackageId,
   };
   String? _lastInitializedUserId;
   bool _isConfigured = false;
@@ -204,8 +205,8 @@ class RevenueCatService with ChangeNotifier {
       if (offerings.current != null &&
           offerings.current?.monthly != null &&
           offerings.current?.annual != null) {
-        _cachedSubscriptions['monthly'] = offerings.current!.monthly!;
-        _cachedSubscriptions['annual'] = offerings.current!.annual!;
+        _cachedSubscriptions[PurchaseTexts.monthly] = offerings.current!.monthly!;
+        _cachedSubscriptions[PurchaseTexts.annual] = offerings.current!.annual!;
       }
       return _cachedSubscriptions;
     } catch (e) {

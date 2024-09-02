@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
+import '../helpers/constants.dart';
 import '../helpers/purchase_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../services/revenuecat_service.dart';
@@ -24,7 +25,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
 
   bool _isLoading = false;
   Map<String, String> _prices = {};
-  String _selectedPlan = 'annual';
+  String _selectedPlan = PurchaseTexts.annual;
   bool _isEntitled = false;
 
   @override
@@ -143,7 +144,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
 
   Widget _buildTitle(BuildContext context) {
     return Text(
-      'Unlock All Features',
+      PurchaseTexts.subscribeTitle,
       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: Theme.of(context).primaryColor,
             fontWeight: FontWeight.w900,
@@ -155,12 +156,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Text(
-        '• Detailed Compatibility Analysis\n'
-        '• Unlimited Pet Oracle Questions\n'
-        '• Personalized Improvement Plans\n'
-        '• Comprehensive Results History\n'
-        '• Multi-Pet Harmony Insights\n'
-        '• Daily Pet & Owner Horoscopes',
+        PurchaseTexts.subscribeFeaturesList,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
     );
@@ -175,14 +171,16 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
         children: [
           _buildSubscriptionCard(
             context,
-            'annual',
-            convertAnnualToMonthly(_prices['\$rc_annual']) ?? '\$2.49',
+            PurchaseTexts.annual,
+            _prices[PurchaseTexts.annualPackageId] ??
+                PurchaseTexts.defaultAnnualPrice,
             true,
           ),
           _buildSubscriptionCard(
             context,
-            'monthly',
-            _prices['\$rc_monthly'] ?? '\$2.99',
+            PurchaseTexts.monthly,
+            _prices[PurchaseTexts.monthlyPackageId] ??
+                PurchaseTexts.defaultMonthlyPrice,
             false,
           ),
         ],
@@ -193,6 +191,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   Widget _buildSubscriptionCard(
       BuildContext context, String planType, String price, bool isBestOffer) {
     bool isSelected = _selectedPlan == planType;
+    bool isAnnual = planType == PurchaseTexts.annual;
     double cardWidth = 150;
     double cardHeight = 200;
     double bestOfferHeight = 30;
@@ -229,7 +228,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    'Best Offer',
+                    PurchaseTexts.bestValueLabel,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
                           fontSize: 14,
@@ -278,7 +277,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(
-                          price,
+                          isAnnual ? convertAnnualToMonthly(price)! : price,
                           style: Theme.of(context)
                               .textTheme
                               .headlineLarge
@@ -295,6 +294,15 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                                     color: Theme.of(context).primaryColor,
                                   ),
                         ),
+                        if (isAnnual)
+                          Text(
+                            '($price/year)',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                          ),
                       ],
                     ),
                   ],
@@ -328,7 +336,8 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
         onPressed: _isEntitled ? null : () => _handlePurchase(subscriptionType),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(320, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           backgroundColor: _isEntitled ? Colors.grey : null,
         ),
         child: Text(_isEntitled ? 'Subscribed' : 'Subscribe'),

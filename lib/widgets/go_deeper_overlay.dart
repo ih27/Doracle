@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:doracle/helpers/string_extensions.dart';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../helpers/constants.dart';
 import '../helpers/purchase_utils.dart';
 
 class GoDeeperOverlay extends StatelessWidget {
@@ -60,7 +61,7 @@ class GoDeeperOverlay extends StatelessWidget {
             children: [
               const SizedBox(width: 40),
               Text(
-                'Unlock All Features',
+                PurchaseTexts.subscribeTitle,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -80,7 +81,7 @@ class GoDeeperOverlay extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Detailed compatibility reports.\nIn-depth practical compatibility analysis.\nComprehensive astrological compatibility breakdown.',
+            PurchaseTexts.subscribeDescription,
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.left,
           ),
@@ -97,15 +98,17 @@ class GoDeeperOverlay extends StatelessWidget {
         children: [
           _buildSubscriptionCard(
             context,
-            'monthly',
-            prices['\$rc_monthly'] ?? '\$2.99',
-            false,
+            PurchaseTexts.annual,
+            prices[PurchaseTexts.annualPackageId] ??
+                PurchaseTexts.defaultAnnualPrice,
+            true,
           ),
           _buildSubscriptionCard(
             context,
-            'annual',
-            convertAnnualToMonthly(prices['\$rc_annual']) ?? '\$2.49',
-            true,
+            PurchaseTexts.monthly,
+            prices[PurchaseTexts.monthlyPackageId] ??
+                PurchaseTexts.defaultMonthlyPrice,
+            false,
           ),
         ],
       ),
@@ -114,6 +117,7 @@ class GoDeeperOverlay extends StatelessWidget {
 
   Widget _buildSubscriptionCard(
       BuildContext context, String packageId, String price, bool isBestValue) {
+    bool isAnnual = packageId == PurchaseTexts.annual;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -144,17 +148,18 @@ class GoDeeperOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${packageId.capitalize()}\nSubscription',
+                '${packageId.capitalize()}\nPlan',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 20,
+                      fontSize: 22,
                       letterSpacing: 0,
+                      color: Theme.of(context).primaryColor,
                     ),
               ),
               Column(
                 children: [
                   AutoSizeText(
-                    price,
+                    isAnnual ? convertAnnualToMonthly(price)! : price,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           color: AppTheme.success,
                           letterSpacing: 0,
@@ -167,8 +172,17 @@ class GoDeeperOverlay extends StatelessWidget {
                     '/month',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           letterSpacing: 0,
+                          color: Theme.of(context).primaryColor,
                         ),
                   ),
+                  if (isAnnual)
+                    Text(
+                      '($price/year)',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                 ],
               ),
               ElevatedButton(
@@ -219,7 +233,7 @@ class GoDeeperOverlay extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Best Value',
+                  PurchaseTexts.bestValueLabel,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppTheme.primaryBackground,
                         fontSize: 16,

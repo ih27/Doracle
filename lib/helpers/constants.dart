@@ -198,3 +198,57 @@ class TermsAndConditionsTexts {
 
 By using Doracle, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.''';
 }
+
+class PurchaseTexts {
+  static const bestValueLabel = 'Best Value';
+  static const defaultMonthlyPrice = '\$2.99';
+  static const defaultAnnualPrice = '\$29.99';
+
+  static const discountedSmallTreatPrice = '\$0.99';
+  static const defaultSmallTreatPrice = '\$4.99';
+  static const discountedMediumTreatPrice = '\$1.99';
+  static const defaultMediumTreatPrice = '\$9.99';
+  static const discountedLargeTreatPrice = '\$2.99';
+  static const defaultLargeTreatPrice = '\$14.99';
+
+  static int smallTreatQuestionCount = 10;
+  static int mediumTreatQuestionCount = 30;
+  static int largeTreatQuestionCount = 50;
+
+  static String smallTreat = 'Small';
+  static String mediumTreat = 'Medium';
+  static String largeTreat = 'Large';
+
+  static String smallTreatPackageId = 'small_treat';
+  static String mediumTreatPackageId = 'medium_treat';
+  static String largeTreatPackageId = 'large_treat';
+
+  static String monthly = 'monthly';
+  static String annual = 'annual';
+
+  static String monthlyPackageId = '\$rc_monthly';
+  static String annualPackageId = '\$rc_annual';
+
+  static String smallTreatDescription =
+      'Just a nibble! Keep the pup happy and keep the questions coming.';
+  static String mediumTreatDescription =
+      'A tasty snack! Your questions are his favorite treat.';
+  static String largeTreatDescription =
+      'A full meal! The oracle dog will be full and ready to reveal all!';
+
+  static String purchaseOverlayDescription =
+      'You\'ve run out of questions for today. Feed Doracle with \ntreats to unlock more answers!';
+  static String purchaseTitle = 'Feed the Dog';
+  static String purchaseDescription =
+      'Give Doracle treats to get more questions answered.';
+
+  static String subscribeTitle = 'Unlock All Features';
+  static String subscribeFeaturesList = '• Detailed Compatibility Analysis\n'
+      '• Unlimited Pet Oracle Questions\n'
+      '• Personalized Improvement Plans\n'
+      '• Comprehensive Results History\n'
+      '• Multi-Pet Harmony Insights\n'
+      '• Daily Pet & Owner Horoscopes';
+  static String subscribeDescription =
+      'Detailed compatibility reports.\nIn-depth practical compatibility analysis.\nComprehensive astrological compatibility breakdown.';
+}

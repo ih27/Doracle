@@ -1,3 +1,4 @@
+import '../helpers/constants.dart';
 import '../services/revenuecat_service.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
@@ -107,7 +108,7 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text('Feed the Dog'),
+            title: Text(PurchaseTexts.purchaseTitle),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
             forceMaterialTransparency: true,
@@ -118,7 +119,7 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
                 child: Text(
-                  'Give Doracle treats to get more questions answered.',
+                  PurchaseTexts.purchaseDescription,
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
@@ -126,35 +127,44 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
                 child: ListView(
                   children: [
                     TreatCard(
-                      treatSize: 'Small',
-                      questionCount: 10,
-                      originalPrice:
-                          convertPrice(_prices['small_treat']) ?? '\$4.99',
-                      discountedPrice: _prices['small_treat'] ?? '\$0.99',
-                      description:
-                          'Just a nibble! Keep the pup happy and keep the questions coming.',
-                      onTap: () => _handlePurchase(10),
+                      treatSize: PurchaseTexts.smallTreat,
+                      questionCount: PurchaseTexts.smallTreatQuestionCount,
+                      originalPrice: convertPrice(
+                              _prices[PurchaseTexts.smallTreatPackageId]) ??
+                          PurchaseTexts.defaultSmallTreatPrice,
+                      discountedPrice:
+                          _prices[PurchaseTexts.smallTreatPackageId] ??
+                              PurchaseTexts.discountedSmallTreatPrice,
+                      description: PurchaseTexts.smallTreatDescription,
+                      onTap: () => _handlePurchase(
+                          PurchaseTexts.smallTreatQuestionCount),
                     ),
                     TreatCard(
-                      treatSize: 'Medium',
-                      questionCount: 30,
-                      originalPrice:
-                          convertPrice(_prices['medium_treat']) ?? '\$9.99',
-                      discountedPrice: _prices['medium_treat'] ?? '\$1.99',
-                      description:
-                          'A tasty snack! Your questions are his favorite treat.',
+                      treatSize: PurchaseTexts.mediumTreat,
+                      questionCount: PurchaseTexts.mediumTreatQuestionCount,
+                      originalPrice: convertPrice(
+                              _prices[PurchaseTexts.mediumTreatPackageId]) ??
+                          PurchaseTexts.defaultMediumTreatPrice,
+                      discountedPrice:
+                          _prices[PurchaseTexts.mediumTreatPackageId] ??
+                              PurchaseTexts.discountedMediumTreatPrice,
+                      description: PurchaseTexts.mediumTreatDescription,
                       isHighlighted: true,
-                      onTap: () => _handlePurchase(30),
+                      onTap: () => _handlePurchase(
+                          PurchaseTexts.mediumTreatQuestionCount),
                     ),
                     TreatCard(
-                      treatSize: 'Large',
-                      questionCount: 50,
-                      originalPrice:
-                          convertPrice(_prices['large_treat']) ?? '\$14.99',
-                      discountedPrice: _prices['large_treat'] ?? '\$2.99',
-                      description:
-                          'A full meal! The oracle dog will be full and ready to reveal all!',
-                      onTap: () => _handlePurchase(50),
+                      treatSize: PurchaseTexts.largeTreat,
+                      questionCount: PurchaseTexts.largeTreatQuestionCount,
+                      originalPrice: convertPrice(
+                              _prices[PurchaseTexts.largeTreatPackageId]) ??
+                          PurchaseTexts.defaultLargeTreatPrice,
+                      discountedPrice:
+                          _prices[PurchaseTexts.largeTreatPackageId] ??
+                              PurchaseTexts.discountedLargeTreatPrice,
+                      description: PurchaseTexts.largeTreatDescription,
+                      onTap: () => _handlePurchase(
+                          PurchaseTexts.largeTreatQuestionCount),
                     ),
                   ],
                 ),

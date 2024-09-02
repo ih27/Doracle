@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../helpers/constants.dart';
 
 class OutOfQuestionsOverlay extends StatelessWidget {
   final VoidCallback onClose;
@@ -59,12 +60,36 @@ class OutOfQuestionsOverlay extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildTreatCard(context, w, h, treatCardWidth, 'Small',
-                          '10', prices['small_treat'] ?? '\$0.99', false),
-                      _buildTreatCard(context, w, h, treatCardWidth, 'Medium',
-                          '30', prices['medium_treat'] ?? '\$1.99', true),
-                      _buildTreatCard(context, w, h, treatCardWidth, 'Large',
-                          '50', prices['large_treat'] ?? '\$2.99', false),
+                      _buildTreatCard(
+                          context,
+                          w,
+                          h,
+                          treatCardWidth,
+                          PurchaseTexts.smallTreat,
+                          PurchaseTexts.smallTreatQuestionCount.toString(),
+                          prices[PurchaseTexts.smallTreatPackageId] ??
+                              PurchaseTexts.discountedSmallTreatPrice,
+                          false),
+                      _buildTreatCard(
+                          context,
+                          w,
+                          h,
+                          treatCardWidth,
+                          PurchaseTexts.mediumTreat,
+                          PurchaseTexts.mediumTreatQuestionCount.toString(),
+                          prices[PurchaseTexts.mediumTreatPackageId] ??
+                              PurchaseTexts.discountedMediumTreatPrice,
+                          true),
+                      _buildTreatCard(
+                          context,
+                          w,
+                          h,
+                          treatCardWidth,
+                          PurchaseTexts.largeTreat,
+                          PurchaseTexts.largeTreatQuestionCount.toString(),
+                          prices[PurchaseTexts.largeTreatPackageId] ??
+                              PurchaseTexts.discountedLargeTreatPrice,
+                          false),
                     ],
                   ),
                 ),
@@ -141,7 +166,7 @@ class OutOfQuestionsOverlay extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: Text(
-                'You\'ve run out of questions for today. Feed Doracle with \ntreats to unlock more answers!',
+                PurchaseTexts.purchaseOverlayDescription,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       letterSpacing: 0,
@@ -300,7 +325,7 @@ class OutOfQuestionsOverlay extends StatelessWidget {
         ),
         alignment: const AlignmentDirectional(0, 0),
         child: Text(
-          'Best Value',
+          PurchaseTexts.bestValueLabel,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppTheme.primaryBackground,
                 fontSize: 16,
