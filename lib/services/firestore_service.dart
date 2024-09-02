@@ -12,7 +12,7 @@ class FirestoreService {
   static String? _lastUsedPersona;
   static const int _maxRetries = 3;
   static const Duration _retryDelay = Duration(seconds: 1);
-  static const int defaultStartingCount = 50;
+  static const int defaultStartingCount = 1;
 
   static const String _questionsKey = 'cached_questions';
   static const String _lastFetchTimeKey = 'last_fetch_time';
