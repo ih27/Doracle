@@ -21,8 +21,10 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
   final OwnerManager _ownerManager = getIt<OwnerManager>();
   Pet? selectedPet;
   Owner? selectedOwner;
-  final CarouselSliderController _petCarouselController = CarouselSliderController();
-  final CarouselSliderController _ownerCarouselController = CarouselSliderController();
+  final CarouselSliderController _petCarouselController =
+      CarouselSliderController();
+  final CarouselSliderController _ownerCarouselController =
+      CarouselSliderController();
 
   bool get isCompatibilityCheckEnabled =>
       selectedPet != null && selectedOwner != null;
@@ -174,17 +176,17 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
                   width: MediaQuery.sizeOf(context).width,
                   height: MediaQuery.sizeOf(context).height * 0.25,
                   decoration: const BoxDecoration(),
-                  child: EntityCarousel<Pet>(
-                    entities: _petManager.entities,
-                    maxEntities: 10,
-                    onAddEntity: _addNewPet,
-                    onEditEntity: _editPet,
-                    isPet: true,
-                    onPageChanged: _selectPet,
-                    carouselController: _petCarouselController,
-                    initialPage: _petManager.entities.isNotEmpty
-                        ? _petManager.entities
-                            .indexOf(selectedPet ?? _petManager.entities.first)
+                  child: EntityCarousel<Owner>(
+                    entities: _ownerManager.entities,
+                    maxEntities: 1,
+                    onAddEntity: _addNewOwner,
+                    onEditEntity: _editOwner,
+                    isPet: false,
+                    onPageChanged: _selectOwner,
+                    carouselController: _ownerCarouselController,
+                    initialPage: _ownerManager.entities.isNotEmpty
+                        ? _ownerManager.entities.indexOf(
+                            selectedOwner ?? _ownerManager.entities.first)
                         : 0,
                   ),
                 ),
@@ -272,17 +274,17 @@ class _OwnerCompatabilityScreenState extends State<OwnerCompatabilityScreen> {
                   width: MediaQuery.sizeOf(context).width,
                   height: MediaQuery.sizeOf(context).height * 0.25,
                   decoration: const BoxDecoration(),
-                  child: EntityCarousel<Owner>(
-                    entities: _ownerManager.entities,
-                    maxEntities: 1,
-                    onAddEntity: _addNewOwner,
-                    onEditEntity: _editOwner,
-                    isPet: false,
-                    onPageChanged: _selectOwner,
-                    carouselController: _ownerCarouselController,
-                    initialPage: _ownerManager.entities.isNotEmpty
-                        ? _ownerManager.entities.indexOf(
-                            selectedOwner ?? _ownerManager.entities.first)
+                  child: EntityCarousel<Pet>(
+                    entities: _petManager.entities,
+                    maxEntities: 10,
+                    onAddEntity: _addNewPet,
+                    onEditEntity: _editPet,
+                    isPet: true,
+                    onPageChanged: _selectPet,
+                    carouselController: _petCarouselController,
+                    initialPage: _petManager.entities.isNotEmpty
+                        ? _petManager.entities
+                            .indexOf(selectedPet ?? _petManager.entities.first)
                         : 0,
                   ),
                 ),
