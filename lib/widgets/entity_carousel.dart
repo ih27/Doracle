@@ -164,13 +164,13 @@ class EntityCarousel<T> extends StatelessWidget {
             ),
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 5),
+        Padding(
+          padding: const EdgeInsets.only(top: 5),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              'Add',
-              style: TextStyle(
+              isPet ? 'Add Pet' : 'Add',
+              style: const TextStyle(
                 color: AppTheme.primaryColor,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

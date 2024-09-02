@@ -1,14 +1,10 @@
 import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import '../helpers/constants.dart';
-import '../helpers/iap_utils.dart';
 import '../repositories/compatibility_data_repository.dart';
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
-import '../services/revenuecat_service.dart';
-import '../services/user_service.dart';
 import '../widgets/custom_expansion_panel_list.dart';
 
 class CompatibilityResultCardScreen extends StatefulWidget {
@@ -25,20 +21,14 @@ class CompatibilityResultCardScreen extends StatefulWidget {
 
 class _CompatibilityResultCardScreenState
     extends State<CompatibilityResultCardScreen> {
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
-  final UserService _userService = getIt<UserService>();
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
   late List<bool> _isExpanded;
-  Map<String, String> _cachedPrices = {};
-  bool _isEntitled = false;
 
   @override
   void initState() {
     super.initState();
     _isExpanded = List.generate(4, (_) => false);
-    _fetchPricesIfNeeded();
-    _isEntitled = _purchaseService.isEntitled;
   }
 
   @override
@@ -70,53 +60,14 @@ class _CompatibilityResultCardScreenState
                 padding: const EdgeInsets.fromLTRB(25, 10, 25, 0),
                 child: CustomExpansionPanelList(
                   expansionCallback: (int index, bool isExpanded) {
-                    if (_isEntitled) {
-                      setState(() {
-                        _isExpanded[index] = !_isExpanded[index];
-                      });
-                    }
+                    setState(() {
+                      _isExpanded[index] = !_isExpanded[index];
+                    });
                   },
-                  onNonExpandableTap: _isEntitled ? null : _showIAPOverlay,
                   children: expansionPanels,
                 ),
               ),
               const SizedBox(height: 25),
-              if (!_isEntitled)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: 160,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _purchaseButton(),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: 275,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Detailed compatibility reports.',
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                              Text('In-depth practical compatibility analysis.',
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                              Text(
-                                  'Comprehensive astrological compatibility breakdown.',
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
             ],
           ),
         );
@@ -138,7 +89,6 @@ class _CompatibilityResultCardScreenState
       return _buildCustomExpansionPanel(
         cardKeys.indexOf(key),
         cardData['title'],
-        cardData['content'].split('.').first,
         cardData['content'],
       );
     }).toList();
@@ -154,7 +104,6 @@ class _CompatibilityResultCardScreenState
       cards.add(_buildCustomExpansionPanel(
         i,
         'Recommendation ${i + 1}',
-        recData.split('.').first,
         recData,
       ));
     }
@@ -164,7 +113,6 @@ class _CompatibilityResultCardScreenState
     cards.add(_buildCustomExpansionPanel(
       5,
       'Astrological Bonus Tip',
-      bonusTip.split('.').first,
       bonusTip,
     ));
 
@@ -174,7 +122,6 @@ class _CompatibilityResultCardScreenState
   CustomExpansionPanel _buildCustomExpansionPanel(
     int index,
     String header,
-    String summary,
     String details,
   ) {
     return CustomExpansionPanel(
@@ -183,6 +130,7 @@ class _CompatibilityResultCardScreenState
           color:
               isExpanded ? AppTheme.lemonChiffon : AppTheme.primaryBackground,
           padding: const EdgeInsets.all(16),
+          width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -196,13 +144,29 @@ class _CompatibilityResultCardScreenState
                 maxFontSize: 24,
               ),
               if (!isExpanded)
-                AutoSizeText(
-                  summary,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.primaryColor,
-                      ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: RichText(
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppTheme.primaryColor,
+                          ),
+                      children: [
+                        TextSpan(
+                          text: details.substring(
+                              0, details.length > 100 ? 100 : details.length),
+                        ),
+                        const TextSpan(
+                          text: '...Read more',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -242,68 +206,5 @@ class _CompatibilityResultCardScreenState
       return json.decode(recommendationsJson);
     }
     return {};
-  }
-
-  Widget _purchaseButton() {
-    return GestureDetector(
-      onTap: _showIAPOverlay,
-      child: Material(
-        color: Colors.transparent,
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Container(
-          width: 250,
-          height: 50,
-          decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 4,
-                color: AppTheme.secondaryColor,
-                offset: Offset(0, 2),
-              )
-            ],
-            gradient: const LinearGradient(
-              colors: [AppTheme.secondaryColor, AppTheme.yaleBlue],
-              stops: [0, 1],
-              begin: AlignmentDirectional(0, -1),
-              end: AlignmentDirectional(0, 1),
-            ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: const AlignmentDirectional(0, 0),
-          child: Text(
-            'Go deeper+',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppTheme.secondaryBackground,
-                  letterSpacing: 0,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _fetchPricesIfNeeded() async {
-    final updatedPrices = await IAPUtils.fetchSubscriptionPrices(_cachedPrices);
-    setState(() {
-      _cachedPrices = updatedPrices;
-    });
-  }
-
-  void _showIAPOverlay() {
-    IAPUtils.showIAPOverlay(context, _cachedPrices, _handlePurchase);
-  }
-
-  Future<void> _handlePurchase(String subscriptionType) async {
-    bool success = await IAPUtils.handlePurchase(context, subscriptionType);
-    if (success) {
-      await _userService.updateSubscriptionHistory(subscriptionType);
-      setState(() {
-        _isEntitled = true;
-      });
-    }
   }
 }

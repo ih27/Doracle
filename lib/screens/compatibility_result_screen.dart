@@ -398,6 +398,9 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
           ? () {
               if (customNavigation != null) {
                 customNavigation(context);
+              }
+              else if (locked != null && locked) {
+                _showIAPOverlay(context);
               } else {
                 _compatibilityDataRepository.markPlanAsOpened(planId);
                 navigateToCardDetail(context, cardId, planId);
