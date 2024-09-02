@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 
-class RevenueCatService {
+class RevenueCatService with ChangeNotifier {
   final AuthService _authService;
   final String _lastUserIdKey = 'last_revenue_cat_user_id';
   final Map<int, String> _productsHash = {
@@ -16,13 +16,21 @@ class RevenueCatService {
   };
   String? _lastInitializedUserId;
   bool _isConfigured = false;
-  bool _isEntitled = false;
   List<StoreProduct>? _cachedProducts;
   Map<String, Package> _cachedSubscriptions = {};
 
   List<String> get _products => _productsHash.values.toList();
   Completer<void>? _initializationCompleter;
+
+  bool _isEntitled = false;
   bool get isEntitled => _isEntitled;
+
+  set isEntitled(bool value) {
+    if (_isEntitled != value) {
+      _isEntitled = value;
+      notifyListeners();
+    }
+  }
 
   RevenueCatService(this._authService);
 
