@@ -59,19 +59,23 @@ Color getColorFor(double percent) {
   return progressColor;
 }
 
-String getLevelFor(double percent) {
-  String level = 'They\'re like oil and water!';
+String getLevelFor(double percent, bool isPetOwner) {
   final percentInt = (percent * 100).toInt();
+  final prefix = isPetOwner ? 'You are' : 'They\'re';
+
   if (percentInt > 80) {
-    level = 'They\'re very harmonious!';
+    return '$prefix very harmonious!';
   } else if (percentInt > 60) {
-    level = 'They\'re a promising pair!';
+    return '$prefix a promising pair!';
   } else if (percentInt > 40) {
-    level = 'They\'re finding their rhythm.';
+    return '$prefix finding your rhythm.';
   } else if (percentInt > 20) {
-    level = 'There\'s room for improvement.';
+    return 'There\'s room for improvement.';
+  } else {
+    return isPetOwner
+        ? 'You are like oil and water!'
+        : 'They\'re like oil and water!';
   }
-  return level;
 }
 
 String getEntityImage(dynamic entity) {

@@ -315,7 +315,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
             ),
           ),
           Text(
-            getLevelFor(overallPercent),
+            getLevelFor(overallPercent, widget.entity2 is Owner),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppTheme.primaryColor,
@@ -398,8 +398,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
           ? () {
               if (customNavigation != null) {
                 customNavigation(context);
-              }
-              else if (locked != null && locked) {
+              } else if (locked != null && locked) {
                 _showIAPOverlay(context);
               } else {
                 _compatibilityDataRepository.markPlanAsOpened(planId);
