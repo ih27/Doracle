@@ -136,15 +136,15 @@ ${isPetB ? 'Pet B' : 'Pet'} Information:
     return '''
 - Name: ${owner.name}
 - Date of Birth: ${owner.birthdate}
-- Time of Birth: ${owner.birthtime ?? 'Unavailable'}
-- Living Situation: ${owner.livingSituation ?? 'Unknown'}
+- Time of Birth: ${owner.birthtime}
+- Living Situation: ${owner.livingSituation}
 - Daily Activity Level: ${_getActivityLevel(owner.activityLevel)}
 - Desired Interaction Level: ${_getInteractionLevel(owner.interactionLevel)}
-- Work Schedule: ${owner.workSchedule ?? 'Unknown'}
-- Pet Experience: ${owner.petExperience ?? 'Unknown'}
+- Work Schedule: ${owner.workSchedule}
+- Pet Experience: ${owner.petExperience}
 - Grooming Commitment: ${_getGroomingCommitment(owner.groomingCommitment)}
 - Noise Tolerance: ${_getNoiseToleranceLevel(owner.noiseTolerance)}
-- Primary Reason for Pet: ${owner.petReason ?? 'Unknown'}
+- Primary Reason for Pet: ${owner.petReason}
 - Zodiac Sign: ${_getZodiacSign(owner.birthdate)}
 ''';
   }

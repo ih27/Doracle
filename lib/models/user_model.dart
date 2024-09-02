@@ -10,7 +10,7 @@ class AppUser extends ChangeNotifier {
   List<Map<String, dynamic>> purchaseHistory;
   bool canVibrate;
   bool isEntitled;
-  static const _remainingQuestionsCount = 50;
+  static const _remainingQuestionsCount = 1;
   static const _totalQuestionsAsked = 0;
   dynamic lastQuestionTimestamp;
   dynamic lastPurchaseTimestamp;

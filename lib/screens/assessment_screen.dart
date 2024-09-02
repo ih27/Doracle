@@ -54,39 +54,36 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   }
 
   void _navigateToImprovementPlan(String planId) async {
-  final canAccess = _isEntitled || await _repository.planWasOpened(planId);
-  if (mounted) {
-    if (canAccess) {
-      navigateToImprovementPlan(context, planId);
-    } else {
-      _showIAPOverlay(context, planId);
+    final canAccess = _isEntitled || await _repository.planWasOpened(planId);
+    if (mounted) {
+      if (canAccess) {
+        navigateToImprovementPlan(context, planId);
+      } else {
+        _showIAPOverlay(context, planId);
+      }
     }
   }
-}
 
   void _showIAPOverlay(BuildContext overlayContext, String planId) {
-  IAPUtils.showIAPOverlay(
-    overlayContext, 
-    _cachedPrices, 
-    (subscriptionType) => _handlePurchase(subscriptionType, planId)
-  );
-}
+    IAPUtils.showIAPOverlay(overlayContext, _cachedPrices,
+        (subscriptionType) => _handlePurchase(subscriptionType, planId));
+  }
 
   Future<void> _handlePurchase(String subscriptionType, String planId) async {
-  bool success = await IAPUtils.handlePurchase(context, subscriptionType);
-  if (success) {
-    await _userService.updateSubscriptionHistory(subscriptionType);
-    setState(() {
-      _isEntitled = true;
-    });
-    
-    // Mark the plan as opened and navigate to it
-    await _repository.markPlanAsOpened(planId);
-    if (mounted) {
-      navigateToImprovementPlan(context, planId);
+    bool success = await IAPUtils.handlePurchase(context, subscriptionType);
+    if (success) {
+      await _userService.updateSubscriptionHistory(subscriptionType);
+      setState(() {
+        _isEntitled = true;
+      });
+
+      // Mark the plan as opened and navigate to it
+      await _repository.markPlanAsOpened(planId);
+      if (mounted) {
+        navigateToImprovementPlan(context, planId);
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {

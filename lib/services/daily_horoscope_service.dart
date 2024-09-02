@@ -63,7 +63,6 @@ class DailyHoroscopeService {
       Map<String, dynamic> jsonResponse = json.decode(response);
       return jsonResponse['horoscope'] ?? 'No horoscope available';
     } catch (e) {
-      print("Error parsing horoscope response: $e");
       return 'Failed to generate horoscope';
     }
   }

@@ -15,9 +15,9 @@ String generateConsistentPlanId(dynamic entity1, dynamic entity2) {
 
 String _getStableEntityIdentifier(dynamic entity) {
   if (entity is Pet) {
-    return 'Pet_${entity.name}_${entity.species}${entity.birthdate != null ? '_${entity.birthdate}' : ''}';
+    return 'Pet_${entity.name}_${entity.species}_${entity.birthdate}';
   } else if (entity is Owner) {
-    return 'Owner_${entity.name}${entity.birthdate != null ? '_${entity.birthdate}' : ''}';
+    return 'Owner_${entity.name}_${entity.birthdate}';
   } else {
     throw ArgumentError('Unknown entity type');
   }
