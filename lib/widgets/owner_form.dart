@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/pet_owner_form_utils.dart';
+import '../helpers/show_snackbar.dart';
 import 'custom_datepicker.dart';
 import 'custom_timepicker.dart';
 import 'custom_underline_textfield.dart';
@@ -676,6 +677,8 @@ class _OwnerFormState extends State<OwnerForm> {
         'noiseTolerance': _noiseTolerance,
         'petReason': _petReason,
       });
+    } else {
+      showErrorSnackBar(context, CompatibilityTexts.requiredFieldsError);
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/pet_owner_form_utils.dart';
+import '../helpers/show_snackbar.dart';
 import '../widgets/custom_datepicker.dart';
 import '../widgets/custom_underline_textfield.dart';
 import '../widgets/map_overlay.dart';
@@ -604,6 +605,8 @@ class _PetFormState extends State<PetForm> {
         'exerciseRequirement': _exerciseRequirement,
         'socializationNeed': _socializationNeed,
       });
+    }  else {
+      showErrorSnackBar(context, CompatibilityTexts.requiredFieldsError);
     }
   }
 
