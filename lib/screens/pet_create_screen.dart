@@ -28,7 +28,7 @@ class CreatePetScreen extends StatelessWidget {
       birthtime: formData['birthtime'] != null
           ? formatTime(formData['birthtime'])
           : null,
-      location: formData['location'],
+      //location: formData['location'],
       temperament: formData['temperament'],
       exerciseRequirement: formData['exerciseRequirement'],
       socializationNeed: formData['socializationNeed'],

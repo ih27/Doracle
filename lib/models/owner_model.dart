@@ -7,7 +7,7 @@ class Owner implements Entity {
   final String gender;
   final String? birthdate;
   final String? birthtime;
-  final String? location;
+  //final String? location;
   final String? livingSituation;
   final int activityLevel;
   final int interactionLevel;
@@ -23,7 +23,7 @@ class Owner implements Entity {
     required this.gender,
     this.birthdate,
     this.birthtime,
-    this.location,
+    //this.location,
     this.livingSituation,
     required this.activityLevel,
     required this.interactionLevel,
@@ -41,7 +41,7 @@ class Owner implements Entity {
       'gender': gender,
       'birthdate': birthdate,
       'birthtime': birthtime,
-      'location': location,
+      //'location': location,
       'livingSituation': livingSituation,
       'activityLevel': activityLevel,
       'interactionLevel': interactionLevel,
@@ -60,7 +60,7 @@ class Owner implements Entity {
       gender: json['gender'],
       birthdate: json['birthdate'],
       birthtime: json['birthtime'],
-      location: json['location'],
+      //location: json['location'],
       livingSituation: json['livingSituation'],
       activityLevel: json['activityLevel'] as int,
       interactionLevel: json['interactionLevel'] as int,
@@ -91,8 +91,8 @@ class Owner implements Entity {
         return birthdate;
       case 'birthtime':
         return birthtime;
-      case 'location':
-        return location;
+      // case 'location':
+      //   return location;
       case 'livingSituation':
         return livingSituation;
       case 'activityLevel':

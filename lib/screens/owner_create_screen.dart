@@ -30,7 +30,7 @@ class CreateOwnerScreen extends StatelessWidget {
       birthtime: formData['birthtime'] != null
           ? formatTime(formData['birthtime'])
           : null,
-      location: formData['location'],
+      //location: formData['location'],
       livingSituation: formData['livingSituation'],
       activityLevel: formData['activityLevel'],
       interactionLevel: formData['interactionLevel'],

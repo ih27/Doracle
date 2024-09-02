@@ -7,7 +7,7 @@ class Pet implements Entity {
   final String species;
   final String? birthdate;
   final String? birthtime;
-  final String? location;
+  //final String? location;
   final List<String> temperament;
   final int exerciseRequirement;
   final int socializationNeed;
@@ -18,7 +18,7 @@ class Pet implements Entity {
     required this.species,
     this.birthdate,
     this.birthtime,
-    this.location,
+    //this.location,
     required this.temperament,
     required this.exerciseRequirement,
     required this.socializationNeed,
@@ -31,7 +31,7 @@ class Pet implements Entity {
       'species': species,
       'birthdate': birthdate,
       'birthtime': birthtime,
-      'location': location,
+      //'location': location,
       'temperament': temperament,
       'exerciseRequirement': exerciseRequirement,
       'socializationNeed': socializationNeed,
@@ -45,7 +45,7 @@ class Pet implements Entity {
       species: json['species'],
       birthdate: json['birthdate'],
       birthtime: json['birthtime'],
-      location: json['location'],
+      //location: json['location'],
       temperament: List<String>.from(json['temperament'] ?? []),
       exerciseRequirement: json['exerciseRequirement'] as int,
       socializationNeed: json['socializationNeed'] as int,
@@ -71,8 +71,8 @@ class Pet implements Entity {
         return birthdate;
       case 'birthtime':
         return birthtime;
-      case 'location':
-        return location;
+      // case 'location':
+      //   return location;
       case 'temperament':
         return temperament;
       case 'exerciseRequirement':

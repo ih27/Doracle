@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../widgets/custom_datepicker.dart';
 import '../widgets/custom_underline_textfield.dart';
-import '../widgets/map_overlay.dart';
 import '../widgets/sendable_textfield.dart';
 import '../config/theme.dart';
 import '../helpers/constants.dart';
@@ -16,7 +14,7 @@ class PetForm extends StatefulWidget {
   final String? initialSpecies;
   final DateTime? initialBirthdate;
   final TimeOfDay? initialBirthtime;
-  final String? initialLocation;
+  //final String? initialLocation;
   final List<String> initialTemperament;
   final int initialExerciseRequirement;
   final int initialSocializationNeed;
@@ -31,7 +29,7 @@ class PetForm extends StatefulWidget {
     this.initialSpecies,
     this.initialBirthdate,
     this.initialBirthtime,
-    this.initialLocation,
+    //this.initialLocation,
     this.initialTemperament = const [],
     this.initialExerciseRequirement = 2,
     this.initialSocializationNeed = 2,
@@ -49,12 +47,12 @@ class _PetFormState extends State<PetForm> {
   late TextEditingController _nameController;
   late TextEditingController _birthdateController;
   late TextEditingController _birthtimeController;
-  late TextEditingController _locationController;
+  //late TextEditingController _locationController;
 
   String? _species;
   DateTime? _birthdate;
   TimeOfDay? _birthtime;
-  String? _location;
+  //String? _location;
   late List<String> _temperament;
   late int _exerciseRequirement;
   late int _socializationNeed;
@@ -77,12 +75,12 @@ class _PetFormState extends State<PetForm> {
           ? formatTime(widget.initialBirthtime!)
           : '',
     );
-    _locationController = TextEditingController(text: widget.initialLocation);
+    //_locationController = TextEditingController(text: widget.initialLocation);
 
     _species = widget.initialSpecies;
     _birthdate = widget.initialBirthdate;
     _birthtime = widget.initialBirthtime;
-    _location = widget.initialLocation;
+    //_location = widget.initialLocation;
     _temperament = List.from(widget.initialTemperament);
     _exerciseRequirement = widget.initialExerciseRequirement;
     _socializationNeed = widget.initialSocializationNeed;
@@ -93,25 +91,25 @@ class _PetFormState extends State<PetForm> {
     _nameController.dispose();
     _birthdateController.dispose();
     _birthtimeController.dispose();
-    _locationController.dispose();
+    //_locationController.dispose();
     super.dispose();
   }
 
-  void _showMapOverlay() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return MapOverlay(
-          onLocationSelected: (LatLng location, String address) {
-            setState(() {
-              _location = address;
-              _locationController.text = _location!;
-            });
-          },
-        );
-      },
-    );
-  }
+  // void _showMapOverlay() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return MapOverlay(
+  //         onLocationSelected: (LatLng location, String address) {
+  //           setState(() {
+  //             _location = address;
+  //             _locationController.text = _location!;
+  //           });
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -142,8 +140,8 @@ class _PetFormState extends State<PetForm> {
             const SizedBox(height: 8),
             _buildBirthtimeSection(),
             const SizedBox(height: 8),
-            _buildLocationSection(),
-            const SizedBox(height: 8),
+            // _buildLocationSection(),
+            // const SizedBox(height: 8),
             const Divider(
               thickness: 2,
               color: AppTheme.primaryColor,
@@ -329,69 +327,69 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
-  Widget _buildLocationSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.alternateColor,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              'Place of Birth',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontSize: 18,
-                    letterSpacing: 0,
-                  ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: CustomUnderlineTextField(
-                    controller: _locationController,
-                    readOnly: true,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _showMapOverlay,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor:
-                        Theme.of(context).textTheme.titleSmall?.color,
-                    backgroundColor: AppTheme.primaryColor,
-                    minimumSize:
-                        Size(MediaQuery.of(context).size.width * 0.3, 40),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Select',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppTheme.info,
-                          letterSpacing: 0,
-                        ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildLocationSection() {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       color: AppTheme.secondaryBackground,
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(
+  //         color: AppTheme.alternateColor,
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.all(8),
+  //           child: Text(
+  //             'Place of Birth',
+  //             style: Theme.of(context).textTheme.titleLarge?.copyWith(
+  //                   color: AppTheme.primaryColor,
+  //                   fontSize: 18,
+  //                   letterSpacing: 0,
+  //                 ),
+  //           ),
+  //         ),
+  //         Padding(
+  //           padding: const EdgeInsets.all(8),
+  //           child: Row(
+  //             children: [
+  //               Expanded(
+  //                 child: CustomUnderlineTextField(
+  //                   controller: _locationController,
+  //                   readOnly: true,
+  //                 ),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: _showMapOverlay,
+  //                 style: ElevatedButton.styleFrom(
+  //                   foregroundColor:
+  //                       Theme.of(context).textTheme.titleSmall?.color,
+  //                   backgroundColor: AppTheme.primaryColor,
+  //                   minimumSize:
+  //                       Size(MediaQuery.of(context).size.width * 0.3, 40),
+  //                   padding: const EdgeInsets.symmetric(horizontal: 24),
+  //                   elevation: 3,
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   'Select',
+  //                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
+  //                         color: AppTheme.info,
+  //                         letterSpacing: 0,
+  //                       ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildTemperamentSection() {
     return Container(
@@ -600,7 +598,7 @@ class _PetFormState extends State<PetForm> {
         'species': _species,
         'birthdate': _birthdate,
         'birthtime': _birthtime,
-        'location': _location,
+        //'location': _location,
         'temperament': _temperament,
         'exerciseRequirement': _exerciseRequirement,
         'socializationNeed': _socializationNeed,

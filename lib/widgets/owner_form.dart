@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import 'custom_datepicker.dart';
 import 'custom_timepicker.dart';
 import 'custom_underline_textfield.dart';
-import 'map_overlay.dart';
 import 'sendable_textfield.dart';
 import '../config/theme.dart';
 import '../helpers/constants.dart';
@@ -15,7 +13,7 @@ class OwnerForm extends StatefulWidget {
   final String? initialGender;
   final DateTime? initialBirthdate;
   final TimeOfDay? initialBirthtime;
-  final String? initialLocation;
+  //final String? initialLocation;
   final String? initialLivingSituation;
   final int initialActivityLevel;
   final int initialInteractionLevel;
@@ -35,7 +33,7 @@ class OwnerForm extends StatefulWidget {
     this.initialGender,
     this.initialBirthdate,
     this.initialBirthtime,
-    this.initialLocation,
+    //this.initialLocation,
     this.initialLivingSituation,
     this.initialActivityLevel = 2,
     this.initialInteractionLevel = 2,
@@ -58,12 +56,12 @@ class _OwnerFormState extends State<OwnerForm> {
   late TextEditingController _nameController;
   late TextEditingController _birthdateController;
   late TextEditingController _birthtimeController;
-  late TextEditingController _locationController;
+  //late TextEditingController _locationController;
 
   String? _gender;
   DateTime? _birthdate;
   TimeOfDay? _birthtime;
-  String? _location;
+  //String? _location;
   String? _livingSituation;
   late int _activityLevel;
   late int _interactionLevel;
@@ -90,12 +88,12 @@ class _OwnerFormState extends State<OwnerForm> {
           ? formatTime(widget.initialBirthtime!)
           : '',
     );
-    _locationController = TextEditingController(text: widget.initialLocation);
+    //_locationController = TextEditingController(text: widget.initialLocation);
 
     _gender = widget.initialGender;
     _birthdate = widget.initialBirthdate;
     _birthtime = widget.initialBirthtime;
-    _location = widget.initialLocation;
+    //_location = widget.initialLocation;
     _livingSituation = widget.initialLivingSituation;
     _activityLevel = widget.initialActivityLevel;
     _interactionLevel = widget.initialInteractionLevel;
@@ -111,25 +109,25 @@ class _OwnerFormState extends State<OwnerForm> {
     _nameController.dispose();
     _birthdateController.dispose();
     _birthtimeController.dispose();
-    _locationController.dispose();
+    //_locationController.dispose();
     super.dispose();
   }
 
-  void _showMapOverlay() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return MapOverlay(
-          onLocationSelected: (LatLng location, String address) {
-            setState(() {
-              _location = address;
-              _locationController.text = _location!;
-            });
-          },
-        );
-      },
-    );
-  }
+  // void _showMapOverlay() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return MapOverlay(
+  //         onLocationSelected: (LatLng location, String address) {
+  //           setState(() {
+  //             _location = address;
+  //             _locationController.text = _location!;
+  //           });
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +158,8 @@ class _OwnerFormState extends State<OwnerForm> {
             const SizedBox(height: 8),
             _buildBirthtimeSection(),
             const SizedBox(height: 8),
-            _buildLocationSection(),
-            const SizedBox(height: 8),
+            // _buildLocationSection(),
+            // const SizedBox(height: 8),
             const Divider(
               thickness: 2,
               color: AppTheme.primaryColor,
@@ -412,69 +410,69 @@ class _OwnerFormState extends State<OwnerForm> {
     );
   }
 
-  Widget _buildLocationSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.alternateColor,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              'Location',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontSize: 18,
-                    letterSpacing: 0,
-                  ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: CustomUnderlineTextField(
-                    controller: _locationController,
-                    readOnly: true,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _showMapOverlay,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor:
-                        Theme.of(context).textTheme.titleSmall?.color,
-                    backgroundColor: AppTheme.primaryColor,
-                    minimumSize:
-                        Size(MediaQuery.of(context).size.width * 0.3, 40),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Select',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppTheme.info,
-                          letterSpacing: 0,
-                        ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildLocationSection() {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       color: AppTheme.secondaryBackground,
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(
+  //         color: AppTheme.alternateColor,
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.all(8),
+  //           child: Text(
+  //             'Location',
+  //             style: Theme.of(context).textTheme.titleLarge?.copyWith(
+  //                   color: AppTheme.primaryColor,
+  //                   fontSize: 18,
+  //                   letterSpacing: 0,
+  //                 ),
+  //           ),
+  //         ),
+  //         Padding(
+  //           padding: const EdgeInsets.all(8),
+  //           child: Row(
+  //             children: [
+  //               Expanded(
+  //                 child: CustomUnderlineTextField(
+  //                   controller: _locationController,
+  //                   readOnly: true,
+  //                 ),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: _showMapOverlay,
+  //                 style: ElevatedButton.styleFrom(
+  //                   foregroundColor:
+  //                       Theme.of(context).textTheme.titleSmall?.color,
+  //                   backgroundColor: AppTheme.primaryColor,
+  //                   minimumSize:
+  //                       Size(MediaQuery.of(context).size.width * 0.3, 40),
+  //                   padding: const EdgeInsets.symmetric(horizontal: 24),
+  //                   elevation: 3,
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   'Select',
+  //                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
+  //                         color: AppTheme.info,
+  //                         letterSpacing: 0,
+  //                       ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSingleSelectSection({
     required String label,
@@ -667,7 +665,7 @@ class _OwnerFormState extends State<OwnerForm> {
         'gender': _gender,
         'birthdate': _birthdate,
         'birthtime': _birthtime,
-        'location': _location,
+        //'location': _location,
         'livingSituation': _livingSituation,
         'activityLevel': _activityLevel,
         'interactionLevel': _interactionLevel,

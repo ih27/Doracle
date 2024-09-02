@@ -19,7 +19,7 @@ class UpdateOwnerScreen extends StatelessWidget {
           owner.birthdate != null ? parseDateString(owner.birthdate!) : null,
       initialBirthtime:
           owner.birthtime != null ? parseTimeString(owner.birthtime!) : null,
-      initialLocation: owner.location,
+      //initialLocation: owner.location,
       initialLivingSituation: owner.livingSituation,
       initialActivityLevel: owner.activityLevel,
       initialInteractionLevel: owner.interactionLevel,
@@ -44,7 +44,7 @@ class UpdateOwnerScreen extends StatelessWidget {
       birthtime: formData['birthtime'] != null
           ? formatTime(formData['birthtime'])
           : null,
-      location: formData['location'],
+      //location: formData['location'],
       livingSituation: formData['livingSituation'],
       activityLevel: formData['activityLevel'],
       interactionLevel: formData['interactionLevel'],
