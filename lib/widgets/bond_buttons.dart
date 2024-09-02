@@ -50,7 +50,7 @@ class BondButtons extends StatelessWidget {
           ),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
-            height: MediaQuery.sizeOf(context).height * 0.14,
+            height: MediaQuery.sizeOf(context).height * 0.09,
           ),
           _buildIntroLine(context),
           _buildCompatibilityButton(
