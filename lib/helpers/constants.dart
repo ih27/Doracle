@@ -64,6 +64,13 @@ class CompatibilityTexts {
 
   static const ownerNameError = 'Please enter a name';
   static const ownerGenderError = 'Please select a gender';
+  static const ownerBirthdateError = 'Please select a birth date';
+  static const ownerBirthtimeError = 'Please select a birth time';
+  static const ownerLivingSituationError = 'Please select a living situation';
+  static const ownerWorkScheduleError = 'Please select a work schedule';
+  static const ownerPetExperienceError = 'Please select your pet experience';
+  static const ownerPetReasonError = 'Please select a reason for having a pet';
+
   static const requiredFieldsError = 'Please fill in all required fields.';
 
   static const ownerLivingSituationLabel = 'Living Situation';

@@ -17,7 +17,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final PetManager _petManager = getIt<PetManager>();
   final OwnerManager _ownerManager = getIt<OwnerManager>();
-  final DailyHoroscopeService _horoscopeService = getIt<DailyHoroscopeService>();
+  final DailyHoroscopeService _horoscopeService =
+      getIt<DailyHoroscopeService>();
   late Future<void> _dataLoadingFuture;
 
   @override
@@ -77,19 +78,25 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               dayName,
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: AppTheme.primaryColor,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineLarge
+                                  ?.copyWith(
+                                    color: AppTheme.primaryColor,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                             ),
                             Text(
                               date,
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: AppTheme.primaryColor,
-                                fontSize: 18,
-                                fontWeight: FontWeight.normal,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineLarge
+                                  ?.copyWith(
+                                    color: AppTheme.primaryColor,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.normal,
+                                  ),
                             ),
                           ],
                         ),
@@ -119,13 +126,20 @@ class _HomeScreenState extends State<HomeScreen> {
       interactionLevel: 2,
       groomingCommitment: 2,
       noiseTolerance: 2,
+      birthdate: '01/01/1970',
+      birthtime: '13:13',
+      livingSituation: 'Other',
+      workSchedule: 'Full-time away',
+      petExperience: 'First-time',
+      petReason: 'Other',
     );
     return _buildOwnerSection(currentUser);
   }
 
   Widget _buildOwnerSection(Owner owner) {
     return FutureBuilder<String>(
-      future: _horoscopeService.getHoroscopeForOwner(owner, _petManager.entities),
+      future:
+          _horoscopeService.getHoroscopeForOwner(owner, _petManager.entities),
       builder: (context, snapshot) {
         final horoscope = snapshot.data ?? 'Loading daily vibe...';
         return Column(
@@ -154,16 +168,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'You',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppTheme.primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               horoscope,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppTheme.primaryColor,
-              ),
+                    color: AppTheme.primaryColor,
+                  ),
             ),
           ],
         );
@@ -205,9 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   pet.name,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -215,8 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               horoscope,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppTheme.primaryColor,
-              ),
+                    color: AppTheme.primaryColor,
+                  ),
             ),
           ],
         );

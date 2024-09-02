@@ -5,33 +5,33 @@ class Owner implements Entity {
   final String id;
   final String name;
   final String gender;
-  final String? birthdate;
-  final String? birthtime;
+  final String birthdate;
+  final String birthtime;
   //final String? location;
-  final String? livingSituation;
+  final String livingSituation;
   final int activityLevel;
   final int interactionLevel;
-  final String? workSchedule;
-  final String? petExperience;
+  final String workSchedule;
+  final String petExperience;
   final int groomingCommitment;
   final int noiseTolerance;
-  final String? petReason;
+  final String petReason;
 
   Owner({
     required this.id,
     required this.name,
     required this.gender,
-    this.birthdate,
-    this.birthtime,
+    required this.birthdate,
+    required this.birthtime,
     //this.location,
-    this.livingSituation,
+    required this.livingSituation,
     required this.activityLevel,
     required this.interactionLevel,
-    this.workSchedule,
-    this.petExperience,
+    required this.workSchedule,
+    required this.petExperience,
     required this.groomingCommitment,
     required this.noiseTolerance,
-    this.petReason,
+    required this.petReason,
   });
 
   Map<String, dynamic> toJson() {

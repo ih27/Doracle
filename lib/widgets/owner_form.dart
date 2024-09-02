@@ -73,6 +73,12 @@ class _OwnerFormState extends State<OwnerForm> {
 
   String? _nameError;
   String? _genderError;
+  String? _birthdateError;
+  String? _birthtimeError;
+  String? _livingSituationError;
+  String? _workScheduleError;
+  String? _petExperienceError;
+  String? _petReasonError;
 
   @override
   void initState() {
@@ -172,9 +178,11 @@ class _OwnerFormState extends State<OwnerForm> {
               onChanged: (String? newValue) {
                 setState(() {
                   _livingSituation = newValue;
+                  _livingSituationError = null;
                 });
               },
               context: context,
+              errorText: _livingSituationError,
             ),
             const SizedBox(height: 8),
             _buildSliderSection(
@@ -202,9 +210,11 @@ class _OwnerFormState extends State<OwnerForm> {
               onChanged: (String? newValue) {
                 setState(() {
                   _workSchedule = newValue;
+                  _workScheduleError = null;
                 });
               },
               context: context,
+              errorText: _workScheduleError,
             ),
             const SizedBox(height: 8),
             _buildSingleSelectSection(
@@ -214,9 +224,11 @@ class _OwnerFormState extends State<OwnerForm> {
               onChanged: (String? newValue) {
                 setState(() {
                   _petExperience = newValue;
+                  _petExperienceError = null;
                 });
               },
               context: context,
+              errorText: _petExperienceError,
             ),
             const SizedBox(height: 8),
             _buildSliderSection(
@@ -244,9 +256,11 @@ class _OwnerFormState extends State<OwnerForm> {
               onChanged: (String? newValue) {
                 setState(() {
                   _petReason = newValue;
+                  _petReasonError = null;
                 });
               },
               context: context,
+              errorText: _petReasonError,
             ),
             const SizedBox(height: 8),
             _buildFormButtons(widget.deleteAvailable),
@@ -348,12 +362,21 @@ class _OwnerFormState extends State<OwnerForm> {
                     setState(() {
                       _birthdate = date;
                       _birthdateController.text = formatDate(date);
+                      _birthdateError = null;
                     });
                   },
                 ),
               ],
             ),
           ),
+          if (_birthdateError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8),
+              child: Text(
+                _birthdateError!,
+                style: const TextStyle(color: AppTheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -399,12 +422,21 @@ class _OwnerFormState extends State<OwnerForm> {
                     setState(() {
                       _birthtime = time;
                       _birthtimeController.text = formatTime(time);
+                      _birthtimeError = null;
                     });
                   },
                 ),
               ],
             ),
           ),
+          if (_birthtimeError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8),
+              child: Text(
+                _birthtimeError!,
+                style: const TextStyle(color: AppTheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -480,6 +512,7 @@ class _OwnerFormState extends State<OwnerForm> {
     required String? selectedValue,
     required Function(String?) onChanged,
     required BuildContext context,
+    String? errorText,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -519,6 +552,14 @@ class _OwnerFormState extends State<OwnerForm> {
               ],
             ),
           ),
+          if (errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8),
+              child: Text(
+                errorText,
+                style: const TextStyle(color: AppTheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );
@@ -693,6 +734,49 @@ class _OwnerFormState extends State<OwnerForm> {
     if (_gender == null) {
       setState(() {
         _genderError = CompatibilityTexts.ownerGenderError;
+      });
+      isValid = false;
+    }
+
+    // New checks
+    if (_birthdate == null) {
+      setState(() {
+        _birthdateError = CompatibilityTexts.ownerBirthdateError;
+      });
+      isValid = false;
+    }
+
+    if (_birthtime == null) {
+      setState(() {
+        _birthtimeError = CompatibilityTexts.ownerBirthtimeError;
+      });
+      isValid = false;
+    }
+
+    if (_livingSituation == null) {
+      setState(() {
+        _livingSituationError = CompatibilityTexts.ownerLivingSituationError;
+      });
+      isValid = false;
+    }
+
+    if (_workSchedule == null) {
+      setState(() {
+        _workScheduleError = CompatibilityTexts.ownerWorkScheduleError;
+      });
+      isValid = false;
+    }
+
+    if (_petExperience == null) {
+      setState(() {
+        _petExperienceError = CompatibilityTexts.ownerPetExperienceError;
+      });
+      isValid = false;
+    }
+
+    if (_petReason == null) {
+      setState(() {
+        _petReasonError = CompatibilityTexts.ownerPetReasonError;
       });
       isValid = false;
     }
