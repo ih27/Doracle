@@ -399,6 +399,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
               if (customNavigation != null) {
                 customNavigation(context);
               } else {
+                _compatibilityDataRepository.markPlanAsOpened(planId);
                 navigateToCardDetail(context, cardId, planId);
               }
             }
@@ -503,11 +504,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardTitle = CompatibilityTexts.astrologyCardLoadingTitle;
       cardSubtitle = CompatibilityTexts.astrologyCardLoadingSubtitle;
     }
+
+    final locked = !_isEntitled && !_planWasOpenedBefore;
+
     return _buildCompatibilitySection(
       CompatibilityTexts.astrologyCardId,
       cardTitle,
       cardSubtitle,
       _getCompatibilityImage('01'),
+      locked: locked,
     );
   }
 
@@ -518,11 +523,15 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardTitle = CompatibilityTexts.recommendationCardLoadingTitle;
       cardSubtitle = CompatibilityTexts.recommendationCardLoadingSubtitle;
     }
+
+    final locked = !_isEntitled && !_planWasOpenedBefore;
+
     return _buildCompatibilitySection(
       CompatibilityTexts.recommendationCardId,
       cardTitle,
       cardSubtitle,
       _getCompatibilityImage('02'),
+      locked: locked,
     );
   }
 
