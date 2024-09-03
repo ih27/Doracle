@@ -44,10 +44,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     });
   }
 
-  void _navigateToImprovementPlan(String planId) async {
-    final canAccess =
-        Provider.of<EntitlementProvider>(context, listen: false).isEntitled ||
-            await _repository.planWasOpened(planId);
+  void _navigateToImprovementPlan(
+      EntitlementProvider entitlementProvider, String planId) async {
+    final canAccess = entitlementProvider.isEntitled ||
+        await _repository.planWasOpened(planId);
 
     if (mounted) {
       if (canAccess) {
@@ -101,7 +101,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                     const SizedBox(height: 16),
                     _improvementPlans.isEmpty
                         ? _buildEmptyState()
-                        : _buildImprovementPlansList(),
+                        : _buildImprovementPlansList(entitlementProvider),
                   ],
                 ),
               ),
@@ -125,7 +125,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     );
   }
 
-  Widget _buildImprovementPlansList() {
+  Widget _buildImprovementPlansList(EntitlementProvider entitlementProvider) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -133,12 +133,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       itemBuilder: (context, index) {
         String planId = _improvementPlans.keys.elementAt(index);
         Map<String, dynamic> planData = _improvementPlans[planId]!;
-        return _buildImprovementPlanCard(planId, planData);
+        return _buildImprovementPlanCard(entitlementProvider, planId, planData);
       },
     );
   }
 
-  Widget _buildImprovementPlanCard(
+  Widget _buildImprovementPlanCard(EntitlementProvider entitlementProvider,
       String planId, Map<String, dynamic> planData) {
     dynamic entity1 = planData['entity1'];
     dynamic entity2 = planData['entity2'];
@@ -148,12 +148,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       future: _repository.planWasOpened(planId),
       builder: (context, snapshot) {
         bool canAccess =
-            Provider.of<EntitlementProvider>(context, listen: false)
-                    .isEntitled ||
-                (snapshot.data ?? false);
+            entitlementProvider.isEntitled || (snapshot.data ?? false);
 
         return GestureDetector(
-          onTap: () => _navigateToImprovementPlan(planId),
+          onTap: () => _navigateToImprovementPlan(entitlementProvider, planId),
           child: Card(
             margin: const EdgeInsets.only(bottom: 16),
             shape: RoundedRectangleBorder(

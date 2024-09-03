@@ -1,16 +1,33 @@
 import 'package:flutter/foundation.dart';
+import '../providers/entitlement_provider.dart';
 import 'haptic_service.dart';
 import '../config/dependency_injection.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
-import 'revenuecat_service.dart';
 
 class UserService extends ValueNotifier<AppUser?> {
   final UserRepository _userRepository;
   final HapticService _hapticService = getIt<HapticService>();
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  final EntitlementProvider _entitlementProvider = getIt<EntitlementProvider>();
 
-  UserService(this._userRepository) : super(null);
+  UserService(this._userRepository) : super(null) {
+    _entitlementProvider.addListener(_onEntitlementChanged);
+  }
+
+  bool get isEntitled => _entitlementProvider.isEntitled;
+
+  void _onEntitlementChanged() {
+    if (value != null) {
+      value!.isEntitled = isEntitled;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _entitlementProvider.removeListener(_onEntitlementChanged);
+    super.dispose();
+  }
 
   Future<void> loadCurrentUser(String userId) async {
     final userData = await _userRepository.getUser(userId);
@@ -56,7 +73,7 @@ class UserService extends ValueNotifier<AppUser?> {
         'persona': persona,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
-      if (!_purchaseService.isEntitled) {
+      if (!isEntitled) {
         value!.remainingQuestionsCount--;
       }
       await _userRepository.updateUser(value!.id, value!.toMap());
