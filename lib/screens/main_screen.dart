@@ -125,12 +125,6 @@ class _MainScreenState extends State<MainScreen> {
           _buildNavigator(2, BondButtons(onNavigate: _navigateTo)),
           _buildNavigator(3, const AssessmentScreen()),
         ],
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index;
-            _currentTitle = _getTitleForIndex(index);
-          });
-        },
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(bottom: 8, top: 1),
@@ -156,7 +150,12 @@ class _MainScreenState extends State<MainScreen> {
         }
         return _appRouter.onGenerateRoute(settings);
       },
-      observers: [_appRouter.observer],
+      observers: [
+        _MainScreenNavigatorObserver(
+          updateCanPop: _updateCanPop,
+          updateTitle: _updateTitle,
+        ),
+      ],
     );
   }
 
