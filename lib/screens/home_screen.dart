@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:styled_divider/styled_divider.dart';
 import '../config/theme.dart';
 import '../entities/entity_manager.dart';
 import '../helpers/compatibility_utils.dart';
@@ -36,9 +37,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onPetManagerUpdate() {
     if (mounted) {
-      setState(() {
-        // This will trigger a rebuild of the pet sections
-      });
+      setState(() {});
+    }
+  }
+
+  Future<void> _addNewPet() async {
+    final result = await Navigator.pushNamed(context, '/pet/create');
+    if (result != null && result is Pet) {
+      await _petManager.addEntity(result);
     }
   }
 
@@ -61,58 +67,51 @@ class _HomeScreenState extends State<HomeScreen> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          return Stack(
-            alignment: AlignmentDirectional.center,
-            children: [
-              Align(
-                alignment: AlignmentDirectional.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              dayName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                    color: AppTheme.primaryColor,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                            ),
-                            Text(
-                              date,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                    color: AppTheme.primaryColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        _buildCurrentUserSection(),
-                        const SizedBox(height: 10),
-                        ..._petManager.entities.map(_buildPetSection),
-                      ],
-                    ),
-                  ),
-                ),
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(dayName, date),
+                  const SizedBox(height: 10),
+                  _buildCurrentUserSection(),
+                  const SizedBox(height: 10),
+                  _buildAddPetSection(),
+                  const SizedBox(height: 10),
+                  ..._petManager.entities.map(_buildPetSection),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                ],
               ),
-            ],
+            ),
           );
         }
       },
+    );
+  }
+
+  Widget _buildHeader(String dayName, String date) {
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            dayName,
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
+          ),
+          Text(
+            date,
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -137,104 +136,398 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildOwnerSection(Owner owner) {
-    return FutureBuilder<String>(
-      future:
-          _horoscopeService.getHoroscopeForOwner(owner, _petManager.entities),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _horoscopeService.getHoroscopeForOwner(owner),
       builder: (context, snapshot) {
-        final horoscope = snapshot.data ?? 'Loading daily vibe...';
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: AppTheme.alternateColor,
-                shape: BoxShape.circle,
-                border: Border.all(
+        final horoscope = snapshot.data ?? {};
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.primaryColor,
+              width: 2,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildOwnerHeader(owner),
+                const SizedBox(height: 10),
+                _buildDailyVibe(horoscope['dailyVibe']),
+                const StyledDivider(
+                  thickness: 2,
                   color: AppTheme.primaryColor,
-                  width: 5,
+                  lineStyle: DividerLineStyle.dashed,
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(75),
-                child: Image.asset(
-                  getEntityImage(owner),
-                  fit: BoxFit.cover,
-                ),
-              ),
+                const SizedBox(height: 5),
+                _buildHoroscopeSection(
+                    '💖 Relationships', horoscope['relationships']),
+                const SizedBox(height: 5),
+                _buildHoroscopeSection(
+                    '💼 Work & Productivity', horoscope['workAndProductivity']),
+                const SizedBox(height: 5),
+                _buildHoroscopeSection(
+                    '🏡 Home & Self-Care', horoscope['homeAndSelfCare']),
+                const SizedBox(height: 5),
+                _buildHoroscopeSection(
+                    '💪 Health & Wellness', horoscope['healthAndWellness']),
+                const SizedBox(height: 5),
+                _buildCosmicInsight(horoscope['cosmicInsight']),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              'You',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              horoscope,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.primaryColor,
-                  ),
-            ),
-          ],
+          ),
         );
       },
     );
   }
 
-  Widget _buildPetSection(Pet pet) {
-    return FutureBuilder<String>(
-      future: _horoscopeService.getHoroscopeForPet(pet),
-      builder: (context, snapshot) {
-        final horoscope = snapshot.data ?? 'Loading daily vibe...';
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppTheme.alternateColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppTheme.primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Image.asset(
-                      getEntityImage(pet),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Text(
-                  pet.name,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ],
+  Widget _buildOwnerHeader(Owner owner) {
+    return Row(
+      children: [
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: AppTheme.alternateColor,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppTheme.primaryColor,
+              width: 2,
             ),
-            const SizedBox(height: 8),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.asset(
+              getEntityImage(owner),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        const SizedBox(width: 15),
+        Text(
+          'You',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.secondaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDailyVibe(Map<String, dynamic>? dailyVibe) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Today\'s Vibe',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.secondaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        Text(
+          '${dailyVibe?['theme'] ?? ''} ${dailyVibe?['emoji'] ?? ''}',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.primaryColor,
+                fontSize: 16,
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHoroscopeSection(
+      String title, Map<String, dynamic>? sectionData) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.secondaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        if (sectionData != null) ...[
+          if (sectionData['morning'] != null)
+            _buildHoroscopeItem('Morning', sectionData['morning']),
+          if (sectionData['evening'] != null)
+            _buildHoroscopeItem('Evening', sectionData['evening']),
+          if (sectionData['keyAdvice'] != null)
+            _buildHoroscopeItem('Key Advice', sectionData['keyAdvice']),
+          if (sectionData['productivityTip'] != null)
+            _buildHoroscopeItem(
+                'Productivity Tip', sectionData['productivityTip']),
+          if (sectionData['homeTask'] != null)
+            _buildHoroscopeItem('Home Task', sectionData['homeTask']),
+          if (sectionData['selfCareActivity'] != null)
+            _buildHoroscopeItem(
+                'Self-Care Activity', sectionData['selfCareActivity']),
+          if (sectionData['nutritionAdvice'] != null)
+            _buildHoroscopeItem(
+                'Nutrition Advice', sectionData['nutritionAdvice']),
+          if (sectionData['exerciseOrWellnessSuggestion'] != null)
+            _buildHoroscopeItem('Exercise/Wellness Suggestion',
+                sectionData['exerciseOrWellnessSuggestion']),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHoroscopeItem(String time, String? content) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: '$time: ',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          TextSpan(
+            text: content ?? '',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 16,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCosmicInsight(String? cosmicInsight) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.yaleBlue,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Column(
+          children: [
             Text(
-              horoscope,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.primaryColor,
+              '🔮 Cosmic Insight',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.naplesYellow,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            Text(
+              cosmicInsight ?? '',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.primaryBackground,
+                    fontSize: 16,
                   ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddPetSection() {
+    return GestureDetector(
+      onTap: _addNewPet,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppTheme.primaryColor,
+            width: 2,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: AppTheme.alternateColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppTheme.primaryColor,
+                    width: 2,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.asset(
+                    'assets/images/plus.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+              Text(
+                'Add Your Pet',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.secondaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPetSection(Pet pet) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _horoscopeService.getHoroscopeForPet(pet),
+      builder: (context, snapshot) {
+        final horoscope = snapshot.data ?? {};
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.primaryColor,
+              width: 2,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPetHeader(pet),
+                const SizedBox(height: 10),
+                _buildDailyVibe(horoscope['dailyVibe']),
+                const StyledDivider(
+                  thickness: 2,
+                  color: AppTheme.primaryColor,
+                  lineStyle: DividerLineStyle.dashed,
+                ),
+                const SizedBox(height: 5),
+                _buildPetHoroscopeSection(
+                    '🦴 Playtime & Bonding', horoscope['playtimeAndBonding']),
+                const SizedBox(height: 5),
+                _buildPetHoroscopeSection(
+                    '🏠 Home Adventures', horoscope['homeAdventures']),
+                const SizedBox(height: 5),
+                _buildPetHoroscopeSection(
+                    '🍖 Treats & Naps', horoscope['treatsAndNaps']),
+                const SizedBox(height: 5),
+                _buildPetHoroscopeSection(
+                    '🐕 Walkies & Exercise', horoscope['walkiesAndExercise']),
+                const SizedBox(height: 5),
+                _buildPetHoroscopeSection(
+                    '🌟 Quick Boosters', horoscope['quickBoosters']),
+                const SizedBox(height: 5),
+                _buildCosmicInsight(horoscope['cosmicCanineWisdom']),
+                const SizedBox(height: 5),
+                if (horoscope['message'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      horoscope['message'],
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.primaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildPetHeader(Pet pet) {
+    return Row(
+      children: [
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: AppTheme.alternateColor,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppTheme.primaryColor,
+              width: 2,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.asset(
+              getEntityImage(pet),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        const SizedBox(width: 15),
+        Text(
+          pet.name,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.secondaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPetHoroscopeSection(String title, dynamic sectionData) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.secondaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        if (sectionData != null) ...[
+          if (sectionData is Map<String, dynamic>) ...[
+            if (sectionData['morning'] != null)
+              _buildHoroscopeItem('Morning', sectionData['morning']),
+            if (sectionData['evening'] != null)
+              _buildHoroscopeItem('Evening', sectionData['evening']),
+            if (sectionData['todaysSnack'] != null)
+              _buildHoroscopeItem('Today\'s Snack', sectionData['todaysSnack']),
+            if (sectionData['napSpot'] != null)
+              _buildHoroscopeItem('Nap Spot', sectionData['napSpot']),
+            if (title == '🌟 Quick Boosters') ...[
+              if (sectionData['luckyToy'] != null)
+                _buildHoroscopeItem('Lucky Toy', sectionData['luckyToy']),
+              if (sectionData['powerMove'] != null)
+                _buildHoroscopeItem('Power Move', sectionData['powerMove']),
+              if (sectionData['goodDeed'] != null)
+                _buildHoroscopeItem('Good Deed', sectionData['goodDeed']),
+            ],
+          ] else if (sectionData is List) ...[
+            for (var item in sectionData)
+              Text(
+                item,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontSize: 16,
+                    ),
+              ),
+          ],
+        ],
+      ],
     );
   }
 

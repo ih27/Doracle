@@ -5,7 +5,8 @@ enum PromptType {
   tenDayPlan,
   astrologicalCompatibility,
   personalizedRecommendations,
-  dailyHoroscope,
+  dailyPetHoroscope,
+  dailyOwnerHoroscope,
 }
 
 enum EntityCombination {
@@ -13,6 +14,7 @@ enum EntityCombination {
   petPet,
   ownerPets,
   singlePet,
+  singleOwner,
 }
 
 class AIPromptGenerationService {
@@ -39,6 +41,9 @@ class AIPromptGenerationService {
     }
     if (pet != null) {
       return EntityCombination.singlePet;
+    }
+    if (owner != null) {
+      return EntityCombination.singleOwner;
     }
     throw ArgumentError('Invalid entity combination');
   }
@@ -69,19 +74,10 @@ $specificInstructions
         return "Generate an astrological compatibility analysis for ${combination == EntityCombination.petOwner ? 'a pet and their owner' : 'two pets'}, divided into four specific categories in json.";
       case PromptType.personalizedRecommendations:
         return "Generate fun and practical ${combination == EntityCombination.petOwner ? 'pet care recommendations for a pet and their owner' : 'pet-to-pet compatibility recommendations'} in json.";
-      case PromptType.dailyHoroscope:
-        return "Generate a concise daily horoscope paragraph for ${_getDailyHoroscopeSubject(combination)} in json.";
-    }
-  }
-
-  String _getDailyHoroscopeSubject(EntityCombination combination) {
-    switch (combination) {
-      case EntityCombination.ownerPets:
-        return 'a pet owner and their pet(s)';
-      case EntityCombination.singlePet:
-        return 'a pet';
-      default:
-        return 'the specified entities';
+      case PromptType.dailyPetHoroscope:
+        return "Generate a fun and engaging daily horoscope for a pet in JSON format.";
+      case PromptType.dailyOwnerHoroscope:
+        return "Generate a concise daily horoscope for a zodiac sign in JSON format.";
     }
   }
 
@@ -112,6 +108,8 @@ ${pets!.map((p) => _getPetInfo(p, isShort: true)).join('\n')}
 ''';
       case EntityCombination.singlePet:
         return _getPetInfo(pet!);
+      case EntityCombination.singleOwner:
+        return _getOwnerInfo(owner!);
     }
   }
 
@@ -158,8 +156,10 @@ ${isPetB ? 'Pet B' : 'Pet'} Information:
         return _getAstrologyInstructions(combination);
       case PromptType.personalizedRecommendations:
         return _getRecommendationsInstructions(combination);
-      case PromptType.dailyHoroscope:
-        return _getDailyHoroscopeInstructions(combination);
+      case PromptType.dailyPetHoroscope:
+        return _getPetHoroscopeInstructions(combination);
+      case PromptType.dailyOwnerHoroscope:
+        return _getOwnerHoroscopeInstructions(combination);
     }
   }
 
@@ -301,21 +301,95 @@ Preface the recommendations with a brief, one-sentence introduction that sets a 
 ''';
   }
 
-  String _getDailyHoroscopeInstructions(EntityCombination combination) {
+  String _getPetHoroscopeInstructions(EntityCombination combination) {
     return '''
-Based on the zodiac signs and information provided, create a concise daily horoscope paragraph ${combination == EntityCombination.ownerPets ? 'for the owner and their pets' : 'for the pet'}. Include the following elements:
+Generate a fun and engaging daily horoscope for pets in the following JSON format:
 
-1. General mood and energy for the day
-2. Potential challenges or opportunities
-3. Advice for harmonious interactions ${combination == EntityCombination.ownerPets ? 'between the owner and pets' : 'with humans or other animals'}
-4. A practical tip for well-being
-
-Provide the response in the following JSON format:
 {
-  "horoscope": "Your concise horoscope paragraph here."
+  "petName": "[PET_NAME]",
+  "petSpecies": "[PET_SPECIES]",
+  "dailyVibe": {
+    "theme": "[THEME_OF_THE_DAY]",
+    "emoji": "[EMOJI]"
+  },
+  "playtimeAndBonding": {
+    "morning": "[BRIEF_MORNING_ACTIVITY]",
+    "evening": "[BRIEF_EVENING_ACTIVITY]"
+  },
+  "homeAdventures": [
+    "[FUN_HOME_ACTIVITY_1]",
+    "[FUN_HOME_ACTIVITY_2]"
+  ],
+  "treatsAndNaps": {
+    "todaysSnack": "[TREAT_SUGGESTION]",
+    "napSpot": "[NAP_LOCATION_IDEA]"
+  },
+  "walkiesAndExercise": [
+    "[OUTDOOR_ACTIVITY_SUGGESTION]",
+    "[SIMPLE_EXERCISE_IDEA]"
+  ],
+  "cosmicCanineWisdom": "[SHORT_INSPIRATIONAL_QUOTE_FOR_PETS]",
+  "quickBoosters": {
+    "luckyToy": "[SPECIFIC_TOY_SUGGESTION]",
+    "powerMove": "[CUTE_PET_BEHAVIOR]",
+    "goodDeed": "[KIND_ACTION_FOR_PETS]"
+  },
+  "message": "[0NE_SENTENCE_WITH_POSITIVE_VIBE]"
 }
 
-Keep the horoscope to a single paragraph of about 3-5 sentences. Use a friendly and encouraging tone, while still acknowledging potential challenges. Make the horoscope specific to ${combination == EntityCombination.ownerPets ? 'the dynamic between the owner and their pets' : 'the pet\'s needs and characteristics'}.
+Guidelines for generation:
+1. Adjust [PET_SPECIES] to match the target pet type (dog, cat, bird, fish).
+2. Keep the language simple, playful, and pet-oriented.
+3. Ensure all suggested activities are safe and appropriate for pets.
+4. Vary the content daily while maintaining a consistent structure.
+5. Include a mix of indoor and outdoor activities.
+6. Add subtle reminders for pet care when possible.
+7. Use pet-related emojis sparingly to enhance readability.
+8. Limit the entire horoscope to around 150-200 words when combined.
+9. Ensure the overall tone is positive, fun, and engaging for pet owners.
+10. Use proper JSON formatting, ensuring all strings are properly escaped.
+11. Replace [PLACEHOLDERS] with appropriate content tailored to different pet types and personalities.
+12. [0NE_SENTENCE_WITH_POSITIVE_VIBE] should include [PET_NAME] and some fun emoji(s).
+''';
+  }
+
+  String _getOwnerHoroscopeInstructions(EntityCombination combination) {
+    return '''
+Generate a concise daily horoscope for [ZODIAC_SIGN] in the following JSON format:
+
+{
+  "zodiacSign": "[ZODIAC_SIGN]",
+  "dailyVibe": {
+    "theme": "[THEME_OF_THE_DAY]",
+    "emoji": "[EMOJI]"
+  },
+  "relationships": {
+    "morning": "[BRIEF_MORNING_ADVICE]",
+    "evening": "[BRIEF_EVENING_ADVICE]"
+  },
+  "workAndProductivity": {
+    "keyAdvice": "[KEY_WORK_ADVICE]",
+    "productivityTip": "[PRODUCTIVITY_TIP]"
+  },
+  "homeAndSelfCare": {
+    "homeTask": "[HOME_TASK]",
+    "selfCareActivity": "[SELF_CARE_ACTIVITY]"
+  },
+  "healthAndWellness": {
+    "nutritionAdvice": "[NUTRITION_ADVICE]",
+    "exerciseOrWellnessSuggestion": "[EXERCISE_OR_WELLNESS_SUGGESTION]"
+  },
+  "cosmicInsight": "[SHORT_INSPIRATIONAL_QUOTE]"
+}
+
+Guidelines:
+1. Keep each point brief and actionable.
+2. Tailor advice to [ZODIAC_SIGN]'s typical traits and current astrological influences.
+3. Ensure the overall tone is positive and empowering.
+4. Vary content daily while maintaining relevance to the zodiac sign.
+5. Limit the entire horoscope to around 100-150 words when combined.
+6. Use proper JSON formatting, ensuring all strings are properly escaped.
+7. Replace [PLACEHOLDERS] with appropriate content for the specific zodiac sign and day.
 ''';
   }
 

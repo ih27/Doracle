@@ -10,8 +10,8 @@ class FirestoreService {
   static final Map<String, List<String>> _questionsCache = {};
   static final Map<String, String> _personasCache = {};
   static String? _lastUsedPersona;
-  static const int _maxRetries = 3;
-  static const Duration _retryDelay = Duration(seconds: 1);
+  // static const int _maxRetries = 3;
+  // static const Duration _retryDelay = Duration(seconds: 1);
   static const int defaultStartingCount = 1;
 
   static const String _questionsKey = 'cached_questions';
@@ -155,30 +155,30 @@ class FirestoreService {
     return {};
   }
 
-  static Future<Map<String, String>> _fetchPersonas() async {
-    if (_personasCache.isNotEmpty) {
-      return _personasCache;
-    }
+  // static Future<Map<String, String>> _fetchPersonas() async {
+  //   if (_personasCache.isNotEmpty) {
+  //     return _personasCache;
+  //   }
 
-    for (int attempt = 0; attempt < _maxRetries; attempt++) {
-      try {
-        final snapshot = await _firestore.collection('personas').get();
-        for (var doc in snapshot.docs) {
-          _personasCache[doc.id] = doc['instructions'] as String;
-        }
-        if (_personasCache.isNotEmpty) {
-          return _personasCache;
-        }
-        return {};
-      } catch (e) {
-        if (attempt == _maxRetries - 1) {
-          return _getDefaultPersonas();
-        }
-        await Future.delayed(_retryDelay);
-      }
-    }
-    return _personasCache;
-  }
+  //   for (int attempt = 0; attempt < _maxRetries; attempt++) {
+  //     try {
+  //       final snapshot = await _firestore.collection('personas').get();
+  //       for (var doc in snapshot.docs) {
+  //         _personasCache[doc.id] = doc['instructions'] as String;
+  //       }
+  //       if (_personasCache.isNotEmpty) {
+  //         return _personasCache;
+  //       }
+  //       return {};
+  //     } catch (e) {
+  //       if (attempt == _maxRetries - 1) {
+  //         return _getDefaultPersonas();
+  //       }
+  //       await Future.delayed(_retryDelay);
+  //     }
+  //   }
+  //   return _personasCache;
+  // }
 
   static Future<Map<String, String>> getRandomPersona() async {
     if (_personasCache.isEmpty) {
@@ -204,11 +204,11 @@ class FirestoreService {
     };
   }
 
-  static Map<String, String> _getDefaultPersonas() {
-    return {
-      'Default': DefaultPersona.instructions,
-    };
-  }
+  // static Map<String, String> _getDefaultPersonas() {
+  //   return {
+  //     'Default': DefaultPersona.instructions,
+  //   };
+  // }
 
   static Future<void> clearCache() async {
     try {

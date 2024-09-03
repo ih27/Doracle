@@ -43,6 +43,7 @@ dependencies:
   percent_indicator: ^4.2.3
   smooth_page_indicator: ^1.2.0+3
   flutter_animate: ^4.5.0
+  styled_divider: ^1.0.5
 
 dev_dependencies:
   flutter_lints: ^4.0.0
