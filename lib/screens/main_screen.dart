@@ -24,12 +24,8 @@ class _MainScreenState extends State<MainScreen> {
   String _currentTitle = CompatibilityTexts.homeTitle;
   late final AppRouter _appRouter;
   late final PageController _pageController;
-  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-  ];
+  final List<GlobalKey<NavigatorState>> _navigatorKeys =
+      List.generate(4, (_) => GlobalKey<NavigatorState>());
 
   @override
   void initState() {

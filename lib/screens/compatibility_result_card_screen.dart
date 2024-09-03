@@ -28,7 +28,9 @@ class _CompatibilityResultCardScreenState
   @override
   void initState() {
     super.initState();
-    _isExpanded = List.generate(4, (_) => false);
+    _isExpanded = List.generate(
+        widget.cardId == CompatibilityTexts.astrologyCardId ? 4 : 6,
+        (_) => false);
   }
 
   @override
@@ -39,7 +41,10 @@ class _CompatibilityResultCardScreenState
           : _loadRecommendationsData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
+          return const Center(
+              child: CircularProgressIndicator(
+            color: AppTheme.primaryColor,
+          ));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
