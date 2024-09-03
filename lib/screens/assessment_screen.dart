@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
 import '../helpers/iap_utils.dart';
+import '../providers/entitlement_provider.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
-import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 
 class AssessmentScreen extends StatefulWidget {
@@ -18,18 +19,15 @@ class AssessmentScreen extends StatefulWidget {
 class _AssessmentScreenState extends State<AssessmentScreen> {
   final CompatibilityDataRepository _repository =
       getIt<CompatibilityDataRepository>();
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
   Map<String, Map<String, dynamic>> _improvementPlans = {};
   Map<String, String> _cachedPrices = {};
-  bool _isEntitled = false;
 
   @override
   void initState() {
     super.initState();
     _loadImprovementPlans();
     _fetchPricesIfNeeded();
-    _checkEntitlement();
   }
 
   Future<void> _loadImprovementPlans() async {
@@ -46,15 +44,11 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     });
   }
 
-  void _checkEntitlement() {
-    bool isEntitled = _purchaseService.isEntitled;
-    setState(() {
-      _isEntitled = isEntitled;
-    });
-  }
-
   void _navigateToImprovementPlan(String planId) async {
-    final canAccess = _isEntitled || await _repository.planWasOpened(planId);
+    final canAccess =
+        Provider.of<EntitlementProvider>(context, listen: false).isEntitled ||
+            await _repository.planWasOpened(planId);
+
     if (mounted) {
       if (canAccess) {
         navigateToImprovementPlan(context, planId);
@@ -73,9 +67,6 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     bool success = await IAPUtils.handlePurchase(context, subscriptionType);
     if (success) {
       await _userService.updateSubscriptionHistory(subscriptionType);
-      setState(() {
-        _isEntitled = true;
-      });
 
       // Mark the plan as opened and navigate to it
       await _repository.markPlanAsOpened(planId);
@@ -87,32 +78,37 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    'Assessment',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+    return Consumer<EntitlementProvider>(
+      builder: (context, entitlementProvider, child) {
+        return Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        'Assessment',
+                        style:
+                            Theme.of(context).textTheme.displayMedium?.copyWith(
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _improvementPlans.isEmpty
+                        ? _buildEmptyState()
+                        : _buildImprovementPlansList(),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                _improvementPlans.isEmpty
-                    ? _buildEmptyState()
-                    : _buildImprovementPlansList(),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -151,7 +147,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     return FutureBuilder<bool>(
       future: _repository.planWasOpened(planId),
       builder: (context, snapshot) {
-        bool canAccess = _isEntitled || (snapshot.data ?? false);
+        bool canAccess =
+            Provider.of<EntitlementProvider>(context, listen: false)
+                    .isEntitled ||
+                (snapshot.data ?? false);
 
         return GestureDetector(
           onTap: () => _navigateToImprovementPlan(planId),

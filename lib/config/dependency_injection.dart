@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../providers/entitlement_provider.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../repositories/daily_horoscope_repository.dart';
 import '../repositories/firestore_fortune_content_repository.dart';
@@ -81,4 +82,9 @@ void setupDependencies() {
     ),
   );
   getIt.registerLazySingleton<HapticService>(() => HapticService());
+
+  // Providers
+  getIt.registerLazySingleton<EntitlementProvider>(
+    () => EntitlementProvider(getIt<RevenueCatService>()),
+  );
 }

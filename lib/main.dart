@@ -6,12 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'config/notifications.dart';
 import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
 import 'config/theme.dart';
 import 'app_manager.dart';
 import 'global_key.dart';
+import 'providers/entitlement_provider.dart';
 import 'services/analytics_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
@@ -38,7 +40,12 @@ Future<void> main() async {
   await setupNotifications();
   setupDependencies();
   await _initializeApp();
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => getIt<EntitlementProvider>(),
+      child: const MyApp(),
+    ),
+  );
   cleanUpNotifications();
 }
 
