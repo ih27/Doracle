@@ -63,14 +63,14 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
     }
 
     return FutureBuilder<PlanData>(
       future: _planFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
         } else if (snapshot.hasError) {
           return const Center(child: Text('Some "ewwroar" occured :('));
         } else if (!snapshot.hasData) {

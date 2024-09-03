@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'config/dependency_injection.dart';
+import 'config/theme.dart';
 import 'entities/entity_manager.dart';
 import 'global_key.dart';
 import 'helpers/constants.dart';
@@ -60,21 +61,21 @@ class _AppManagerState extends State<AppManager> {
       stream: _authService.authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
         } else if (snapshot.hasData) {
           debugPrint('Auth userId: ${snapshot.data!.uid}');
           return FutureBuilder(
             future: _loadUser(snapshot.data!.uid),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
               } else {
                 return FutureBuilder<bool>(
                   future: _checkOwnerExists(),
                   builder: (context, ownerSnapshot) {
                     if (ownerSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
                     } else if (ownerSnapshot.data == true) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         navigatorKey.currentState?.pushAndRemoveUntil(
@@ -87,7 +88,7 @@ class _AppManagerState extends State<AppManager> {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _handleInitialOwnerCreation(context);
                       });
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
                     }
                   },
                 );

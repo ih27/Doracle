@@ -262,7 +262,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
     }
 
     return Scaffold(

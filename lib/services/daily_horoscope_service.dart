@@ -13,6 +13,12 @@ class DailyHoroscopeService {
   final DailyHoroscopeRepository _repository =
       getIt<DailyHoroscopeRepository>();
 
+  // METHOD FOR DENUGGING PURPOSES
+  Future<void> clearData() async {
+    await _repository.clearOwnerHoroscope();
+    await _repository.clearPetHoroscopes();
+  }
+
   Future<Map<String, dynamic>> getHoroscopeForPet(Pet pet) async {
     if (await _repository.isPetHoroscopeStale()) {
       await _repository.clearPetHoroscopes();

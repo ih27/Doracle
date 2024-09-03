@@ -49,6 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
+    // DEBUGGING
+    // await _horoscopeService.clearData();
     await _petManager.loadEntities();
     await _ownerManager.loadEntities();
   }
@@ -63,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _dataLoadingFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
@@ -139,7 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return FutureBuilder<Map<String, dynamic>>(
       future: _horoscopeService.getHoroscopeForOwner(owner),
       builder: (context, snapshot) {
-        final horoscope = snapshot.data ?? {};
         return Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -156,32 +157,49 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildOwnerHeader(owner),
                 const SizedBox(height: 10),
-                _buildDailyVibe(horoscope['dailyVibe']),
-                const StyledDivider(
-                  thickness: 2,
-                  color: AppTheme.primaryColor,
-                  lineStyle: DividerLineStyle.dashed,
-                ),
-                const SizedBox(height: 5),
-                _buildHoroscopeSection(
-                    '💖 Relationships', horoscope['relationships']),
-                const SizedBox(height: 5),
-                _buildHoroscopeSection(
-                    '💼 Work & Productivity', horoscope['workAndProductivity']),
-                const SizedBox(height: 5),
-                _buildHoroscopeSection(
-                    '🏡 Home & Self-Care', horoscope['homeAndSelfCare']),
-                const SizedBox(height: 5),
-                _buildHoroscopeSection(
-                    '💪 Health & Wellness', horoscope['healthAndWellness']),
-                const SizedBox(height: 5),
-                _buildCosmicInsight(horoscope['cosmicInsight']),
+                _buildOwnerHoroscopeContent(snapshot),
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  Widget _buildOwnerHoroscopeContent(
+      AsyncSnapshot<Map<String, dynamic>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return _buildLoadingIndicator('Loading daily vibe...');
+    } else if (snapshot.hasError) {
+      return _buildErrorWidget();
+    } else {
+      final horoscope = snapshot.data ?? {};
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDailyVibe(horoscope['dailyVibe']),
+          const StyledDivider(
+            thickness: 2,
+            color: AppTheme.primaryColor,
+            lineStyle: DividerLineStyle.dashed,
+          ),
+          const SizedBox(height: 5),
+          _buildHoroscopeSection(
+              '💖 Relationships', horoscope['relationships']),
+          const SizedBox(height: 5),
+          _buildHoroscopeSection(
+              '💼 Work & Productivity', horoscope['workAndProductivity']),
+          const SizedBox(height: 5),
+          _buildHoroscopeSection(
+              '🏡 Home & Self-Care', horoscope['homeAndSelfCare']),
+          const SizedBox(height: 5),
+          _buildHoroscopeSection(
+              '💪 Health & Wellness', horoscope['healthAndWellness']),
+          const SizedBox(height: 5),
+          _buildCosmicInsight(horoscope['cosmicInsight']),
+        ],
+      );
+    }
   }
 
   Widget _buildOwnerHeader(Owner owner) {
@@ -391,7 +409,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return FutureBuilder<Map<String, dynamic>>(
       future: _horoscopeService.getHoroscopeForPet(pet),
       builder: (context, snapshot) {
-        final horoscope = snapshot.data ?? {};
         return Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -408,48 +425,64 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildPetHeader(pet),
                 const SizedBox(height: 10),
-                _buildDailyVibe(horoscope['dailyVibe']),
-                const StyledDivider(
-                  thickness: 2,
-                  color: AppTheme.primaryColor,
-                  lineStyle: DividerLineStyle.dashed,
-                ),
-                const SizedBox(height: 5),
-                _buildPetHoroscopeSection(
-                    '🦴 Playtime & Bonding', horoscope['playtimeAndBonding']),
-                const SizedBox(height: 5),
-                _buildPetHoroscopeSection(
-                    '🏠 Home Adventures', horoscope['homeAdventures']),
-                const SizedBox(height: 5),
-                _buildPetHoroscopeSection(
-                    '🍖 Treats & Naps', horoscope['treatsAndNaps']),
-                const SizedBox(height: 5),
-                _buildPetHoroscopeSection(
-                    '🐕 Walkies & Exercise', horoscope['walkiesAndExercise']),
-                const SizedBox(height: 5),
-                _buildPetHoroscopeSection(
-                    '🌟 Quick Boosters', horoscope['quickBoosters']),
-                const SizedBox(height: 5),
-                _buildCosmicInsight(horoscope['cosmicCanineWisdom']),
-                const SizedBox(height: 5),
-                if (horoscope['message'] != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      horoscope['message'],
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.primaryColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ),
+                _buildPetHoroscopeContent(snapshot),
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  Widget _buildPetHoroscopeContent(
+      AsyncSnapshot<Map<String, dynamic>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return _buildLoadingIndicator('Loading daily vibe...');
+    } else if (snapshot.hasError) {
+      return _buildErrorWidget();
+    } else {
+      final horoscope = snapshot.data ?? {};
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDailyVibe(horoscope['dailyVibe']),
+          const StyledDivider(
+            thickness: 2,
+            color: AppTheme.primaryColor,
+            lineStyle: DividerLineStyle.dashed,
+          ),
+          const SizedBox(height: 5),
+          _buildPetHoroscopeSection(
+              '🦴 Playtime & Bonding', horoscope['playtimeAndBonding']),
+          const SizedBox(height: 5),
+          _buildPetHoroscopeSection(
+              '🏠 Home Adventures', horoscope['homeAdventures']),
+          const SizedBox(height: 5),
+          _buildPetHoroscopeSection(
+              '🍖 Treats & Naps', horoscope['treatsAndNaps']),
+          const SizedBox(height: 5),
+          _buildPetHoroscopeSection(
+              '🐕 Walkies & Exercise', horoscope['walkiesAndExercise']),
+          const SizedBox(height: 5),
+          _buildPetHoroscopeSection(
+              '🌟 Quick Boosters', horoscope['quickBoosters']),
+          const SizedBox(height: 5),
+          _buildCosmicInsight(horoscope['cosmicCanineWisdom']),
+          if (horoscope['message'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(
+                horoscope['message'],
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+        ],
+      );
+    }
   }
 
   Widget _buildPetHeader(Pet pet) {
@@ -546,5 +579,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  Widget _buildLoadingIndicator(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: AppTheme.primaryColor,),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 16,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Text(
+        'Failed to load horoscope',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.error,
+              fontSize: 16,
+            ),
+      ),
+    );
   }
 }
