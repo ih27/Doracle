@@ -3,6 +3,7 @@ import '../global_key.dart';
 import '../helpers/constants.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/app_router.dart';
+import '../widgets/fade_page_route.dart';
 import '../widgets/nav_bar.dart';
 import '../screens/home_screen.dart';
 import '../screens/unified_fortune_screen.dart';
@@ -66,8 +67,8 @@ class _MainScreenState extends State<MainScreen> {
     _pageController.jumpToPage(1);
     // Force a rebuild of UnifiedFortuneScreen
     _navigatorKeys[_selectedIndex].currentState?.pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => UnifiedFortuneScreen(fromPurchase: _fromPurchase),
+          FadePageRoute(
+            page: UnifiedFortuneScreen(fromPurchase: _fromPurchase),
             settings: RouteSettings(name: _getRouteForIndex(_selectedIndex)),
           ),
         );
@@ -143,8 +144,8 @@ class _MainScreenState extends State<MainScreen> {
       key: _navigatorKeys[index],
       onGenerateRoute: (settings) {
         if (settings.name == '/' || settings.name == null) {
-          return MaterialPageRoute(
-            builder: (_) => child,
+          return FadePageRoute(
+            page: child,
             settings: RouteSettings(name: _getRouteForIndex(index)),
           );
         }
