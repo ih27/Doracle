@@ -49,12 +49,11 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     final canAccess = entitlementProvider.isEntitled ||
         await _repository.planWasOpened(planId);
 
-    if (mounted) {
-      if (canAccess) {
-        navigateToImprovementPlan(context, planId);
-      } else {
-        _showIAPOverlay(context, planId);
-      }
+    if (!mounted) return;
+    if (canAccess) {
+      navigateToImprovementPlan(context, planId);
+    } else {
+      _showIAPOverlay(context, planId);
     }
   }
 

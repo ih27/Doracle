@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:provider/provider.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
@@ -11,10 +12,10 @@ import '../helpers/constants.dart';
 import '../helpers/show_snackbar.dart';
 import '../models/owner_model.dart';
 import '../models/pet_model.dart';
+import '../providers/entitlement_provider.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../services/compatibility_content_service.dart';
 import '../services/compatibility_score_service.dart';
-import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 
 class CompatibilityResultScreen extends StatefulWidget {
@@ -41,13 +42,11 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       getIt<CompatibilityContentService>();
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
 
   Map<String, dynamic> _compatibilityResult = {};
   bool _isLoading = true;
   Map<String, String> _cachedPrices = {};
-  bool _isEntitled = false;
   bool _planWasOpenedBefore = false;
   Map<String, bool> _isCardDataAvailable = {
     CompatibilityTexts.astrologyCardId: false,
@@ -60,15 +59,13 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     super.initState();
     _initializeData();
     _fetchPricesIfNeeded();
-    _checkEntitlementAndPlanStatus();
+    _checkPlanStatus();
   }
 
-  Future<void> _checkEntitlementAndPlanStatus() async {
-    _isEntitled = _purchaseService.isEntitled;
+  Future<void> _checkPlanStatus() async {
     String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     _planWasOpenedBefore =
         await _compatibilityDataRepository.planWasOpened(planId);
-    setState(() {});
   }
 
   Future<void> _initializeData() async {
@@ -261,30 +258,37 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
-    }
+    return Consumer<EntitlementProvider>(
+      builder: (context, entitlementProvider, child) {
+        if (_isLoading) {
+          return const Center(
+              child: CircularProgressIndicator(
+            color: AppTheme.primaryColor,
+          ));
+        }
 
-    return Scaffold(
-      body: Align(
-        alignment: AlignmentDirectional.topCenter,
-        child: SingleChildScrollView(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                _buildOverallCompatibility(),
-                _buildCompatibilityScores(),
-                _buildAstrologicalCompatibility(),
-                _buildPersonalizedRecommendations(),
-                _buildImprovementPlan(),
-              ].divide(height: 10),
+        return Scaffold(
+          body: Align(
+            alignment: AlignmentDirectional.topCenter,
+            child: SingleChildScrollView(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildOverallCompatibility(),
+                    _buildCompatibilityScores(),
+                    _buildAstrologicalCompatibility(entitlementProvider),
+                    _buildPersonalizedRecommendations(entitlementProvider),
+                    _buildImprovementPlan(entitlementProvider),
+                  ].divide(height: 10),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -499,7 +503,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     );
   }
 
-  Widget _buildAstrologicalCompatibility() {
+  Widget _buildAstrologicalCompatibility(
+      EntitlementProvider entitlementProvider) {
     String cardTitle = CompatibilityTexts.astrologyCardTitle;
     String cardSubtitle = CompatibilityTexts.astrologyCardSubtitle;
     if (!_isCardDataAvailable[CompatibilityTexts.astrologyCardId]!) {
@@ -507,7 +512,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle = CompatibilityTexts.astrologyCardLoadingSubtitle;
     }
 
-    final locked = !_isEntitled && !_planWasOpenedBefore;
+    final locked = !entitlementProvider.isEntitled && !_planWasOpenedBefore;
 
     return _buildCompatibilitySection(
       CompatibilityTexts.astrologyCardId,
@@ -518,7 +523,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     );
   }
 
-  Widget _buildPersonalizedRecommendations() {
+  Widget _buildPersonalizedRecommendations(
+      EntitlementProvider entitlementProvider) {
     String cardTitle = CompatibilityTexts.recommendationCardTitle;
     String cardSubtitle = CompatibilityTexts.recommendationCardSubtitle;
     if (!_isCardDataAvailable[CompatibilityTexts.recommendationCardId]!) {
@@ -526,7 +532,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle = CompatibilityTexts.recommendationCardLoadingSubtitle;
     }
 
-    final locked = !_isEntitled && !_planWasOpenedBefore;
+    final locked = !entitlementProvider.isEntitled && !_planWasOpenedBefore;
 
     return _buildCompatibilitySection(
       CompatibilityTexts.recommendationCardId,
@@ -537,7 +543,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     );
   }
 
-  Widget _buildImprovementPlan() {
+  Widget _buildImprovementPlan(EntitlementProvider entitlementProvider) {
     String cardTitle = CompatibilityTexts.improvementCardTitle;
     String cardSubtitle = CompatibilityTexts.improvementCardSubtitle;
     if (!_isCardDataAvailable[CompatibilityTexts.improvementCardId]!) {
@@ -545,7 +551,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       cardSubtitle = CompatibilityTexts.improvementCardLoadingSubtitle;
     }
 
-    final locked = !_isEntitled && !_planWasOpenedBefore;
+    final locked = !entitlementProvider.isEntitled && !_planWasOpenedBefore;
 
     return _buildCompatibilitySection(
       CompatibilityTexts.improvementCardId,
@@ -581,16 +587,18 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     bool success = await IAPUtils.handlePurchase(context, subscriptionType);
     if (success) {
       await _userService.updateSubscriptionHistory(subscriptionType);
-      setState(() {
-        _isEntitled = true;
-      });
+
+      if (!mounted) return;
+      // Use the new method instead of directly calling notifyListeners
+      Provider.of<EntitlementProvider>(context, listen: false)
+          .refreshEntitlementStatus();
     }
     // Navigate to the improvement plan after successful purchase
     String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
     _compatibilityDataRepository.markPlanAsOpened(planId);
-    if (mounted) {
-      navigateToImprovementPlan(context, planId);
-    }
+
+    if (!mounted) return;
+    navigateToImprovementPlan(context, planId);
   }
 
   String _getCompatibilityImage(String baseImageName) {

@@ -14,6 +14,10 @@ class EntitlementProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void refreshEntitlementStatus() {
+    _onEntitlementChanged();
+  }
+
   @override
   void dispose() {
     _revenueCatService.removeListener(_onEntitlementChanged);
