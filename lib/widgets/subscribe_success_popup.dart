@@ -27,7 +27,7 @@ class SubscribeSuccessPopup extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${subscriptionType.capitalize()} Subscription',
+              '${subscriptionType.capitalize()} Plan',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppTheme.success,
@@ -43,7 +43,9 @@ class SubscribeSuccessPopup extends StatelessWidget {
                       letterSpacing: 0,
                     ),
                 children: const [
-                  TextSpan(text: 'Noice! You\'ve been subscribed!',
+                  TextSpan(
+                    text:
+                        'Pawsome news! You\'ve just fetched yourself a subscription!',
                   ),
                 ],
               ),

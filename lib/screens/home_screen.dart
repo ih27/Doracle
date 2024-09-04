@@ -65,7 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _dataLoadingFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
+          return const Center(
+              child: CircularProgressIndicator(
+            color: AppTheme.primaryColor,
+          ));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
@@ -79,10 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 10),
                   _buildCurrentUserSection(),
                   const SizedBox(height: 10),
+                  ..._petManager.entities.expand((pet) => [
+                        _buildPetSection(pet),
+                        const SizedBox(height: 10),
+                      ]),
                   _buildAddPetSection(),
-                  const SizedBox(height: 10),
-                  ..._petManager.entities.map(_buildPetSection),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                 ],
               ),
             ),
@@ -586,7 +591,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: AppTheme.primaryColor,),
+          const CircularProgressIndicator(
+            color: AppTheme.primaryColor,
+          ),
           const SizedBox(height: 10),
           Text(
             message,
