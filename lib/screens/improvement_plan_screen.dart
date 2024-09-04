@@ -5,7 +5,7 @@ import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/compatibility_utils.dart';
 import '../helpers/show_snackbar.dart';
-import '../services/revenuecat_service.dart';
+import '../services/user_service.dart';
 
 class ImprovementPlanScreen extends StatefulWidget {
   final String planId;
@@ -19,8 +19,7 @@ class ImprovementPlanScreen extends StatefulWidget {
 class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
   final CompatibilityDataRepository _repository =
       getIt<CompatibilityDataRepository>();
-  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
-  bool _isEntitled = false;
+  final UserService _userService = getIt<UserService>();
   bool _planWasOpenedBefore = false;
   bool _isInitialized = false;
 
@@ -34,9 +33,8 @@ class _ImprovementPlanScreenState extends State<ImprovementPlanScreen> {
   }
 
   Future<void> _checkEntitlementAndPlanStatus() async {
-    _isEntitled = _purchaseService.isEntitled;
     _planWasOpenedBefore = await _repository.planWasOpened(widget.planId);
-    if (_isEntitled || _planWasOpenedBefore) {
+    if (_userService.isEntitled || _planWasOpenedBefore) {
       _planFuture = _loadPlanAndChecklist();
       setState(() {
         _isInitialized = true;

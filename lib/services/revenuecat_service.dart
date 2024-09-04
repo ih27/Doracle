@@ -74,9 +74,9 @@ class RevenueCatService with ChangeNotifier {
       CustomerInfo customerInfo = await Purchases.purchasePackage(
           _cachedSubscriptions[subscriptionType]!);
       if (customerInfo.entitlements.active.isNotEmpty) {
-        _isEntitled = true;
+        isEntitled = true;
       } else {
-        _isEntitled = false;
+        isEntitled = false;
       }
       return _isEntitled;
     } catch (e) {
@@ -91,9 +91,9 @@ class RevenueCatService with ChangeNotifier {
       await ensureInitialized();
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       if (customerInfo.entitlements.active.isNotEmpty) {
-        _isEntitled = true;
+        isEntitled = true;
       } else {
-        _isEntitled = false;
+        isEntitled = false;
       }
       return _isEntitled;
     } catch (e) {
@@ -154,7 +154,7 @@ class RevenueCatService with ChangeNotifier {
       }
 
       // Update the entitlement status after initialization
-      _isEntitled = await _getEntitlementStatus();
+      isEntitled = await _getEntitlementStatus();
 
       _initializationCompleter!.complete();
     } catch (e) {

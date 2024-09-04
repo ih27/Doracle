@@ -1,11 +1,13 @@
 import 'package:doracle/helpers/string_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
 import '../helpers/constants.dart';
 import '../helpers/purchase_utils.dart';
 import '../helpers/show_snackbar.dart';
+import '../providers/entitlement_provider.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../widgets/subscribe_success_popup.dart';
@@ -26,20 +28,11 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   bool _isLoading = false;
   Map<String, String> _prices = {};
   String _selectedPlan = PurchaseTexts.annual;
-  bool _isEntitled = false;
 
   @override
   void initState() {
     super.initState();
     _loadPrices();
-    _checkEntitlement();
-  }
-
-  void _checkEntitlement() {
-    bool isEntitled = _purchaseService.isEntitled;
-    setState(() {
-      _isEntitled = isEntitled;
-    });
   }
 
   Future<void> _loadPrices() async {
@@ -57,12 +50,12 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   }
 
   Future<void> _handlePurchase(String subscriptionType) async {
-    if (_isEntitled) return;
-
     bool success = await _purchase(subscriptionType);
 
     if (mounted) {
       if (success) {
+        Provider.of<EntitlementProvider>(context, listen: false)
+            .refreshEntitlementStatus();
         showDialog(
           context: context,
           builder: (BuildContext buildContext) {
@@ -88,7 +81,6 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
         return false;
       }
       await _userService.updateSubscriptionHistory(subscriptionType);
-      _checkEntitlement();
       return true;
     } catch (e) {
       debugPrint('Purchase error: $e');
@@ -98,37 +90,42 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon:
-                  Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
-              onPressed: () => Navigator.pop(context),
+    return Consumer<EntitlementProvider>(
+      builder: (context, entitlementProvider, child) {
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back,
+                      color: Theme.of(context).primaryColor),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                elevation: 0,
+                forceMaterialTransparency: true,
+              ),
+              body: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHeaderImage(),
+                    _buildTitle(context),
+                    _buildFeaturesList(context),
+                    _buildSubscriptionOptions(context),
+                    _buildSecurityInfo(context),
+                    _buildSubscribeButton(
+                        context, entitlementProvider, _selectedPlan),
+                    _buildFooterInfo(context),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
             ),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            elevation: 0,
-            forceMaterialTransparency: true,
-          ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildHeaderImage(),
-                _buildTitle(context),
-                _buildFeaturesList(context),
-                _buildSubscriptionOptions(context),
-                _buildSecurityInfo(context),
-                _buildSubscribeButton(context, _selectedPlan),
-                _buildFooterInfo(context),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ),
-        ),
-        _buildLoadingOverlay(),
-      ],
+            _buildLoadingOverlay(),
+          ],
+        );
+      },
     );
   }
 
@@ -329,18 +326,22 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     );
   }
 
-  Widget _buildSubscribeButton(BuildContext context, String subscriptionType) {
+  Widget _buildSubscribeButton(BuildContext context,
+      EntitlementProvider entitlementProvider, String subscriptionType) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: ElevatedButton(
-        onPressed: _isEntitled ? null : () => _handlePurchase(subscriptionType),
+        onPressed: entitlementProvider.isEntitled
+            ? null
+            : () => _handlePurchase(subscriptionType),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(320, 50),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: _isEntitled ? Colors.grey : null,
+          backgroundColor: entitlementProvider.isEntitled ? Colors.grey : null,
         ),
-        child: Text(_isEntitled ? 'Subscribed' : 'Subscribe'),
+        child:
+            Text(entitlementProvider.isEntitled ? 'Subscribed' : 'Subscribe'),
       ),
     );
   }
