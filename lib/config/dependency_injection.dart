@@ -29,6 +29,7 @@ void setupDependencies() {
         getIt<UserService>(),
         getIt<HapticService>(),
         getIt<RevenueCatService>(),
+        getIt<EntitlementProvider>(),
         getIt<FortuneTeller>(),
       ));
 

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../helpers/constants.dart';
+import '../providers/entitlement_provider.dart';
 import '../services/fortune_teller_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
@@ -11,7 +12,8 @@ class FortuneViewModel extends ChangeNotifier {
   final UserService _userService;
   final HapticService _hapticService;
   final RevenueCatService _purchaseService;
-  bool get isSubscribed => _purchaseService.isEntitled;
+  final EntitlementProvider _entitlementProvider;
+  bool get isSubscribed => _entitlementProvider.isEntitled;
   final FortuneTeller _fortuneTeller;
 
   bool isHome = true;
@@ -26,9 +28,21 @@ class FortuneViewModel extends ChangeNotifier {
     this._userService,
     this._hapticService,
     this._purchaseService,
+    this._entitlementProvider,
     this._fortuneTeller,
   ) {
+    _entitlementProvider.addListener(_onEntitlementChanged);
     _remainingQuestionsCount = _userService.getRemainingQuestionsCount();
+  }
+
+  void _onEntitlementChanged() {
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _entitlementProvider.removeListener(_onEntitlementChanged);
+    super.dispose();
   }
 
   Future<void> initialize() async {
@@ -88,7 +102,7 @@ class FortuneViewModel extends ChangeNotifier {
   bool _hasRunOutOfQuestions() => _userService.hasRunOutOfQuestions();
 
   Future<void> _fetchPricesIfNeeded() async {
-    if (_hasRunOutOfQuestions() && cachedPrices.isEmpty) {
+    if (!isSubscribed && _hasRunOutOfQuestions() && cachedPrices.isEmpty) {
       try {
         await _purchaseService.ensureInitialized();
         cachedPrices = await _purchaseService.fetchPrices();
