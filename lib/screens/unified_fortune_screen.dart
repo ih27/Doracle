@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:typewritertext/typewritertext.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import '../helpers/purchase_utils.dart';
 import '../viewmodels/fortune_view_model.dart';
 import '../mixins/fortune_animation_mixin.dart';
@@ -18,12 +19,10 @@ import '../helpers/show_snackbar.dart';
 import '../config/dependency_injection.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
-  //final Function(String, {String? title}) onNavigate;
   final bool fromPurchase;
 
   const UnifiedFortuneScreen({
     super.key,
-    //required this.onNavigate,
     this.fromPurchase = false,
   });
 
@@ -32,7 +31,7 @@ class UnifiedFortuneScreen extends StatefulWidget {
 }
 
 class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
-    with ShakeDetectorMixin, WidgetsBindingObserver, FortuneAnimationMixin {
+    with ShakeDetectorMixin, FortuneAnimationMixin {
   late FortuneViewModel _viewModel;
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocusNode = FocusNode();
@@ -41,6 +40,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   bool _isFortuneCompleted = false;
   bool _isKeyboardVisible = false;
   late TypeWriterController _fortuneController;
+  late StreamSubscription<bool> _keyboardSubscription;
 
   @override
   void initState() {
@@ -49,12 +49,20 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _viewModel.addListener(_onViewModelChanged);
     initShakeDetector(onShake: animateShake);
     _viewModel.initialize();
-    WidgetsBinding.instance.addObserver(this);
     _questionFocusNode.addListener(_handleFocusChange);
     if (widget.fromPurchase) {
       _viewModel.leaveHome();
     }
     _fortuneController = TypeWriterController.fromStream(const Stream.empty());
+
+    // Initialize keyboard visibility listener
+    final keyboardVisibilityController = KeyboardVisibilityController();
+    _keyboardSubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
+      setState(() {
+        _isKeyboardVisible = visible;
+      });
+    });
   }
 
   void _onViewModelChanged() {
@@ -67,38 +75,12 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   void dispose() {
     _viewModel.removeListener(_onViewModelChanged);
     disposeRiveController();
-    WidgetsBinding.instance.removeObserver(this);
     _questionController.dispose();
     _questionFocusNode.removeListener(_handleFocusChange);
     _questionFocusNode.dispose();
     _fortuneController.dispose();
+    _keyboardSubscription.cancel();
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkKeyboardVisibility();
-  }
-
-  @override
-  void didChangeMetrics() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _checkKeyboardVisibility();
-      }
-    });
-  }
-
-  void _checkKeyboardVisibility() {
-    if (!mounted) return;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final newIsKeyboardVisible = bottomInset > 0;
-    if (newIsKeyboardVisible != _isKeyboardVisible) {
-      setState(() {
-        _isKeyboardVisible = newIsKeyboardVisible;
-      });
-    }
   }
 
   void _handleFocusChange() {
@@ -136,6 +118,15 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     });
 
     await _getFortune(question);
+  }
+
+  void _handleAskAnother() {
+    _questionController.text = '';
+    setState(() {
+      _isFortuneCompleted = false;
+      _isFortuneInProgress = false;
+    });
+    _viewModel.resetFortuneState();
   }
 
   Future<void> _getFortune(String question) async {
@@ -241,13 +232,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
       return FortuneContent(
         fortuneController: _fortuneController,
         isFortuneCompleted: _isFortuneCompleted,
-        onAskAnother: () {
-          setState(() {
-            _isFortuneCompleted = false;
-            _isFortuneInProgress = false;
-          });
-          _viewModel.resetFortuneState();
-        },
+        onAskAnother: _handleAskAnother,
       );
     } else {
       return _buildQuestionSection();
@@ -255,60 +240,42 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   }
 
   Widget _buildQuestionSection() {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final mediaQuery = MediaQuery.of(context);
-        final bottomPadding = mediaQuery.padding.bottom;
-        final bottomInset = mediaQuery.viewInsets.bottom;
-
-        return Stack(
-          children: [
-            SizedBox(
-              height: constraints.maxHeight -
-                  FortuneConstants.inputFieldFixedHeight -
-                  bottomPadding,
-              child: AnimatedOpacity(
-                opacity: _isKeyboardVisible ? 0.0 : 1.0,
-                duration: FortuneConstants.carouselFadeoutDelay,
-                curve: Curves.easeInOut,
-                child: _viewModel.randomQuestions.isEmpty
-                    ? Center(
-                        child: Text(
-                          'Type your question below',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          textAlign: TextAlign.center,
-                        ),
-                      )
-                    : QuestionCarousel(
-                        questions: _viewModel.randomQuestions,
-                        onQuestionSelected: _onQuestionSubmitted,
+    return Column(
+      children: [
+        Expanded(
+          child: !_isKeyboardVisible
+              ? _viewModel.randomQuestions.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Type your question below',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        textAlign: TextAlign.center,
                       ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: _isKeyboardVisible ? bottomInset : bottomPadding,
-              child: QuestionInput(
-                controller: _questionController,
-                focusNode: _questionFocusNode,
-                onSubmitted: _onQuestionSubmitted,
-                remainingQuestions: _viewModel.getRemainingQuestionsCount(),
-                isSubscribed: _viewModel.isSubscribed,
-                onShowOutOfQuestions:
-                    _viewModel.isSubscribed ? null : _showIAPOverlay,
-              ),
-            ),
-          ],
-        );
-      },
+                    )
+                  : QuestionCarousel(
+                      questions: _viewModel.randomQuestions,
+                      onQuestionSelected: _onQuestionSubmitted,
+                    )
+              : const SizedBox.shrink(),
+        ),
+        QuestionInput(
+          controller: _questionController,
+          focusNode: _questionFocusNode,
+          onSubmitted: _onQuestionSubmitted,
+          remainingQuestions: _viewModel.getRemainingQuestionsCount(),
+          isSubscribed: _viewModel.isSubscribed,
+          onShowOutOfQuestions:
+              _viewModel.isSubscribed ? null : _showIAPOverlay,
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _dismissKeyboard,
+      onTap: _isKeyboardVisible ? _dismissKeyboard : null,
+      behavior: HitTestBehavior.opaque,
       child: Column(
         children: [
           FortuneAnimation(onInit: _initializeRiveController),

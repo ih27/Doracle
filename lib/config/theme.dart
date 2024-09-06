@@ -34,8 +34,10 @@ class AppTheme {
   static const Color tomato = Color(0xFFf95738);
 
   // Dog text style
-  static TextStyle dogTextStyle =
+  static TextStyle dogGreetingTextStyle =
       GoogleFonts.robotoMono(fontSize: 16.0, color: AppTheme.primaryText);
+  static TextStyle dogFortuneTextStyle =
+      GoogleFonts.robotoMono(fontSize: 15.0, color: AppTheme.primaryText);
   static TextStyle humanTextStyle =
       GoogleFonts.roboto(fontSize: 14.0, color: AppTheme.primaryText);
 

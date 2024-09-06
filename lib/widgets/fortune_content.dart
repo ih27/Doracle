@@ -36,7 +36,7 @@ class FortuneContent extends StatelessWidget {
                         return SelectionArea(
                           child: Text(
                             value.text,
-                            style: AppTheme.dogTextStyle,
+                            style: AppTheme.dogFortuneTextStyle,
                           ),
                         );
                       },

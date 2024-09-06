@@ -28,7 +28,7 @@ class OracleHomeContent extends StatelessWidget {
                 child: Text(
                   welcomeMessage,
                   textAlign: TextAlign.center,
-                  style: AppTheme.dogTextStyle,
+                  style: AppTheme.dogGreetingTextStyle,
                 ),
               ),
             ),
