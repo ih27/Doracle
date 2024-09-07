@@ -17,8 +17,9 @@ class UserService extends ValueNotifier<AppUser?> {
   bool get isEntitled => _entitlementProvider.isEntitled;
 
   void _onEntitlementChanged() {
-    if (value != null) {
+    if (value != null && value!.isEntitled != isEntitled) {
       value!.isEntitled = isEntitled;
+      _updateUserEntitlementStatus();
       notifyListeners();
     }
   }
@@ -45,6 +46,12 @@ class UserService extends ValueNotifier<AppUser?> {
           await updateUserField('canVibrate', currentCanVibrate);
         }
 
+        // Update the isEntitled status based on the EntitlementProvider
+        if (value!.isEntitled != isEntitled) {
+          value!.isEntitled = isEntitled;
+          await _updateUserEntitlementStatus();
+        }
+
         notifyListeners();
       } catch (e) {
         debugPrint('Error creating AppUser: $e');
@@ -55,6 +62,7 @@ class UserService extends ValueNotifier<AppUser?> {
         id: userId,
         email: '', // You might want to get this from Firebase Auth
         canVibrate: currentCanVibrate,
+        isEntitled: isEntitled,
       );
       await _userRepository.addUser(userId, value!.toMap());
       notifyListeners();
@@ -98,7 +106,16 @@ class UserService extends ValueNotifier<AppUser?> {
         'subscriptionType': subscriptionType,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
+      value!.isEntitled = true;
       await _userRepository.updateUser(value!.id, value!.toMap());
+      notifyListeners();
+    }
+  }
+
+  Future<void> _updateUserEntitlementStatus() async {
+    if (value != null) {
+      await _userRepository
+          .updateUser(value!.id, {'isEntitled': value!.isEntitled});
       notifyListeners();
     }
   }
