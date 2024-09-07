@@ -33,6 +33,13 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   void initState() {
     super.initState();
     _loadPrices();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final entitlementProvider =
+          Provider.of<EntitlementProvider>(context, listen: false);
+      entitlementProvider.refreshEntitlementStatus();
+      _updateSelectedPlan(entitlementProvider.currentSubscriptionPlan);
+    });
   }
 
   Future<void> _loadPrices() async {
@@ -46,6 +53,14 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  void _updateSelectedPlan(String? currentPlan) {
+    if (currentPlan != null) {
+      setState(() {
+        _selectedPlan = currentPlan;
+      });
     }
   }
 
@@ -112,11 +127,11 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                     _buildHeaderImage(),
                     _buildTitle(context),
                     _buildFeaturesList(context),
-                    _buildSubscriptionOptions(context),
+                    _buildSubscriptionOptions(context, entitlementProvider),
                     _buildSecurityInfo(context),
                     _buildSubscribeButton(
                         context, entitlementProvider, _selectedPlan),
-                    _buildFooterInfo(context),
+                    _buildFooterInfo(context, entitlementProvider),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -159,7 +174,11 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     );
   }
 
-  Widget _buildSubscriptionOptions(BuildContext context) {
+  Widget _buildSubscriptionOptions(
+      BuildContext context, EntitlementProvider entitlementProvider) {
+    final currentPlan = entitlementProvider.currentSubscriptionPlan;
+    final isSubscribed = entitlementProvider.isEntitled;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
@@ -172,6 +191,8 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
             _prices[PurchaseTexts.annualPackageId] ??
                 PurchaseTexts.defaultAnnualPrice,
             true,
+            isSubscribed,
+            currentPlan == PurchaseTexts.annual,
           ),
           _buildSubscriptionCard(
             context,
@@ -179,6 +200,8 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
             _prices[PurchaseTexts.monthlyPackageId] ??
                 PurchaseTexts.defaultMonthlyPrice,
             false,
+            isSubscribed,
+            currentPlan == PurchaseTexts.monthly,
           ),
         ],
       ),
@@ -186,19 +209,32 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   }
 
   Widget _buildSubscriptionCard(
-      BuildContext context, String planType, String price, bool isBestOffer) {
+    BuildContext context,
+    String planType,
+    String price,
+    bool isBestOffer,
+    bool isSubscribed,
+    bool isCurrentPlan,
+  ) {
     bool isSelected = _selectedPlan == planType;
+    // If subscribed, force the current plan to be selected
+    if (isSubscribed && isCurrentPlan) {
+      isSelected = true;
+    }
+
     bool isAnnual = planType == PurchaseTexts.annual;
     double cardWidth = 150;
     double cardHeight = 200;
     double bestOfferHeight = 30;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPlan = planType;
-        });
-      },
+      onTap: isSubscribed
+          ? null
+          : () {
+              setState(() {
+                _selectedPlan = planType;
+              });
+            },
       child: SizedBox(
         width: cardWidth,
         height: isBestOffer ? cardHeight + bestOfferHeight : cardHeight,
@@ -238,13 +274,22 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
               width: cardWidth,
               height: cardHeight,
               decoration: BoxDecoration(
-                gradient: isSelected
+                gradient: isCurrentPlan
                     ? const LinearGradient(
-                        colors: [AppTheme.lemonChiffon, AppTheme.naplesYellow],
+                        colors: [Colors.white, AppTheme.secondaryColor],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       )
-                    : null,
+                    : isSelected
+                        ? const LinearGradient(
+                            colors: [
+                              AppTheme.lemonChiffon,
+                              AppTheme.naplesYellow
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          )
+                        : null,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(isBestOffer ? 0 : 20),
                   topRight: Radius.circular(isBestOffer ? 0 : 20),
@@ -346,11 +391,15 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     );
   }
 
-  Widget _buildFooterInfo(BuildContext context) {
+  Widget _buildFooterInfo(
+      BuildContext context, EntitlementProvider entitlementProvider) {
+    final currentPlan = entitlementProvider.currentSubscriptionPlan;
     return Column(
       children: [
         Text(
-          'Subscription is optional and auto-renewable',
+          currentPlan != null
+              ? 'Current plan: ${currentPlan.capitalize()} (auto-renewable)'
+              : 'Subscription is optional and auto-renewable',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 10),

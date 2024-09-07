@@ -9,12 +9,15 @@ class EntitlementProvider with ChangeNotifier {
   }
 
   bool get isEntitled => _revenueCatService.isEntitled;
+  String? get currentSubscriptionPlan =>
+      _revenueCatService.currentSubscriptionPlan;
 
   void _onEntitlementChanged() {
     notifyListeners();
   }
 
   void refreshEntitlementStatus() {
+    _revenueCatService.getEntitlementStatus();
     _onEntitlementChanged();
   }
 

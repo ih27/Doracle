@@ -33,14 +33,22 @@ class RevenueCatService with ChangeNotifier {
     }
   }
 
+  String? _currentSubscriptionPlan;
+  String? get currentSubscriptionPlan => _currentSubscriptionPlan;
+
   RevenueCatService(this._authService);
 
-  Future<bool> _getEntitlementStatus() async {
+  Future<bool> getEntitlementStatus() async {
     final customerInfo = await Purchases.getCustomerInfo();
     if (customerInfo.entitlements.active.isNotEmpty) {
-      debugPrint(customerInfo.entitlements.active.toString());
+      _currentSubscriptionPlan =
+          customerInfo.entitlements.active.values.first.productIdentifier;
+      print('getEntitlementStatus- plan: $_currentSubscriptionPlan');
+      notifyListeners();
       return true;
     }
+    _currentSubscriptionPlan = null;
+    notifyListeners();
     return false;
   }
 
@@ -74,10 +82,14 @@ class RevenueCatService with ChangeNotifier {
       CustomerInfo customerInfo = await Purchases.purchasePackage(
           _cachedSubscriptions[subscriptionType]!);
       if (customerInfo.entitlements.active.isNotEmpty) {
+        _currentSubscriptionPlan =
+            customerInfo.entitlements.active.values.first.productIdentifier;
         isEntitled = true;
       } else {
+        _currentSubscriptionPlan = null;
         isEntitled = false;
       }
+      notifyListeners();
       return _isEntitled;
     } catch (e) {
       debugPrint("Buy subscription error: $e");
@@ -154,7 +166,7 @@ class RevenueCatService with ChangeNotifier {
       }
 
       // Update the entitlement status after initialization
-      isEntitled = await _getEntitlementStatus();
+      isEntitled = await getEntitlementStatus();
 
       _initializationCompleter!.complete();
     } catch (e) {
@@ -205,7 +217,8 @@ class RevenueCatService with ChangeNotifier {
       if (offerings.current != null &&
           offerings.current?.monthly != null &&
           offerings.current?.annual != null) {
-        _cachedSubscriptions[PurchaseTexts.monthly] = offerings.current!.monthly!;
+        _cachedSubscriptions[PurchaseTexts.monthly] =
+            offerings.current!.monthly!;
         _cachedSubscriptions[PurchaseTexts.annual] = offerings.current!.annual!;
       }
       return _cachedSubscriptions;
