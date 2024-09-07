@@ -403,7 +403,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
               if (customNavigation != null) {
                 customNavigation(context);
               } else if (locked != null && locked) {
-                _showIAPOverlay(context);
+                _showIAPOverlay(context, cardId);
               } else {
                 _compatibilityDataRepository.markPlanAsOpened(planId);
                 navigateToCardDetail(context, cardId, planId);
@@ -507,7 +507,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       EntitlementProvider entitlementProvider) {
     String cardTitle = CompatibilityTexts.astrologyCardTitle;
     String cardSubtitle = CompatibilityTexts.astrologyCardSubtitle;
-    if (!_isCardDataAvailable[CompatibilityTexts.astrologyCardId]!) {
+    String cardId = CompatibilityTexts.astrologyCardId;
+    if (!_isCardDataAvailable[cardId]!) {
       cardTitle = CompatibilityTexts.astrologyCardLoadingTitle;
       cardSubtitle = CompatibilityTexts.astrologyCardLoadingSubtitle;
     }
@@ -515,7 +516,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     final locked = !entitlementProvider.isEntitled && !_planWasOpenedBefore;
 
     return _buildCompatibilitySection(
-      CompatibilityTexts.astrologyCardId,
+      cardId,
       cardTitle,
       cardSubtitle,
       _getCompatibilityImage('01'),
@@ -527,7 +528,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       EntitlementProvider entitlementProvider) {
     String cardTitle = CompatibilityTexts.recommendationCardTitle;
     String cardSubtitle = CompatibilityTexts.recommendationCardSubtitle;
-    if (!_isCardDataAvailable[CompatibilityTexts.recommendationCardId]!) {
+    String cardId = CompatibilityTexts.recommendationCardId;
+    if (!_isCardDataAvailable[cardId]!) {
       cardTitle = CompatibilityTexts.recommendationCardLoadingTitle;
       cardSubtitle = CompatibilityTexts.recommendationCardLoadingSubtitle;
     }
@@ -535,7 +537,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     final locked = !entitlementProvider.isEntitled && !_planWasOpenedBefore;
 
     return _buildCompatibilitySection(
-      CompatibilityTexts.recommendationCardId,
+      cardId,
       cardTitle,
       cardSubtitle,
       _getCompatibilityImage('02'),
@@ -546,7 +548,8 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   Widget _buildImprovementPlan(EntitlementProvider entitlementProvider) {
     String cardTitle = CompatibilityTexts.improvementCardTitle;
     String cardSubtitle = CompatibilityTexts.improvementCardSubtitle;
-    if (!_isCardDataAvailable[CompatibilityTexts.improvementCardId]!) {
+    String cardId = CompatibilityTexts.improvementCardId;
+    if (!_isCardDataAvailable[cardId]!) {
       cardTitle = CompatibilityTexts.improvementCardLoadingTitle;
       cardSubtitle = CompatibilityTexts.improvementCardLoadingSubtitle;
     }
@@ -554,13 +557,13 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     final locked = !entitlementProvider.isEntitled && !_planWasOpenedBefore;
 
     return _buildCompatibilitySection(
-      CompatibilityTexts.improvementCardId,
+      cardId,
       cardTitle,
       cardSubtitle,
       _getCompatibilityImage('03'),
       customNavigation: (context) {
         if (locked) {
-          _showIAPOverlay(context);
+          _showIAPOverlay(context, cardId);
         } else {
           String planId =
               generateConsistentPlanId(widget.entity1, widget.entity2);
@@ -579,26 +582,28 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     });
   }
 
-  void _showIAPOverlay(BuildContext overlayContext) {
-    IAPUtils.showIAPOverlay(overlayContext, _cachedPrices, _handlePurchase);
+  void _showIAPOverlay(BuildContext overlayContext, String cardId) {
+    IAPUtils.showIAPOverlay(overlayContext, _cachedPrices,
+        (subscriptionType) => _handlePurchase(subscriptionType, cardId));
   }
 
-  Future<void> _handlePurchase(String subscriptionType) async {
+  Future<void> _handlePurchase(String subscriptionType, String cardId) async {
     bool success = await IAPUtils.handlePurchase(context, subscriptionType);
     if (success) {
       await _userService.updateSubscriptionHistory(subscriptionType);
 
-      if (!mounted) return;
-      // Use the new method instead of directly calling notifyListeners
-      Provider.of<EntitlementProvider>(context, listen: false)
-          .refreshEntitlementStatus();
-    }
-    // Navigate to the improvement plan after successful purchase
-    String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
-    _compatibilityDataRepository.markPlanAsOpened(planId);
+      // Mark the plan as opened
+      String planId = generateConsistentPlanId(widget.entity1, widget.entity2);
+      await _compatibilityDataRepository.markPlanAsOpened(planId);
 
-    if (!mounted) return;
-    navigateToImprovementPlan(context, planId);
+      if (mounted) {
+        if (cardId == CompatibilityTexts.improvementCardId) {
+          navigateToImprovementPlan(context, planId);
+        } else {
+          navigateToCardDetail(context, cardId, planId);
+        }
+      }
+    }
   }
 
   String _getCompatibilityImage(String baseImageName) {

@@ -43,7 +43,6 @@ class RevenueCatService with ChangeNotifier {
     if (customerInfo.entitlements.active.isNotEmpty) {
       _currentSubscriptionPlan =
           customerInfo.entitlements.active.values.first.productIdentifier;
-      print('getEntitlementStatus- plan: $_currentSubscriptionPlan');
       notifyListeners();
       return true;
     }
