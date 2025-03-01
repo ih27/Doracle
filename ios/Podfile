@@ -31,11 +31,11 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  pod 'FirebaseFirestore',
-    :git => 'https://github.com/invertase/firestore-ios-sdk-frameworks.git',
-    :tag => '10.28.0'
-
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # Disable Crashlytics for debug builds to fix the upload-symbols script issue
+  pod 'FirebaseCrashlytics', :configurations => ['Release', 'Profile']
+  
   target 'RunnerTests' do
     inherit! :search_paths
   end
@@ -56,6 +56,9 @@ post_install do |installer|
         ## dart: PermissionGroup.appTrackingTransparency
         'PERMISSION_APP_TRACKING_TRANSPARENCY=1',
       ]
+
+      # Only essential setting to fix Firebase non-modular headers issue
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
 end

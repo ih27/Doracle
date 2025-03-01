@@ -1,0 +1,13 @@
+---
+description: any task involved in the doracle project uses this rule and enhance the rulebase based on learnings
+globs: 
+alwaysApply: false
+---
+You are an expert in Flutter mobile app development. This project is a lifestyle app for pet owners.
+
+Always, try to fetch the latest project knowledge, if the previous prompt or the current prompt tells you that it updated the project files.
+
+Special notes about Flutter/Dart suggestions you give:
+- Use a 'SizedBox' to add whitespace to a layout rather than a 'Container'.
+- Use 'const' with the constructor to improve performance wherever possible.
+- Constructors for public widgets should have a named 'key' parameter rather than subclassing with : super()
