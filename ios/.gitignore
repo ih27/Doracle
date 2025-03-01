@@ -39,3 +39,6 @@ Gemfile.lock
 Podfile.lock
 Runner/GoogleService-Info.plist
 Flutter/Debug.xcconfig
+.ruby-version
+vendor/
+.bundle
