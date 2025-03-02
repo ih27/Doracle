@@ -7,6 +7,7 @@ import '../helpers/show_snackbar.dart';
 import '../services/user_service.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../widgets/treat_card.dart';
+import '../services/facebook_app_events_service.dart';
 
 class FeedTheDogScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;
@@ -23,6 +24,8 @@ class FeedTheDogScreen extends StatefulWidget {
 class FeedTheDogScreenState extends State<FeedTheDogScreen> {
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
+  final FacebookAppEventsService _facebookEvents =
+      getIt<FacebookAppEventsService>();
 
   bool _isLoading = false;
   Map<String, String> _prices = {};
@@ -31,6 +34,12 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
   void initState() {
     super.initState();
     _loadPrices();
+
+    // Track screen view
+    _facebookEvents.logViewContent(
+      contentType: 'screen',
+      contentId: 'feedthedog_screen',
+    );
   }
 
   Future<void> _loadPrices() async {
@@ -55,6 +64,22 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
 
       if (!await _purchaseService.purchaseProduct(questionCount)) {
         throw Exception('Purchase failed');
+      }
+
+      // Track purchase with Facebook
+      String packageId = questionCount == PurchaseTexts.smallTreatQuestionCount
+          ? PurchaseTexts.smallTreatPackageId
+          : questionCount == PurchaseTexts.mediumTreatQuestionCount
+              ? PurchaseTexts.mediumTreatPackageId
+              : PurchaseTexts.largeTreatPackageId;
+
+      String? price = _prices[packageId];
+      if (price != null) {
+        await _facebookEvents.logPurchaseWithPriceString(
+          priceString: price,
+          productIdentifier: packageId,
+          parameters: {'question_count': questionCount.toString()},
+        );
       }
 
       await _userService.updatePurchaseHistory(questionCount);

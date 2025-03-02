@@ -1,5 +1,5 @@
 ---
-description: any task involved in the Doracle project uses this rule and enhance the rulebase based on learnings
+description: any task involved in this project uses this rule and enhance the rulebase based on learnings
 globs: 
 alwaysApply: false
 ---
@@ -132,6 +132,18 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Analytics services for tracking
   - API communication services
 
+### Analytics and Tracking Services
+
+- Use service classes to abstract analytics functionality
+  - Implement tracking consistently across similar UI elements
+  - Track key user journeys with appropriate event parameters
+  - Handle platform-specific implementation details within services
+- Follow a consistent pattern for event tracking:
+  - Track screen views with `logViewContent` in `initState` methods
+  - Track purchases with `logPurchaseWithPriceString` and relevant details
+  - Track subscriptions with `logSubscribeWithPriceString` and subscription details
+  - Use `logCustomEvent` for specific user actions not covered by standard events
+
 ### Models
 
 - Models represent data structures
@@ -186,6 +198,24 @@ Generate code, corrections, and refactorings that comply with the basic principl
 - Prioritize patterns observed in recent code changes over general rules when relevant
 - Consider project-specific edge cases that may deviate from standard practices
 - Adjust recommendations based on feedback received in previous interactions
+
+### Implementation Best Practices
+
+- Respect existing dependency injection patterns
+  - Use the project's established DI approach (e.g., getIt from dependency_injection.dart)
+  - Avoid introducing new ways to access dependencies when existing patterns work
+- Don't modify existing class structures unnecessarily
+  - Keep changes focused on the specific feature being implemented
+  - Avoid refactoring unrelated code during feature implementation
+- Use consistent parameter naming across similar function calls
+  - Follow established patterns for parameter names (e.g., contentId, contentType)
+  - Maintain consistency with existing implementation examples
+- Utilize existing constants rather than creating new ones
+  - Reference project constants (like PurchaseTexts) instead of hardcoding values
+  - Ensure constant references match exact spelling and structure
+- Make targeted edits that minimize impact
+  - Focus only on code that needs to change
+  - Avoid modifications to working code unrelated to your task
 
 ### Context Awareness
 

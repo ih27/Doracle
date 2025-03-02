@@ -32,6 +32,8 @@ class _SettingsScreenState extends State<SettingsScreen>
   final UserService userService = getIt<UserService>();
   final AuthService authService = getIt<AuthService>();
   final RevenueCatService purchaseService = getIt<RevenueCatService>();
+  final FacebookAppEventsService _facebookEvents =
+      getIt<FacebookAppEventsService>();
   bool _notificationsEnabled = false;
 
   @override
@@ -39,6 +41,12 @@ class _SettingsScreenState extends State<SettingsScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkNotificationPermission();
+
+    // Track screen view
+    _facebookEvents.logViewContent(
+      contentType: 'screen',
+      contentId: 'settings_screen',
+    );
   }
 
   @override
@@ -405,8 +413,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final InAppReview inAppReview = InAppReview.instance;
 
     // Log rating event to Facebook
-    final facebookEvents = getIt<FacebookAppEventsService>();
-    await facebookEvents.logCustomEvent(
+    await _facebookEvents.logCustomEvent(
       eventName: 'fb_mobile_rate',
       parameters: {'content_type': 'app'},
     );

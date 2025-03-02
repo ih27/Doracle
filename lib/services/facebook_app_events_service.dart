@@ -1,9 +1,19 @@
 import 'package:facebook_app_events/facebook_app_events.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 
 class FacebookAppEventsService {
   static FacebookAppEventsService? _instance;
   final FacebookAppEvents _facebookAppEvents = FacebookAppEvents();
   bool _isInitialized = false;
+
+  // Constants
+  static const String _skadNetworkSchema = 'SKAdNetwork';
+
+  // Conversion values for different actions
+  static const int _registrationConversionValue = 2;
+  static const int _purchaseConversionValue = 4;
+  static const int _subscriptionConversionValue = 6;
 
   FacebookAppEventsService._() {
     _initialize();
@@ -17,14 +27,51 @@ class FacebookAppEventsService {
     if (!_isInitialized) {
       await _facebookAppEvents.setAutoLogAppEventsEnabled(true);
       await _facebookAppEvents.setAdvertiserTracking(enabled: true);
+
+      if (Platform.isIOS) {
+        try {
+          debugPrint(
+              'Initializing Facebook App Events with SKAdNetwork support');
+        } catch (e) {
+          debugPrint('Error initializing Facebook App Events for iOS 14+: $e');
+        }
+      }
+
       _isInitialized = true;
     }
   }
 
+  /// Core method to log events with platform-specific handling
+  Future<void> _logEventCore({
+    required String name,
+    Map<String, dynamic>? parameters,
+    int? conversionValue,
+  }) async {
+    await _initialize();
+
+    // Handle parameters
+    final Map<String, dynamic> params = parameters ?? {};
+
+    if (Platform.isIOS) {
+      // For iOS, include SKAdNetwork schema in parameters
+      params['schema'] = _skadNetworkSchema;
+
+      // Update conversion value if provided
+      if (conversionValue != null) {
+        await updateConversionValue(conversionValue);
+      }
+    }
+
+    // Log the event with the appropriate parameters
+    await _facebookAppEvents.logEvent(
+      name: name,
+      parameters: params.isNotEmpty ? params : null,
+    );
+  }
+
   // Basic events
   Future<void> logActivateApp() async {
-    await _initialize();
-    await _facebookAppEvents.logEvent(
+    await _logEventCore(
       name: 'fb_mobile_activate_app',
     );
   }
@@ -32,9 +79,22 @@ class FacebookAppEventsService {
   // Registration event - used in app_manager.dart
   Future<void> logCompleteRegistration({String? registrationMethod}) async {
     await _initialize();
-    await _facebookAppEvents.logCompletedRegistration(
-      registrationMethod: registrationMethod,
-    );
+
+    if (Platform.isIOS) {
+      // For iOS, use the SKAdNetwork schema
+      await _logEventCore(
+        name: 'fb_mobile_complete_registration',
+        parameters: {
+          'registration_method': registrationMethod ?? 'not_specified',
+        },
+        conversionValue: _registrationConversionValue,
+      );
+    } else {
+      // For Android and other platforms, use the standard API
+      await _facebookAppEvents.logCompletedRegistration(
+        registrationMethod: registrationMethod,
+      );
+    }
   }
 
   // Content view event - used in fortune_view_model.dart
@@ -43,7 +103,6 @@ class FacebookAppEventsService {
     required String contentId,
     Map<String, dynamic>? parameters,
   }) async {
-    await _initialize();
     final Map<String, dynamic> params = {
       'content_type': contentType,
       'content_id': contentId,
@@ -53,7 +112,7 @@ class FacebookAppEventsService {
       params.addAll(parameters);
     }
 
-    await _facebookAppEvents.logEvent(
+    await _logEventCore(
       name: 'fb_mobile_content_view',
       parameters: params,
     );
@@ -64,8 +123,7 @@ class FacebookAppEventsService {
     required String eventName,
     Map<String, dynamic>? parameters,
   }) async {
-    await _initialize();
-    await _facebookAppEvents.logEvent(
+    await _logEventCore(
       name: eventName,
       parameters: parameters,
     );
@@ -107,6 +165,8 @@ class FacebookAppEventsService {
     Map<String, dynamic>? parameters,
   }) async {
     await _initialize();
+
+    // Create base parameters
     final Map<String, dynamic> params = {
       'product_id': productId ?? '',
       'price': price,
@@ -116,11 +176,21 @@ class FacebookAppEventsService {
       params.addAll(parameters);
     }
 
-    await _facebookAppEvents.logPurchase(
-      amount: price,
-      currency: currency,
-      parameters: params,
-    );
+    if (Platform.isIOS) {
+      // For iOS, use SKAdNetwork schema
+      await _logEventCore(
+        name: 'fb_mobile_purchase',
+        parameters: params,
+        conversionValue: _purchaseConversionValue,
+      );
+    } else {
+      // For Android and other platforms, use the standard API
+      await _facebookAppEvents.logPurchase(
+        amount: price,
+        currency: currency,
+        parameters: params,
+      );
+    }
   }
 
   // Simple purchase method - used in fortune_view_model.dart
@@ -129,8 +199,6 @@ class FacebookAppEventsService {
     String? productIdentifier,
     Map<String, dynamic>? parameters,
   }) async {
-    await _initialize();
-
     final Map<String, dynamic> params = {
       'product_id': productIdentifier ?? '',
     };
@@ -143,13 +211,14 @@ class FacebookAppEventsService {
       params.addAll(parameters);
     }
 
-    await _facebookAppEvents.logEvent(
+    await _logEventCore(
       name: 'Purchase',
       parameters: params,
+      conversionValue: Platform.isIOS ? _purchaseConversionValue : null,
     );
   }
 
-  // Subscription events - keep base method for completeness
+  // Subscription events
   Future<void> logSubscribe({
     required String subscriptionId,
     double? price,
@@ -157,6 +226,8 @@ class FacebookAppEventsService {
     Map<String, dynamic>? parameters,
   }) async {
     await _initialize();
+
+    // Create base parameters
     final Map<String, dynamic> params = {
       'subscription_id': subscriptionId,
     };
@@ -169,18 +240,28 @@ class FacebookAppEventsService {
       params.addAll(parameters);
     }
 
-    if (price != null && currency != null) {
-      await _facebookAppEvents.logPurchase(
-        amount: price,
-        currency: currency,
+    if (Platform.isIOS) {
+      // For iOS, use SKAdNetwork schema with conversion value
+      await _logEventCore(
+        name: 'Subscribe',
+        parameters: params,
+        conversionValue: _subscriptionConversionValue,
+      );
+    } else {
+      // For Android and other platforms, use standard APIs
+      if (price != null && currency != null) {
+        await _facebookAppEvents.logPurchase(
+          amount: price,
+          currency: currency,
+          parameters: params,
+        );
+      }
+
+      await _facebookAppEvents.logEvent(
+        name: 'Subscribe',
         parameters: params,
       );
     }
-
-    await _facebookAppEvents.logEvent(
-      name: 'Subscribe',
-      parameters: params,
-    );
   }
 
   // Simple subscription method - used in iap_utils.dart
@@ -189,8 +270,6 @@ class FacebookAppEventsService {
     String? priceString,
     Map<String, dynamic>? parameters,
   }) async {
-    await _initialize();
-
     final Map<String, dynamic> params = {
       'subscription_id': subscriptionId,
     };
@@ -203,10 +282,26 @@ class FacebookAppEventsService {
       params.addAll(parameters);
     }
 
-    await _facebookAppEvents.logEvent(
+    await _logEventCore(
       name: 'Subscribe',
       parameters: params,
+      conversionValue: Platform.isIOS ? _subscriptionConversionValue : null,
     );
+  }
+
+  // SKAdNetwork conversion value update
+  Future<void> updateConversionValue(int value) async {
+    if (!Platform.isIOS) return;
+
+    try {
+      await _facebookAppEvents.logEvent(
+        name: 'fb_mobile_update_conversion_value',
+        parameters: {'value': value.toString(), 'schema': _skadNetworkSchema},
+      );
+      debugPrint('Updated SKAdNetwork conversion value to: $value');
+    } catch (e) {
+      debugPrint('Error updating SKAdNetwork conversion value: $e');
+    }
   }
 
   // Privacy methods

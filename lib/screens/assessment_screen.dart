@@ -4,10 +4,12 @@ import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
 import '../helpers/iap_utils.dart';
+import '../helpers/constants.dart';
 import '../providers/entitlement_provider.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
 import '../services/user_service.dart';
+import '../services/facebook_app_events_service.dart';
 
 class AssessmentScreen extends StatefulWidget {
   const AssessmentScreen({super.key});
@@ -20,6 +22,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   final CompatibilityDataRepository _repository =
       getIt<CompatibilityDataRepository>();
   final UserService _userService = getIt<UserService>();
+  final FacebookAppEventsService _facebookEvents =
+      getIt<FacebookAppEventsService>();
   Map<String, Map<String, dynamic>> _improvementPlans = {};
   Map<String, String> _cachedPrices = {};
 
@@ -28,6 +32,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     super.initState();
     _loadImprovementPlans();
     _fetchPricesIfNeeded();
+
+    // Track screen view
+    _facebookEvents.logViewContent(
+      contentType: 'screen',
+      contentId: 'assessment_screen',
+    );
   }
 
   Future<void> _loadImprovementPlans() async {
@@ -66,6 +76,20 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     bool success = await IAPUtils.handlePurchase(context, subscriptionType);
     if (success) {
       await _userService.updateSubscriptionHistory(subscriptionType);
+
+      // Track subscription with Facebook
+      String? priceString = _cachedPrices[
+          subscriptionType == PurchaseTexts.annual
+              ? PurchaseTexts.annualPackageId
+              : PurchaseTexts.monthlyPackageId];
+
+      if (priceString != null) {
+        await _facebookEvents.logSubscribeWithPriceString(
+          subscriptionId: subscriptionType,
+          priceString: priceString,
+          parameters: {'plan_id': planId},
+        );
+      }
 
       // Mark the plan as opened and navigate to it
       await _repository.markPlanAsOpened(planId);
