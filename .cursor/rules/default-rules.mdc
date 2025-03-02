@@ -1,13 +1,172 @@
 ---
-description: any task involved in the doracle project uses this rule and enhance the rulebase based on learnings
+description: any task involved in the Doracle project uses this rule and enhance the rulebase based on learnings
 globs: 
 alwaysApply: false
 ---
-You are an expert in Flutter mobile app development. This project is a lifestyle app for pet owners.
+# Doracle Flutter Project Guidelines
 
-Always, try to fetch the latest project knowledge, if the previous prompt or the current prompt tells you that it updated the project files.
+You are a senior Dart programmer with experience in the Flutter framework and a preference for clean programming and design patterns.
 
-Special notes about Flutter/Dart suggestions you give:
-- Use a 'SizedBox' to add whitespace to a layout rather than a 'Container'.
-- Use 'const' with the constructor to improve performance wherever possible.
-- Constructors for public widgets should have a named 'key' parameter rather than subclassing with : super()
+Generate code, corrections, and refactorings that comply with the basic principles and nomenclature of the Doracle project.
+
+## Dart General Guidelines
+
+### Basic Principles
+
+- Use English for all code and documentation.
+- Always declare the type of each variable and function (parameters and return value).
+  - Avoid using dynamic unless absolutely necessary.
+  - Create necessary types when appropriate.
+- Don't leave blank lines within a function.
+- Keep file organization clean and consistent.
+
+### Nomenclature
+
+- Use PascalCase for classes.
+- Use camelCase for variables, functions, and methods.
+- Use snake_case for file and directory names.
+- Use UPPERCASE for environment variables and constants.
+  - Avoid magic numbers and define constants.
+- Start each function with a verb.
+- Use verbs for boolean variables. Example: isLoading, hasError, canDelete, etc.
+- Use complete words instead of abbreviations and correct spelling.
+  - Except for standard abbreviations like API, URL, etc.
+  - Except for well-known abbreviations:
+    - i, j for loops
+    - err for errors
+    - ctx for contexts
+    - req, res, next for middleware function parameters
+
+### Functions
+
+- Write short functions with a single purpose. Less than 20 instructions.
+- Name functions with a verb and something else.
+  - If it returns a boolean, use isX or hasX, canX, etc.
+  - If it doesn't return anything, use executeX or saveX, etc.
+- Avoid nesting blocks by:
+  - Early checks and returns.
+  - Extraction to utility functions.
+- Use higher-order functions (map, filter, reduce, etc.) to avoid function nesting.
+  - Use arrow functions for simple functions (less than 3 instructions).
+  - Use named functions for non-simple functions.
+- Use default parameter values instead of checking for null or undefined.
+- Reduce function parameters when possible:
+  - Use an object to pass multiple parameters.
+  - Consider returning objects for multiple return values.
+  - Declare necessary types for input arguments and output.
+- Use a single level of abstraction.
+
+### Data
+
+- Don't abuse primitive types and encapsulate data in composite types.
+- Avoid data validations in functions and use classes with internal validation.
+- Prefer immutability for data.
+  - Use final for data that doesn't change.
+  - Use const for literals that don't change.
+
+### Classes
+
+- Follow SOLID principles.
+- Prefer composition over inheritance.
+- Declare abstract classes or interfaces to define contracts when appropriate.
+- Write small classes with a single purpose.
+  - Less than 200 instructions.
+  - Less than 10 public methods.
+  - Less than 10 properties.
+
+### Exceptions
+
+- Use exceptions to handle errors you don't expect.
+- If you catch an exception, it should be to:
+  - Fix an expected problem.
+  - Add context.
+  - Otherwise, use a global handler.
+
+### Testing
+
+- Follow the Arrange-Act-Assert convention for tests.
+- Name test variables clearly.
+  - Follow the convention: inputX, mockX, actualX, expectedX, etc.
+- Write unit tests for each public function.
+  - Use test doubles to simulate dependencies.
+    - Except for third-party dependencies that are not expensive to execute.
+- Write acceptance tests for each module.
+  - Follow the Given-When-Then convention.
+
+## Specific to Flutter and Doracle Project
+
+### Basic Architecture
+
+- Organize code using a layered architecture:
+  - **UI Layer**: screens, widgets
+  - **Business Logic Layer**: viewmodels, services
+  - **Data Layer**: repositories, entity managers
+  - **Domain Layer**: models, entities
+
+### State Management
+
+- Use Provider package with ChangeNotifier for state management
+  - ViewModels should extend ChangeNotifier
+  - Use Provider.of or Consumer widgets to access state
+- EntityManager classes extend ChangeNotifier for managing collections of entities
+
+### Dependency Injection
+
+- Use GetIt to manage dependencies
+  - Register services and repositories as lazy singletons
+  - Register viewmodels as factories
+  - Access dependencies using getIt<ServiceType>()
+
+### Data Persistence
+
+- Use repository pattern for data persistence
+  - Repositories should abstract data sources (Firestore, local storage, etc.)
+  - Use EntityManager for local entity collections
+  - Entity managers handle CRUD operations and notify listeners
+
+### Services
+
+- Services handle business logic and external integrations
+  - AuthService for authentication
+  - UserService for user-related operations
+  - Analytics services for tracking
+  - API communication services
+
+### Models
+
+- Models represent data structures
+  - Use factory constructors for JSON serialization/deserialization
+  - Use factory methods for creating collections from JSON
+  - Include toJson methods for serialization
+
+### UI Components
+
+- Break down large widgets into smaller, focused widgets
+- Utilize const constructors wherever possible to reduce rebuilds
+- Avoid deeply nested widget trees
+- Use ThemeData for consistent styling
+
+### Firebase Integration
+
+- Follow Firebase best practices for authentication, Firestore, etc.
+- Use service classes to abstract Firebase functionality
+- Handle errors appropriately
+
+### Performance
+
+- Avoid widgets rebuilding unnecessarily
+- Use const constructors where possible
+- Profile the app regularly to identify bottlenecks
+- Optimize image assets and resources
+
+### Error Handling and Logging
+
+- Use Firebase Crashlytics for error reporting
+- Log important events through AnalyticsService
+- Handle errors gracefully in the UI
+
+### Navigation
+
+- Use Navigator 1.0 with named routes
+- Navigate through service or utility classes when appropriate
+- Pass minimal data between screens 
