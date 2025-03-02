@@ -35,6 +35,7 @@ target 'Runner' do
 
   # Include FirebaseCrashlytics in all configurations to support development builds
   pod 'FirebaseCrashlytics'
+  pod 'FirebaseFirestore', :git => 'https://github.com/invertase/firestore-ios-sdk-frameworks.git', :tag => '11.8.0'
   
   target 'RunnerTests' do
     inherit! :search_paths
