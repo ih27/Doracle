@@ -48,7 +48,11 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        manifestPlaceholders += [MAPS_API_KEY: project.findProperty("MAPS_API_KEY") ?: ""]
+        manifestPlaceholders += [
+            MAPS_API_KEY: project.findProperty("manifestPlaceholders += [MAPS_API_KEY: project.findProperty("MAPS_API_KEY") ?: ""]") ?: "",
+            FACEBOOK_APP_ID: project.findProperty("FACEBOOK_APP_ID") ?: "",
+            FACEBOOK_CLIENT_TOKEN: project.findProperty("FACEBOOK_CLIENT_TOKEN") ?: ""
+        ]
     }
 
     signingConfigs {

@@ -56,6 +56,8 @@ jobs:
           echo "${{secrets.GCP_SA_KEY}}" > gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
           echo "MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> android/local.properties
+          echo "FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }}" >> android/local.properties
+          echo "FACEBOOK_CLIENT_TOKEN=${{ secrets.FACEBOOK_CLIENT_TOKEN }}" >> android/local.properties
 
       - name: Get version.txt
         uses: actions/download-artifact@v4
