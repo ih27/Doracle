@@ -25,7 +25,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.2.2"
       - name: Bundle install for iOS Gemfile
         timeout-minutes: 5
         run: cd ./ios && bundle install
