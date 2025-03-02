@@ -32,9 +32,23 @@
 				<string>com.googleusercontent.apps.40432187550-hdtvr8m4vcp4cq2ao67ls54qfhd6j24c</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb[YOUR_FACEBOOK_APP_ID]</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FacebookAppID</key>
+	<string>[YOUR_FACEBOOK_APP_ID]</string>
+	<key>FacebookClientToken</key>
+	<string>[YOUR_FACEBOOK_CLIENT_TOKEN]</string>
+	<key>FacebookDisplayName</key>
+	<string>Doracle</string>
 	<key>GIDClientID</key>
 	<string>40432187550-hdtvr8m4vcp4cq2ao67ls54qfhd6j24c.apps.googleusercontent.com</string>
 	<key>GoogleMapsApiKey</key>

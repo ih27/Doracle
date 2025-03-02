@@ -19,6 +19,7 @@ import 'services/auth_service.dart';
 import 'services/first_launch_service.dart';
 import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
+import 'services/facebook_app_events_service.dart';
 import 'widgets/initial_owner_create.dart';
 
 class AppManager extends StatefulWidget {
@@ -61,21 +62,30 @@ class _AppManagerState extends State<AppManager> {
       stream: _authService.authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
+          return const Center(
+              child: CircularProgressIndicator(
+            color: AppTheme.primaryColor,
+          ));
         } else if (snapshot.hasData) {
           debugPrint('Auth userId: ${snapshot.data!.uid}');
           return FutureBuilder(
             future: _loadUser(snapshot.data!.uid),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
+                return const Center(
+                    child: CircularProgressIndicator(
+                  color: AppTheme.primaryColor,
+                ));
               } else {
                 return FutureBuilder<bool>(
                   future: _checkOwnerExists(),
                   builder: (context, ownerSnapshot) {
                     if (ownerSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
+                      return const Center(
+                          child: CircularProgressIndicator(
+                        color: AppTheme.primaryColor,
+                      ));
                     } else if (ownerSnapshot.data == true) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         navigatorKey.currentState?.pushAndRemoveUntil(
@@ -88,7 +98,10 @@ class _AppManagerState extends State<AppManager> {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _handleInitialOwnerCreation(context);
                       });
-                      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor,));
+                      return const Center(
+                          child: CircularProgressIndicator(
+                        color: AppTheme.primaryColor,
+                      ));
                     }
                   },
                 );
@@ -118,6 +131,13 @@ class _AppManagerState extends State<AppManager> {
     setState(() {
       _isFirstLaunch = false;
     });
+
+    // Log tutorial completion to Facebook
+    final facebookEvents = getIt<FacebookAppEventsService>();
+    await facebookEvents.logCustomEvent(
+      eventName: 'fb_mobile_tutorial_completion',
+      parameters: {'success': true},
+    );
   }
 
   Future<void> _navigateToSignIn(BuildContext context,
@@ -225,6 +245,10 @@ class _AppManagerState extends State<AppManager> {
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
       _analytics.logSignUp(signUpMethod: 'email');
+
+      // Log registration completion to Facebook
+      final facebookEvents = getIt<FacebookAppEventsService>();
+      await facebookEvents.logCompleteRegistration(registrationMethod: 'email');
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);

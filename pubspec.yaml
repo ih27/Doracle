@@ -18,6 +18,9 @@ dependencies:
   firebase_app_check: ^0.3.2+4
   cloud_firestore: ^5.6.5
   
+  # Meta/Facebook marketing
+  facebook_app_events: ^0.19.5
+  
   flutter_dotenv: ^5.1.0
   google_sign_in: ^6.2.1
   google_fonts: ^6.2.1

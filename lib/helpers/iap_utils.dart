@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../services/revenuecat_service.dart';
+import '../services/facebook_app_events_service.dart';
 import '../widgets/go_deeper_overlay.dart';
 import '../widgets/subscribe_success_popup.dart';
 import 'purchase_utils.dart';
@@ -69,6 +70,18 @@ class IAPUtils {
       if (!await _purchaseService.buySubscription(subscriptionType)) {
         return false;
       }
+
+      // Get the price from the RevenueCat service
+      final priceMap = await _purchaseService.fetchSubscriptionPrices();
+      final priceString = priceMap[subscriptionType];
+
+      // Log subscription to Facebook with the exact price string from RevenueCat
+      final facebookEvents = getIt<FacebookAppEventsService>();
+      await facebookEvents.logSubscribeWithPriceString(
+        subscriptionId: subscriptionType,
+        priceString: priceString,
+      );
+
       return true;
     } catch (e) {
       debugPrint('Purchase error: $e');

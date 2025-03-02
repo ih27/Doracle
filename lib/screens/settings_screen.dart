@@ -13,6 +13,7 @@ import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import 'feedthedog_screen.dart';
 import 'unlockallfeatures_screen.dart';
+import '../services/facebook_app_events_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;
@@ -402,6 +403,14 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   Future<void> _handleRateUs() async {
     final InAppReview inAppReview = InAppReview.instance;
+
+    // Log rating event to Facebook
+    final facebookEvents = getIt<FacebookAppEventsService>();
+    await facebookEvents.logCustomEvent(
+      eventName: 'fb_mobile_rate',
+      parameters: {'content_type': 'app'},
+    );
+
     await inAppReview.openStoreListing(appStoreId: '6504555731');
   }
 

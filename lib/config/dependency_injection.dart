@@ -13,6 +13,7 @@ import '../services/auth_service.dart';
 import '../services/compatibility_content_service.dart';
 import '../services/compatibility_score_service.dart';
 import '../services/daily_horoscope_service.dart';
+import '../services/facebook_app_events_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
@@ -51,6 +52,8 @@ void setupDependencies() {
   getIt.registerLazySingleton<OwnerManager>(() => OwnerManager());
 
   // Services
+  getIt.registerLazySingleton<FacebookAppEventsService>(
+      () => FacebookAppEventsService());
   getIt.registerLazySingleton<AIPromptGenerationService>(
       () => AIPromptGenerationService());
   getIt.registerLazySingleton<AnalyticsService>(() => AnalyticsService());

@@ -5,6 +5,8 @@ import '../config/theme.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/dependency_injection.dart';
+import '../services/facebook_app_events_service.dart';
 
 class MapOverlay extends StatefulWidget {
   final Function(LatLng, String) onLocationSelected;
@@ -92,6 +94,17 @@ class _MapOverlayState extends State<MapOverlay> {
                           mapController.animateCamera(
                               CameraUpdate.newLatLngZoom(newLocation, 14.0));
                           _getAddressFromLatLng(newLocation);
+
+                          // Log search event to Facebook
+                          final facebookEvents =
+                              getIt<FacebookAppEventsService>();
+                          facebookEvents.logCustomEvent(
+                            eventName: 'fb_mobile_search',
+                            parameters: {
+                              'search_string': prediction.description,
+                              'content_type': 'location',
+                            },
+                          );
                         }
                       }
                     },

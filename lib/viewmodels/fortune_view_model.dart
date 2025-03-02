@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import '../helpers/constants.dart';
 import '../providers/entitlement_provider.dart';
+import '../services/facebook_app_events_service.dart';
 import '../services/fortune_teller_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
 import '../repositories/fortune_content_repository.dart';
+import 'package:get_it/get_it.dart';
 
 class FortuneViewModel extends ChangeNotifier {
   final FortuneContentRepository _fortuneContentRepository;
@@ -15,6 +17,8 @@ class FortuneViewModel extends ChangeNotifier {
   final EntitlementProvider _entitlementProvider;
   bool get isSubscribed => _entitlementProvider.isEntitled;
   final FortuneTeller _fortuneTeller;
+  final FacebookAppEventsService _facebookAppEvents =
+      GetIt.instance<FacebookAppEventsService>();
 
   bool isHome = true;
   String welcomeMessage = '';
@@ -82,6 +86,13 @@ class FortuneViewModel extends ChangeNotifier {
     }
 
     _hapticService.success();
+
+    // Track content view event for analytics
+    _facebookAppEvents.logViewContent(
+      contentType: 'fortune_reading',
+      contentId: 'fortune_question',
+    );
+
     return _fortuneTeller.getFortune(question);
   }
 
@@ -121,6 +132,20 @@ class FortuneViewModel extends ChangeNotifier {
       }
       await _userService.updatePurchaseHistory(questionCount);
       _remainingQuestionsCount = getRemainingQuestionsCount();
+
+      // Get price string from cached prices
+      final String? priceString = cachedPrices[questionCount.toString()];
+
+      // Log the purchase event to Facebook with the actual price string
+      _facebookAppEvents.logPurchaseWithPriceString(
+        priceString: priceString,
+        productIdentifier: questionCount.toString(),
+        parameters: {
+          'question_count': questionCount,
+          'product_type': 'questions_pack',
+        },
+      );
+
       cachedPrices.clear();
       notifyListeners();
       return true;

@@ -170,3 +170,37 @@ Generate code, corrections, and refactorings that comply with the basic principl
 - Use Navigator 1.0 with named routes
 - Navigate through service or utility classes when appropriate
 - Pass minimal data between screens 
+
+# Continuous Learning and Adaptation
+
+### Rules Management
+
+- The official location for these rules is `.cursor/rules/default-rules.mdc` in the project root
+- Reference these rules using `@default-rules.mdc` when needed
+- Updates to these guidelines should be made directly to the `.cursor/rules/default-rules.mdc` file
+- All project contributors should follow these guidelines for consistency
+
+### Project Evolution
+
+- Apply new insights from our interactions to future suggestions
+- Prioritize patterns observed in recent code changes over general rules when relevant
+- Consider project-specific edge cases that may deviate from standard practices
+- Adjust recommendations based on feedback received in previous interactions
+
+### Context Awareness
+
+- Reference project environment details when appropriate (Flutter version, deployment targets)
+- Consider platform-specific implementation details for iOS and Android
+- Be aware of CI/CD pipeline requirements in the GitHub workflow files
+- Adapt recommendations to align with the observed project structure and naming patterns
+
+### Knowledge Transfer
+
+- Include explanations with recommendations to build understanding
+- Highlight potential improvements when suggesting solutions
+- Document decisions and patterns to maintain consistency across the codebase
+- Suggest refactoring opportunities that align with the evolving project architecture 
+
+
+
+
