@@ -38,6 +38,16 @@ platform :ios do
     commit = last_git_commit
     puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
 
+    # Print diagnostic information
+    puts "*** Environment Diagnostics ***"
+    sh("xcodebuild -version")
+    sh("pod --version")
+    sh("ruby --version")
+    sh("ls -la .symlinks/plugins/facebook_app_events/ios/ || echo 'facebook_app_events plugin not found'")
+    
+    # Check if FBAudienceNetwork version is correctly set
+    sh("grep -A 5 'FBAudienceNetwork' Podfile.lock || echo 'FBAudienceNetwork not found in Podfile.lock'")
+
     #read api key from app_store_connect_api_key lane variable
     api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
 
