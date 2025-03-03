@@ -63,18 +63,6 @@ post_install do |installer|
       
       # Force all Pods to use at least iOS 14.0
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
-      
-      # Add Swift linking flags to fix Swift symbol errors
-      if target.name == 'Runner' || target.name.include?('facebook') || target.name.include?('FBAudienceNetwork')
-        config.build_settings['SWIFT_VERSION'] = '5.0'
-        config.build_settings['LD_RUNPATH_SEARCH_PATHS'] = [
-          '$(inherited)',
-          '@executable_path/Frameworks'
-        ]
-        
-        # Add Swift standard libraries
-        config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
-      end
     end
   end
 end
