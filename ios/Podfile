@@ -27,24 +27,39 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
-# Override the FBAudienceNetwork dependency to use version 6.17.0
-# This will be applied regardless of what version the facebook_app_events plugin requests
-pre_install do |installer|
-  # Override all pods that depend on FBAudienceNetwork to use version 6.17.0
-  puts "Overriding FBAudienceNetwork dependency to version 6.17.0"
-  installer.pod_targets.each do |pod|
-    if pod.name.start_with?('facebook') || pod.dependencies.any? { |dep| dep.name == 'FBAudienceNetwork' }
-      puts "Found pod that depends on FBAudienceNetwork: #{pod.name}"
-      pod.specs.each do |spec|
-        if spec.dependencies.any? { |dep| dep.name == 'FBAudienceNetwork' }
-          puts "Overriding FBAudienceNetwork dependency in #{spec.name}"
-          spec.dependencies.each do |dep|
-            if dep.name == 'FBAudienceNetwork'
-              dep.requirement = Gem::Requirement.new('= 6.17.0')
-            end
-          end
-        end
-      end
+# Find and patch the facebook_app_events plugin podspec before Pod installation
+plugin_pods_path = File.expand_path('.symlinks/plugins', __dir__)
+puts "Searching for facebook_app_events plugin in #{plugin_pods_path}"
+
+# Find podspecs related to facebook
+Dir.glob("#{plugin_pods_path}/**/facebook*.podspec").each do |podspec_path|
+  puts "Found facebook-related podspec: #{podspec_path}"
+  content = File.read(podspec_path)
+  
+  # Check if this podspec depends on FBAudienceNetwork
+  if content.include?('FBAudienceNetwork')
+    puts "Podspec at '#{podspec_path}' depends on FBAudienceNetwork. Patching..."
+    
+    # Patterns to replace
+    patterns = [
+      ["'FBAudienceNetwork', '6.16'", "'FBAudienceNetwork', '6.17.0'"],
+      ['"FBAudienceNetwork", "6.16"', '"FBAudienceNetwork", "6.17.0"'],
+      ["'FBAudienceNetwork', '= 6.16'", "'FBAudienceNetwork', '= 6.17.0'"],
+      ['"FBAudienceNetwork", "= 6.16"', '"FBAudienceNetwork", "= 6.17.0"'],
+      ["'FBAudienceNetwork', '~> 6.16'", "'FBAudienceNetwork', '= 6.17.0'"],
+      ['"FBAudienceNetwork", "~> 6.16"', '"FBAudienceNetwork", "= 6.17.0"']
+    ]
+    
+    patched_content = content
+    patterns.each do |old_pattern, new_pattern|
+      patched_content = patched_content.gsub(old_pattern, new_pattern)
+    end
+    
+    if patched_content != content
+      File.write(podspec_path, patched_content)
+      puts "✅ Successfully patched #{podspec_path}"
+    else
+      puts "⚠️ No matching patterns found in #{podspec_path}"
     end
   end
 end

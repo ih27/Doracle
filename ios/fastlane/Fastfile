@@ -57,6 +57,61 @@ platform :ios do
     puts "*** Podfile Content ***"
     sh("cat ../Podfile")
 
+    # Patch facebook_app_events podspec to use FBAudienceNetwork 6.17.0
+    puts "*** Patching facebook_app_events podspec ***"
+    
+    # First attempt: Use the Ruby script
+    sh("ruby ../scripts/patch_facebook_podspec.rb") rescue puts "Warning: Podspec patching script failed, trying direct modification"
+    
+    # Second attempt: Direct in-line patching as a fallback
+    begin
+      puts "*** Trying direct modification of podspec file ***"
+      facebook_podspec_path = nil
+      
+      # Try to find the podspec
+      plugins_dir = "../.symlinks/plugins"
+      facebook_plugin_dir = "#{plugins_dir}/facebook_app_events"
+      
+      if Dir.exist?(facebook_plugin_dir)
+        ios_dir = "#{facebook_plugin_dir}/ios"
+        if Dir.exist?(ios_dir)
+          podspec_files = Dir.glob("#{ios_dir}/*.podspec")
+          facebook_podspec_path = podspec_files.first unless podspec_files.empty?
+        end
+      end
+      
+      # If podspec was found, patch it
+      if facebook_podspec_path && File.exist?(facebook_podspec_path)
+        puts "Found podspec at #{facebook_podspec_path}"
+        content = File.read(facebook_podspec_path)
+        
+        # Check if it already has the correct version
+        if content.include?("'FBAudienceNetwork', '6.17.0'") || content.include?('"FBAudienceNetwork", "6.17.0"')
+          puts "Podspec already has correct version"
+        else
+          # Try various patterns
+          new_content = content.gsub(/'FBAudienceNetwork',\s*'[^']*'/, "'FBAudienceNetwork', '6.17.0'")
+          new_content = new_content.gsub(/"FBAudienceNetwork",\s*"[^"]*"/, '"FBAudienceNetwork", "6.17.0"')
+          
+          # Write back if changed
+          if new_content != content
+            File.write(facebook_podspec_path, new_content)
+            puts "Successfully patched #{facebook_podspec_path}"
+          else
+            puts "No changes made to the podspec file"
+          end
+        end
+      else
+        puts "Could not find facebook_app_events podspec"
+      end
+    rescue => e
+      puts "Error during direct patching: #{e.message}"
+    end
+
+    # Check for facebook_app_events plugin podspec
+    puts "*** Checking for facebook_app_events plugin podspec ***"
+    sh("find ../.symlinks -name \"*.podspec\" | grep facebook") rescue puts "No facebook podspecs found yet"
+
     #read api key from app_store_connect_api_key lane variable
     api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
 
@@ -92,6 +147,5 @@ platform :ios do
 
     puts "*** Upload app to testflight ***"
     upload_to_testflight(api_key: api_key)
-
   end
 end
