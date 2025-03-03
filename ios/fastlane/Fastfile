@@ -55,7 +55,7 @@ platform :ios do
     
     # Print Podfile content for debugging
     puts "*** Podfile Content ***"
-    sh("cat Podfile")
+    sh("cat ../Podfile")
 
     #read api key from app_store_connect_api_key lane variable
     api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
