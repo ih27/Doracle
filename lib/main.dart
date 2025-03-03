@@ -14,6 +14,7 @@ import 'config/theme.dart';
 import 'app_manager.dart';
 import 'global_key.dart';
 import 'providers/entitlement_provider.dart';
+import 'services/adjust_service.dart';
 import 'services/analytics_service.dart';
 import 'services/facebook_app_events_service.dart';
 import 'services/firestore_service.dart';
@@ -70,6 +71,9 @@ Future<void> _setupErrorReporting() async {
 Future<void> _initializeApp() async {
   // Initialize Analytics service with ATT permission
   await getIt<AnalyticsService>().initialize();
+
+  // Initialize Adjust SDK
+  await getIt<AdjustService>().initialize();
 
   // Log app activation event
   await getIt<FacebookAppEventsService>().logActivateApp();

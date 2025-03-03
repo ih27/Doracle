@@ -7,6 +7,7 @@ import '../repositories/firestore_fortune_content_repository.dart';
 import '../repositories/firestore_user_repository.dart';
 import '../repositories/fortune_content_repository.dart';
 import '../repositories/user_repository.dart';
+import '../services/adjust_service.dart';
 import '../services/ai_prompt_generation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
@@ -52,6 +53,7 @@ void setupDependencies() {
   getIt.registerLazySingleton<OwnerManager>(() => OwnerManager());
 
   // Services
+  getIt.registerLazySingleton<AdjustService>(() => AdjustService());
   getIt.registerLazySingleton<FacebookAppEventsService>(
       () => FacebookAppEventsService());
   getIt.registerLazySingleton<AIPromptGenerationService>(

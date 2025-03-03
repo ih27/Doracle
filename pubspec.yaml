@@ -9,6 +9,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
 
+  # Attribution and analytics
+
   # Firebase dependencies - updated to latest versions
   firebase_core: ^3.12.0
   firebase_auth: ^5.5.0
@@ -52,6 +54,7 @@ dependencies:
   provider: ^6.1.2
   flutter_keyboard_visibility: ^6.0.0
   device_info_plus: ^10.1.2
+  adjust_sdk: ^5.1.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0
