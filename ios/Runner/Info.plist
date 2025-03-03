@@ -47,6 +47,10 @@
 	<string>$(FACEBOOK_APP_ID)</string>
 	<key>FacebookClientToken</key>
 	<string>$(FACEBOOK_CLIENT_TOKEN)</string>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<true/>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
 	<key>FacebookDisplayName</key>
 	<string>Doracle</string>
 	<key>GIDClientID</key>

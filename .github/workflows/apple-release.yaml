@@ -7,12 +7,38 @@ on: #workflow_dispatch
 
 jobs:
   build-and-deploy-ios:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Set up git and fetch all history for all branches and tags
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Check available Xcode versions and select Xcode 16.2
+        run: |
+          echo "Available Xcode versions:"
+          ls -la /Applications/ | grep Xcode
+          
+          # Check if Xcode 16.2 exists
+          if [ -d "/Applications/Xcode_16.2.app" ]; then
+            echo "Selecting Xcode 16.2"
+            sudo xcode-select -s /Applications/Xcode_16.2.app
+          elif [ -d "/Applications/Xcode.app" ]; then
+            echo "Xcode 16.2 not found, checking default Xcode version"
+            sudo xcode-select -s /Applications/Xcode.app
+          else
+            echo "Searching for any Xcode version"
+            XCODE_PATH=$(find /Applications -maxdepth 1 -name "Xcode*.app" | head -n 1)
+            if [ -n "$XCODE_PATH" ]; then
+              echo "Selecting $XCODE_PATH"
+              sudo xcode-select -s "$XCODE_PATH"
+            else
+              echo "No Xcode installation found!"
+              exit 1
+            fi
+          fi
+          
+          # Verify selected Xcode version
+          xcodebuild -version
       - name: Print environment information
         run: |
           echo "macOS version:"

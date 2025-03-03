@@ -43,10 +43,19 @@ platform :ios do
     sh("xcodebuild -version")
     sh("pod --version")
     sh("ruby --version")
-    sh("ls -la .symlinks/plugins/facebook_app_events/ios/ || echo 'facebook_app_events plugin not found'")
     
-    # Check if FBAudienceNetwork version is correctly set
-    sh("grep -A 5 'FBAudienceNetwork' Podfile.lock || echo 'FBAudienceNetwork not found in Podfile.lock'")
+    # Print Swift version
+    sh("xcrun swift --version || echo 'Swift command not found'")
+    
+    # Print system architecture
+    sh("uname -m")
+    
+    # Print CocoaPods environment
+    sh("pod env || echo 'pod env command not available'")
+    
+    # Print Podfile content for debugging
+    puts "*** Podfile Content ***"
+    sh("cat Podfile")
 
     #read api key from app_store_connect_api_key lane variable
     api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
