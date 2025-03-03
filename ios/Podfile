@@ -27,6 +27,18 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+# Modify the facebook_app_events.podspec file to use FBAudienceNetwork 6.17.0
+podspec_path = File.join(File.dirname(__FILE__), '.symlinks', 'plugins', 'facebook_app_events', 'ios', 'facebook_app_events.podspec')
+if File.exist?(podspec_path)
+  puts "Modifying #{podspec_path} to use FBAudienceNetwork 6.17.0"
+  podspec_content = File.read(podspec_path)
+  modified_content = podspec_content.gsub("s.dependency 'FBAudienceNetwork', '6.16'", "s.dependency 'FBAudienceNetwork', '6.17.0'")
+  File.write(podspec_path, modified_content)
+  puts "Successfully modified facebook_app_events.podspec"
+else
+  puts "Warning: Could not find facebook_app_events.podspec at #{podspec_path}"
+end
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
