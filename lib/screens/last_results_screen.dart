@@ -3,6 +3,7 @@ import '../config/theme.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
 import '../helpers/compatibility_utils.dart';
+import '../services/unified_analytics_service.dart';
 
 class LastResultsScreen extends StatefulWidget {
   const LastResultsScreen({super.key});
@@ -14,11 +15,15 @@ class LastResultsScreen extends StatefulWidget {
 class _LastResultsScreenState extends State<LastResultsScreen> {
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
   List<Map<String, dynamic>> _compatibilityScores = [];
 
   @override
   void initState() {
     super.initState();
+
+    _analytics.logScreenView(screenName: 'last_results_screen');
+
     _loadCompatibilityScores();
   }
 

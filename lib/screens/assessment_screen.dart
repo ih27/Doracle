@@ -9,7 +9,7 @@ import '../providers/entitlement_provider.dart';
 import '../repositories/compatibility_data_repository.dart';
 import '../config/dependency_injection.dart';
 import '../services/user_service.dart';
-import '../services/facebook_app_events_service.dart';
+import '../services/unified_analytics_service.dart';
 
 class AssessmentScreen extends StatefulWidget {
   const AssessmentScreen({super.key});
@@ -22,8 +22,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   final CompatibilityDataRepository _repository =
       getIt<CompatibilityDataRepository>();
   final UserService _userService = getIt<UserService>();
-  final FacebookAppEventsService _facebookEvents =
-      getIt<FacebookAppEventsService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
   Map<String, Map<String, dynamic>> _improvementPlans = {};
   Map<String, String> _cachedPrices = {};
 
@@ -34,10 +33,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     _fetchPricesIfNeeded();
 
     // Track screen view
-    _facebookEvents.logViewContent(
-      contentType: 'screen',
-      contentId: 'assessment_screen',
-    );
+    _analytics.logScreenView(screenName: 'assessment_screen');
   }
 
   Future<void> _loadImprovementPlans() async {
@@ -77,14 +73,14 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     if (success) {
       await _userService.updateSubscriptionHistory(subscriptionType);
 
-      // Track subscription with Facebook
+      // Track subscription with unified analytics
       String? priceString = _cachedPrices[
           subscriptionType == PurchaseTexts.annual
               ? PurchaseTexts.annualPackageId
               : PurchaseTexts.monthlyPackageId];
 
       if (priceString != null) {
-        await _facebookEvents.logSubscribeWithPriceString(
+        _analytics.logSubscriptionWithPriceString(
           subscriptionId: subscriptionType,
           priceString: priceString,
           parameters: {'plan_id': planId},

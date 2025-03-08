@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/dependency_injection.dart';
 import '../services/revenuecat_service.dart';
-import '../services/facebook_app_events_service.dart';
+import '../services/unified_analytics_service.dart';
 import '../widgets/go_deeper_overlay.dart';
 import '../widgets/subscribe_success_popup.dart';
 import 'purchase_utils.dart';
@@ -75,9 +75,9 @@ class IAPUtils {
       final priceMap = await _purchaseService.fetchSubscriptionPrices();
       final priceString = priceMap[subscriptionType];
 
-      // Log subscription to Facebook with the exact price string from RevenueCat
-      final facebookEvents = getIt<FacebookAppEventsService>();
-      await facebookEvents.logSubscribeWithPriceString(
+      // Log subscription with unified analytics
+      final analytics = getIt<UnifiedAnalyticsService>();
+      await analytics.logSubscriptionWithPriceString(
         subscriptionId: subscriptionType,
         priceString: priceString,
       );

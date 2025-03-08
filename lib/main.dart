@@ -14,11 +14,9 @@ import 'config/theme.dart';
 import 'app_manager.dart';
 import 'global_key.dart';
 import 'providers/entitlement_provider.dart';
-import 'services/adjust_service.dart';
-import 'services/analytics_service.dart';
-import 'services/facebook_app_events_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
+import 'services/unified_analytics_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,14 +67,8 @@ Future<void> _setupErrorReporting() async {
 }
 
 Future<void> _initializeApp() async {
-  // Initialize Analytics service with ATT permission
-  await getIt<AnalyticsService>().initialize();
-
-  // Initialize Adjust SDK
-  await getIt<AdjustService>().initialize();
-
-  // Log app activation event
-  await getIt<FacebookAppEventsService>().logActivateApp();
+  // Initialize Unified Analytics Service (handles all analytics initialization)
+  await getIt<UnifiedAnalyticsService>().initialize();
 
   // Initialize HapticService early
   await getIt<HapticService>().initialize();

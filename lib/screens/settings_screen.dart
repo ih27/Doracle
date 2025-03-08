@@ -13,7 +13,7 @@ import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import 'feedthedog_screen.dart';
 import 'unlockallfeatures_screen.dart';
-import '../services/facebook_app_events_service.dart';
+import '../services/unified_analytics_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback onPurchaseComplete;
@@ -32,8 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   final UserService userService = getIt<UserService>();
   final AuthService authService = getIt<AuthService>();
   final RevenueCatService purchaseService = getIt<RevenueCatService>();
-  final FacebookAppEventsService _facebookEvents =
-      getIt<FacebookAppEventsService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
   bool _notificationsEnabled = false;
 
   @override
@@ -43,10 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     _checkNotificationPermission();
 
     // Track screen view
-    _facebookEvents.logViewContent(
-      contentType: 'screen',
-      contentId: 'settings_screen',
-    );
+    _analytics.logScreenView(screenName: 'settings_screen');
   }
 
   @override
@@ -412,9 +408,9 @@ class _SettingsScreenState extends State<SettingsScreen>
   Future<void> _handleRateUs() async {
     final InAppReview inAppReview = InAppReview.instance;
 
-    // Log rating event to Facebook
-    await _facebookEvents.logCustomEvent(
-      eventName: 'fb_mobile_rate',
+    // Log rating event without awaiting it
+    _analytics.logEvent(
+      name: 'rate_app',
       parameters: {'content_type': 'app'},
     );
 

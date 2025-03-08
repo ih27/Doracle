@@ -17,6 +17,7 @@ import '../repositories/compatibility_data_repository.dart';
 import '../services/compatibility_content_service.dart';
 import '../services/compatibility_score_service.dart';
 import '../services/user_service.dart';
+import '../services/unified_analytics_service.dart';
 
 class CompatibilityResultScreen extends StatefulWidget {
   final dynamic entity1;
@@ -43,6 +44,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
   final CompatibilityDataRepository _compatibilityDataRepository =
       getIt<CompatibilityDataRepository>();
   final UserService _userService = getIt<UserService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
 
   Map<String, dynamic> _compatibilityResult = {};
   bool _isLoading = true;
@@ -60,6 +62,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
     _initializeData();
     _fetchPricesIfNeeded();
     _checkPlanStatus();
+    _analytics.logScreenView(screenName: 'compatibility_result_screen');
   }
 
   Future<void> _checkPlanStatus() async {

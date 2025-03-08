@@ -7,7 +7,7 @@ import '../models/owner_model.dart';
 import '../models/pet_model.dart';
 import '../config/dependency_injection.dart';
 import '../services/daily_horoscope_service.dart';
-import '../services/facebook_app_events_service.dart';
+import '../services/unified_analytics_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,8 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final OwnerManager _ownerManager = getIt<OwnerManager>();
   final DailyHoroscopeService _horoscopeService =
       getIt<DailyHoroscopeService>();
-  final FacebookAppEventsService _facebookEvents =
-      getIt<FacebookAppEventsService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
   late Future<void> _dataLoadingFuture;
 
   @override
@@ -32,10 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _petManager.addListener(_onPetManagerUpdate);
 
     // Track screen view
-    _facebookEvents.logViewContent(
-      contentType: 'screen',
-      contentId: 'home_screen',
-    );
+    _analytics.logScreenView(screenName: 'home_screen');
   }
 
   @override

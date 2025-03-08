@@ -14,12 +14,11 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/tutorial_screen.dart';
-import 'services/analytics_service.dart';
 import 'services/auth_service.dart';
 import 'services/first_launch_service.dart';
 import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
-import 'services/facebook_app_events_service.dart';
+import 'services/unified_analytics_service.dart';
 import 'widgets/initial_owner_create.dart';
 
 class AppManager extends StatefulWidget {
@@ -33,7 +32,7 @@ class _AppManagerState extends State<AppManager> {
   final AuthService _authService = getIt<AuthService>();
   final UserService _userService = getIt<UserService>();
   final OwnerManager _ownerManager = getIt<OwnerManager>();
-  final AnalyticsService _analytics = getIt<AnalyticsService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
   final RevenueCatService _revenueCatService = getIt<RevenueCatService>();
 
   bool _isFirstLaunch = true;
@@ -132,11 +131,10 @@ class _AppManagerState extends State<AppManager> {
       _isFirstLaunch = false;
     });
 
-    // Log tutorial completion to Facebook
-    final facebookEvents = getIt<FacebookAppEventsService>();
-    await facebookEvents.logCustomEvent(
-      eventName: 'fb_mobile_tutorial_completion',
-      parameters: {'success': true},
+    // Log tutorial completion to analytics (non-blocking)
+    _analytics.logEvent(
+      name: 'tutorial_complete',
+      parameters: {'method': 'normal'},
     );
   }
 
@@ -245,10 +243,6 @@ class _AppManagerState extends State<AppManager> {
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
       _analytics.logSignUp(signUpMethod: 'email');
-
-      // Log registration completion to Facebook
-      final facebookEvents = getIt<FacebookAppEventsService>();
-      await facebookEvents.logCompleteRegistration(registrationMethod: 'email');
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);

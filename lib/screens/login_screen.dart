@@ -4,6 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/form_button.dart';
 import '../config/theme.dart';
 import '../widgets/sendable_textfield.dart';
+import '../config/dependency_injection.dart';
+import '../services/unified_analytics_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(String?, String?) onLogin;
@@ -28,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? emailError, passwordError;
   bool showPasswordRecovery = false;
   bool _passwordVisibility = false;
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -47,6 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
     password = '';
     emailError = null;
     passwordError = null;
+
+    // Log screen view
+    _analytics.logScreenView(screenName: 'login_screen');
   }
 
   @override
@@ -144,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onSubmitted: (_) => showPasswordRecovery
                         ? onPasswordRecovery(_emailController.text)
                         : FocusScope.of(context).requestFocus(_passwordFocus),
-                        onChanged: (value) => email = value,
+                    onChanged: (value) => email = value,
                     errorText: emailError,
                     keyboardType: TextInputType.emailAddress,
                   ),

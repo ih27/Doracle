@@ -4,6 +4,8 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart'
     as smooth_page_indicator;
 
 import '../config/theme.dart';
+import '../config/dependency_injection.dart';
+import '../services/unified_analytics_service.dart';
 import 'splash_screen.dart';
 
 class TutorialScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class TutorialScreen extends StatefulWidget {
 class _TutorialScreenState extends State<TutorialScreen>
     with TickerProviderStateMixin {
   late TutorialScreenModel _model;
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
 
   final List<TutorialPageData> _pageData = [
     TutorialPageData(
@@ -56,6 +59,9 @@ class _TutorialScreenState extends State<TutorialScreen>
   void initState() {
     super.initState();
     _model = TutorialScreenModel();
+
+    // Log screen view
+    _analytics.logScreenView(screenName: 'tutorial_screen');
   }
 
   @override

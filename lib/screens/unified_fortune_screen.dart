@@ -17,7 +17,7 @@ import '../widgets/out_of_questions_overlay.dart';
 import '../widgets/purchase_success_popup.dart';
 import '../helpers/show_snackbar.dart';
 import '../config/dependency_injection.dart';
-import '../services/facebook_app_events_service.dart';
+import '../services/unified_analytics_service.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
   final bool fromPurchase;
@@ -36,8 +36,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   late FortuneViewModel _viewModel;
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocusNode = FocusNode();
-  final FacebookAppEventsService _facebookEvents =
-      getIt<FacebookAppEventsService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
 
   bool _isFortuneInProgress = false;
   bool _isFortuneCompleted = false;
@@ -59,10 +58,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _fortuneController = TypeWriterController.fromStream(const Stream.empty());
 
     // Track screen view
-    _facebookEvents.logViewContent(
-      contentType: 'screen',
-      contentId: 'fortune_screen',
-    );
+    _analytics.logScreenView(screenName: 'fortune_screen');
 
     // Initialize keyboard visibility listener
     final keyboardVisibilityController = KeyboardVisibilityController();

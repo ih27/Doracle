@@ -11,8 +11,8 @@ import '../helpers/show_snackbar.dart';
 import '../providers/entitlement_provider.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
+import '../services/unified_analytics_service.dart';
 import '../widgets/subscribe_success_popup.dart';
-import '../services/facebook_app_events_service.dart';
 
 class UnlockAllFeaturesScreen extends StatefulWidget {
   const UnlockAllFeaturesScreen({
@@ -26,8 +26,7 @@ class UnlockAllFeaturesScreen extends StatefulWidget {
 class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   final UserService _userService = getIt<UserService>();
-  final FacebookAppEventsService _facebookEvents =
-      getIt<FacebookAppEventsService>();
+  final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
 
   bool _isLoading = false;
   Map<String, String> _prices = {};
@@ -39,10 +38,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     _loadPrices();
 
     // Track screen view
-    _facebookEvents.logViewContent(
-      contentType: 'screen',
-      contentId: 'subscription_screen',
-    );
+    _analytics.logScreenView(screenName: 'subscription_screen');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final entitlementProvider =
@@ -106,13 +102,13 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
         return false;
       }
 
-      // Track subscription with Facebook
+      // Track subscription with unified analytics
       String? price = _prices[subscriptionType == PurchaseTexts.annual
           ? PurchaseTexts.annualPackageId
           : PurchaseTexts.monthlyPackageId];
 
       if (price != null) {
-        await _facebookEvents.logSubscribeWithPriceString(
+        _analytics.logSubscriptionWithPriceString(
             subscriptionId: subscriptionType, priceString: price);
       }
 
