@@ -1,6 +1,7 @@
 import 'package:doracle/helpers/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/dependency_injection.dart';
 import '../config/theme.dart';
 import '../helpers/compatibility_utils.dart';
@@ -426,22 +427,33 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildFooterLink(context, 'Terms of Service'),
-            _buildFooterLink(context, 'Privacy Policy'),
-            _buildFooterLink(context, 'Subscription Terms'),
+            _buildFooterLink(context, PurchaseTexts.termsOfServiceText,
+                PurchaseTexts.termsOfServiceUrl),
+            _buildFooterLink(context, PurchaseTexts.privacyPolicyText,
+                PurchaseTexts.privacyPolicyUrl),
+            _buildFooterLink(context, PurchaseTexts.subscriptionTermsText,
+                PurchaseTexts.subscriptionTermsUrl),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildFooterLink(BuildContext context, String text) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.secondary,
-            decoration: TextDecoration.underline,
-          ),
+  Widget _buildFooterLink(BuildContext context, String text, String url) {
+    return InkWell(
+      onTap: () async {
+        final uri = Uri.parse(url);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.secondary,
+              decoration: TextDecoration.underline,
+            ),
+      ),
     );
   }
 
