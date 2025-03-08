@@ -77,7 +77,7 @@ class IAPUtils {
 
       // Log subscription with unified analytics
       final analytics = getIt<UnifiedAnalyticsService>();
-      await analytics.logSubscriptionWithPriceString(
+      analytics.logSubscriptionWithPriceString(
         subscriptionId: subscriptionType,
         priceString: priceString,
       );
