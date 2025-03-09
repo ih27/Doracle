@@ -19,6 +19,10 @@ A sophisticated Flutter application that combines pet lifestyle management with 
 - **Animations**: Custom Rive animations and interactive elements
 - **Analytics**: Unified analytics implementation across Firebase, Facebook, and Adjust
 
+## Documentation 📚
+
+For detailed technical documentation including architecture, user flows, and implementation guidelines, see [Technical Documentation](docs/technical_documentation.md).
+
 ## Getting Started 🚀
 
 ### Prerequisites
@@ -40,35 +44,6 @@ A sophisticated Flutter application that combines pet lifestyle management with 
    ```
 3. Run `flutter pub get`
 4. Configure Firebase using the provided options in `lib/config/firebase_options.dart`
-5. Configure analytics by updating event tokens in `lib/config/adjust_config.dart`
-
-## Architecture 🏗️
-
-The app follows a clean architecture pattern with:
-- **Entities**: Core business objects (Pet, Owner)
-- **Services**: Business logic and external integrations
-- **Repositories**: Data access layer
-- **Providers**: State management
-- **UI**: Screens and widgets
-
-### Analytics Architecture
-The app implements a unified analytics system that centralizes all tracking across multiple providers:
-- **UnifiedAnalyticsService**: Central service that dispatches events to all configured providers
-- **Analytics Providers**: Firebase Analytics, Facebook App Events, and Adjust
-- **Non-blocking Design**: All analytics calls are non-blocking to ensure optimal app performance
-- **Documentation**: See `docs/analytics_migration_guide.md` for detailed analytics implementation guidelines
-
-## Dependencies 📦
-
-Key packages:
-- `firebase_core`, `firebase_auth`, `firebase_analytics`: Firebase integration
-- `dart_openai`: OpenAI API integration
-- `purchases_flutter`: RevenueCat integration
-- `provider`: State management
-- `rive`: Custom animations
-- `get_it`: Dependency injection
-- `facebook_app_events`: Facebook analytics integration
-- `adjust_sdk`: Adjust mobile measurement integration
 
 ## Best Practices 💡
 
@@ -89,14 +64,6 @@ Key packages:
 5. **UI/UX Enhancements**: More interactive animations
 6. **Analytics**: Enhanced event tracking and conversion optimization
 7. **Social Features**: Pet community and sharing capabilities
-
-## Security 🔒
-
-- Firebase App Check implementation
-- Secure API key management
-- User data encryption
-- Privacy-focused design
-- Compliant analytics implementation with user privacy controls
 
 ## License 📄
 
