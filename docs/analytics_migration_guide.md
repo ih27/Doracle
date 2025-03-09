@@ -54,8 +54,8 @@ This document outlines all the analytics events used in the Doracle app across F
 - Event Name: Requires a custom event token
 - Parameters:
   - `method`: Registration method
-- [ ] Create custom Adjust event token for registration (recommended for attribution)
-- [ ] Update app_manager.dart with token from AdjustEvents.registration
+- [x] Create custom Adjust event token for registration (recommended for attribution)
+- [x] Update app_manager.dart with token from AdjustEvents.registration
 
 **App Location:** app_manager.dart
 
@@ -76,8 +76,8 @@ This document outlines all the analytics events used in the Doracle app across F
 - Event Name: Requires a custom event token
 - Parameters:
   - `method`: Login method
-- [ ] Create custom Adjust event token for login (optional)
-- [ ] Update app_manager.dart with token from AdjustEvents.login
+- [x] Create custom Adjust event token for login (optional)
+- [x] Update app_manager.dart with token from AdjustEvents.login
 
 **App Location:** app_manager.dart
 
@@ -105,8 +105,8 @@ This document outlines all the analytics events used in the Doracle app across F
   - `product_id`: Product identifier
   - `price_string`: Price as string
   - `question_count`: Number of questions purchased
-- [ ] Create custom Adjust revenue event token for purchases (important for conversion tracking)
-- [ ] Update feedthedog_screen.dart with token from AdjustEvents.purchase
+- [x] Create custom Adjust revenue event token for purchases (important for conversion tracking)
+- [x] Update feedthedog_screen.dart with token from AdjustEvents.purchase
 
 **App Location:** feedthedog_screen.dart
 
@@ -154,8 +154,8 @@ This document outlines all the analytics events used in the Doracle app across F
 - Requires a custom event token (if needed)
 - Parameters:
   - `content_type`: "app"
-- [ ] Create custom Adjust event token for rating (optional)
-- [ ] Update settings_screen.dart with token from AdjustEvents.rateApp if needed
+- [x] Create custom Adjust event token for rating (optional)
+- [x] Update settings_screen.dart with token from AdjustEvents.rateApp if needed
 
 **App Location:** settings_screen.dart
 
@@ -180,8 +180,8 @@ This document outlines all the analytics events used in the Doracle app across F
 - Parameters:
   - `search_string`: Search term
   - `content_type`: "location"
-- [ ] Create custom Adjust event token for location search (optional)
-- [ ] Update map_overlay.dart with token from AdjustEvents.locationSearch if needed
+- [x] Create custom Adjust event token for location search (optional)
+- [x] Update map_overlay.dart with token from AdjustEvents.locationSearch if needed
 
 **App Location:** map_overlay.dart
 
@@ -203,8 +203,8 @@ This document outlines all the analytics events used in the Doracle app across F
 - Requires a custom event token (if needed)
 - Parameters:
   - `method`: Completion method
-- [ ] Create custom Adjust event token for tutorial completion (recommended for conversion tracking)
-- [ ] Update app_manager.dart with token from AdjustEvents.tutorialComplete
+- [x] Create custom Adjust event token for tutorial completion (recommended for conversion tracking)
+- [x] Update app_manager.dart with token from AdjustEvents.tutorialComplete
 
 **App Location:** app_manager.dart
 
@@ -231,23 +231,23 @@ This document outlines all the analytics events used in the Doracle app across F
 
 #### Adjust
 
-1. [ ] Create custom event tokens in the Adjust dashboard:
-   - [ ] User Registration (important for attribution) - Save token to AdjustEvents.registration
-   - [ ] User Login (optional) - Save token to AdjustEvents.login
-   - [ ] Purchases (important for conversion) - Save token to AdjustEvents.purchase
-   - [ ] Subscriptions (important for conversion) - Save token to AdjustEvents.subscription
-   - [ ] Tutorial Completion (recommended) - Save token to AdjustEvents.tutorialComplete
-   - [ ] App Rating (optional) - Save token to AdjustEvents.rateApp
-   - [ ] Location Search (optional) - Save token to AdjustEvents.locationSearch
+1. [x] Create custom event tokens in the Adjust dashboard:
+   - [x] User Registration (important for attribution) - Save token to AdjustEvents.registration
+   - [x] User Login (optional) - Save token to AdjustEvents.login
+   - [x] Purchases (important for conversion) - Save token to AdjustEvents.purchase
+   - [x] Subscriptions (important for conversion) - Save token to AdjustEvents.subscription
+   - [x] Tutorial Completion (recommended) - Save token to AdjustEvents.tutorialComplete
+   - [x] App Rating (optional) - Save token to AdjustEvents.rateApp
+   - [x] Location Search (optional) - Save token to AdjustEvents.locationSearch
 
-2. [ ] For iOS, configure SKAdNetwork conversion values in Adjust dashboard:
-   - [ ] Registration: conversion value 2
-   - [ ] Tutorial completion: conversion value 1
-   - [ ] Purchase: conversion value 4
-   - [ ] Subscription: conversion value 6
+2. [x] For iOS, configure SKAdNetwork conversion values in Adjust dashboard:
+   - [x] Registration: conversion value 2
+   - [x] Tutorial completion: conversion value 1
+   - [x] Purchase: conversion value 4
+   - [x] Subscription: conversion value 6
    
-3. [ ] Update AdjustEvents class constants with actual tokens
-4. [ ] Enable revenue tracking for purchase and subscription events
+3. [x] Update AdjustEvents class constants with actual tokens
+4. [x] Enable revenue tracking for purchase and subscription events
 
 **Note**: Unlike Firebase and Facebook, Adjust tracking is selective. You only need to create tokens and add tracking for events relevant to your attribution and conversion goals. When no token is provided to the UnifiedAnalyticsService, the event will still be tracked in Firebase and Facebook but not in Adjust.
 
@@ -314,7 +314,7 @@ The UnifiedAnalyticsService provides a simplified interface for tracking events,
 - [x] Update imports to use UnifiedAnalyticsService
 - [x] Replace individual service dependencies with UnifiedAnalyticsService
 - [x] Update event tracking calls
-- [ ] Add Adjust event tokens from AdjustEvents class for key events
+- [x] Add Adjust event tokens from AdjustEvents class for key events
 - [x] Update initialization in main.dart
 - [ ] Test that all events are being sent to all platforms
 
