@@ -263,11 +263,11 @@ class PurchaseTexts {
 
   // Footer URLs for Unlock All Features screen
   static const String termsOfServiceUrl =
-      'https://www.notion.so/doracle/Terms-of-Service-1b0cac6b1a5580b4b5a2e112c3b13da4';
+      'https://doracle.notion.site/Terms-of-Service-1b0cac6b1a5580b4b5a2e112c3b13da4';
   static const String privacyPolicyUrl =
-      'https://www.notion.so/doracle/Privacy-Policy-1b0cac6b1a5580abb1a2c250f0535dc5';
+      'https://doracle.notion.site/Privacy-Policy-1b0cac6b1a5580abb1a2c250f0535dc5';
   static const String subscriptionTermsUrl =
-      'https://www.notion.so/doracle/Subscription-Terms-1b0cac6b1a5580a6a2acdb17f1aa4066';
+      'https://doracle.notion.site/Subscription-Terms-1b0cac6b1a5580a6a2acdb17f1aa4066';
 
   // Footer link text for Unlock All Features screen
   static const String termsOfServiceText = 'Terms of Service';

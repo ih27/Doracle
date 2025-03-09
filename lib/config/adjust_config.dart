@@ -1,24 +1,19 @@
 /// Adjust Event Token Configuration
 ///
 /// This file contains constants for all Adjust event tokens used in the app.
-/// Replace sample tokens with actual tokens from your Adjust dashboard.
 class AdjustEvents {
   // Conversion Events (Revenue)
-  static const String purchase = 'abc123def456'; // Replace with actual token
-  static const String subscription =
-      'xyz789uvw012'; // Replace with actual token
+  static const String purchase = 'hv6sup';
+  static const String subscription = 'chaz8s';
 
   // Attribution Events
-  static const String registration =
-      'reg345token678'; // Replace with actual token
-  static const String login = 'log901token234'; // Replace with actual token
-  static const String tutorialComplete =
-      'tut567token890'; // Replace with actual token
+  static const String registration = 'c19yvd';
+  static const String login = 'opj22l';
+  static const String tutorialComplete = '81nty1';
 
   // Optional Events
-  static const String rateApp = 'rat123token456'; // Replace with actual token
-  static const String locationSearch =
-      'loc789token012'; // Replace with actual token
+  static const String rateApp = 'rhe7js';
+  static const String locationSearch = 'a04aat';
 }
 
 /// SKAdNetwork Conversion Values (iOS Only)
