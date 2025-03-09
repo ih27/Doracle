@@ -117,7 +117,7 @@ This document outlines all the analytics events used in the Doracle app across F
 - Parameters:
   - `subscription_id`: Subscription identifier
   - `price_string`: Price as string (if available)
-- [ ] Create custom Firebase event for subscription_purchase
+- [x] Create custom Firebase event for subscription_purchase
 
 **Facebook App Events:**
 - Method: `logSubscribeWithPriceString` (built-in)
@@ -142,7 +142,7 @@ This document outlines all the analytics events used in the Doracle app across F
 - Event Name: `rate_app` (custom)
 - Parameters:
   - `content_type`: "app"
-- [ ] Create custom Firebase event for rate_app
+- [x] Create custom Firebase event for rate_app
 
 **Facebook App Events:**
 - Event Name: `rate_app` (custom)
@@ -166,7 +166,7 @@ This document outlines all the analytics events used in the Doracle app across F
 - Parameters:
   - `search_string`: Search term
   - `content_type`: "location"
-- [ ] Create custom Firebase event for location_search
+- [x] Create custom Firebase event for location_search
 
 **Facebook App Events:**
 - Event Name: `location_search` (custom)
@@ -191,7 +191,7 @@ This document outlines all the analytics events used in the Doracle app across F
 - Event Name: `tutorial_complete` (custom)
 - Parameters:
   - `method`: Completion method (e.g., "normal")
-- [ ] Create custom Firebase event for tutorial_complete
+- [x] Create custom Firebase event for tutorial_complete
 
 **Facebook App Events:**
 - Event Name: `tutorial_complete` (custom)
@@ -212,12 +212,12 @@ This document outlines all the analytics events used in the Doracle app across F
 
 #### Firebase Analytics
 
-1. [ ] Create the following custom event definitions in Firebase Analytics:
-   - [ ] `subscription_purchase`
-   - [ ] `rate_app`
-   - [ ] `location_search`
-   - [ ] `tutorial_complete`
-2. [ ] Verify built-in events are being tracked correctly
+1. [x] Create the following custom event definitions in Firebase Analytics:
+   - [x] `subscription_purchase`
+   - [x] `rate_app`
+   - [x] `location_search`
+   - [x] `tutorial_complete`
+2. [x] Verify built-in events are being tracked correctly
 
 #### Facebook App Events
 
@@ -311,11 +311,11 @@ The UnifiedAnalyticsService provides a simplified interface for tracking events,
 
 ### Migration Checklist
 
-- [ ] Update imports to use UnifiedAnalyticsService
-- [ ] Replace individual service dependencies with UnifiedAnalyticsService
-- [ ] Update event tracking calls
+- [x] Update imports to use UnifiedAnalyticsService
+- [x] Replace individual service dependencies with UnifiedAnalyticsService
+- [x] Update event tracking calls
 - [ ] Add Adjust event tokens from AdjustEvents class for key events
-- [ ] Update initialization in main.dart
+- [x] Update initialization in main.dart
 - [ ] Test that all events are being sent to all platforms
 
 ### Benefits
