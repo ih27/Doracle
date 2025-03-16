@@ -13,6 +13,7 @@ import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/compatibility_content_service.dart';
 import '../services/compatibility_score_service.dart';
+import '../services/crashlytics_service.dart';
 import '../services/daily_horoscope_service.dart';
 import '../services/facebook_app_events_service.dart';
 import '../services/haptic_service.dart';
@@ -95,6 +96,7 @@ void setupDependencies() {
     ),
   );
   getIt.registerLazySingleton<HapticService>(() => HapticService());
+  getIt.registerLazySingleton<CrashlyticsService>(() => CrashlyticsService());
 
   // Providers
   getIt.registerLazySingleton<EntitlementProvider>(

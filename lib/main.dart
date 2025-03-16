@@ -14,6 +14,7 @@ import 'config/theme.dart';
 import 'app_manager.dart';
 import 'global_key.dart';
 import 'providers/entitlement_provider.dart';
+import 'services/crashlytics_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
 import 'services/unified_analytics_service.dart';
@@ -30,6 +31,8 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Setup dependencies early so we can use CrashlyticsService for error reporting
+  setupDependencies();
   await _setupErrorReporting();
 
   // Activate App Check
@@ -38,7 +41,6 @@ Future<void> main() async {
           kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck);
 
   await setupNotifications();
-  setupDependencies();
   await _initializeApp();
 
   runApp(
@@ -55,13 +57,28 @@ Future<void> _setupErrorReporting() async {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
   }
 
+  // Disable collecting thread and stack information which may be causing the crash
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  await FirebaseCrashlytics.instance.setCustomKey('collectThreads', false);
+
+  // Get the CrashlyticsService from dependency injection
+  final crashlyticsService = getIt<CrashlyticsService>();
+
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    try {
+      crashlyticsService.recordFlutterError(errorDetails);
+    } catch (e) {
+      debugPrint('Error reporting to Crashlytics: $e');
+    }
   };
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    try {
+      crashlyticsService.recordError(error, stack, fatal: true);
+    } catch (e) {
+      debugPrint('Error reporting to Crashlytics: $e');
+    }
     return true;
   };
 }
