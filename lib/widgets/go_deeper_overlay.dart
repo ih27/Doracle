@@ -159,7 +159,7 @@ class GoDeeperOverlay extends StatelessWidget {
               Column(
                 children: [
                   AutoSizeText(
-                    isAnnual ? convertAnnualToMonthly(price)! : price,
+                    price,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           color: AppTheme.success,
                           letterSpacing: 0,
@@ -169,7 +169,7 @@ class GoDeeperOverlay extends StatelessWidget {
                     minFontSize: 18,
                   ),
                   Text(
-                    '/month',
+                    isAnnual ? '/year' : '/month',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           letterSpacing: 0,
                           color: Theme.of(context).primaryColor,
@@ -177,10 +177,10 @@ class GoDeeperOverlay extends StatelessWidget {
                   ),
                   if (isAnnual)
                     Text(
-                      '($price/year)',
+                      '(${convertAnnualToMonthly(price)}/month)',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.normal,
                           ),
                     ),
                 ],

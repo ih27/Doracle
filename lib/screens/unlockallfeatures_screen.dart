@@ -336,7 +336,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(
-                          isAnnual ? convertAnnualToMonthly(price)! : price,
+                          price,
                           style: Theme.of(context)
                               .textTheme
                               .headlineLarge
@@ -347,7 +347,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                               ),
                         ),
                         Text(
-                          '/month',
+                          isAnnual ? '/year' : '/month',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context).primaryColor,
@@ -355,11 +355,11 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                         ),
                         if (isAnnual)
                           Text(
-                            '($price/year)',
+                            '(${convertAnnualToMonthly(price)}/month)',
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.normal,
                                     ),
                           ),
                       ],
