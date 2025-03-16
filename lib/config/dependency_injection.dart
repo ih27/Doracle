@@ -19,6 +19,7 @@ import '../services/facebook_app_events_service.dart';
 import '../services/haptic_service.dart';
 import '../services/openai_service.dart';
 import '../services/revenuecat_service.dart';
+import '../services/secure_storage_service.dart';
 import '../services/unified_analytics_service.dart';
 import '../services/user_service.dart';
 import '../services/fortune_teller_service.dart';
@@ -56,6 +57,8 @@ void setupDependencies() {
   getIt.registerLazySingleton<OwnerManager>(() => OwnerManager());
 
   // Services
+  getIt.registerLazySingleton<SecureStorageService>(
+      () => SecureStorageService());
   getIt.registerLazySingleton<AdjustService>(() => AdjustService());
   getIt.registerLazySingleton<FacebookAppEventsService>(
       () => FacebookAppEventsService());

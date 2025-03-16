@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../helpers/pet_owner_form_utils.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
@@ -8,19 +9,59 @@ import '../widgets/owner_form.dart';
 import '../config/dependency_injection.dart';
 import '../services/auth_service.dart';
 
-class CreateOwnerScreen extends StatelessWidget {
+class CreateOwnerScreen extends StatefulWidget {
   final bool isInitialCreation;
-  final AuthService _authService = getIt<AuthService>();
 
-  CreateOwnerScreen({super.key, this.isInitialCreation = false});
+  const CreateOwnerScreen({super.key, this.isInitialCreation = false});
+
+  @override
+  _CreateOwnerScreenState createState() => _CreateOwnerScreenState();
+}
+
+class _CreateOwnerScreenState extends State<CreateOwnerScreen> {
+  final AuthService _authService = getIt<AuthService>();
+  late String? _initialName;
+  bool _isAppleSignIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() async {
+    // Get user data from Firebase Auth
+    User? user = _authService.currentUser;
+
+    // Check if user signed in with Apple
+    bool isAppleUser =
+        user?.providerData.any((info) => info.providerId == 'apple.com') ??
+            false;
+
+    debugPrint('User signed in with Apple: $isAppleUser');
+
+    // Set Apple sign in flag
+    _isAppleSignIn = isAppleUser;
+
+    if (_isAppleSignIn) {
+      // Try to get name from various sources, prioritizing secure storage
+      String? name = await _authService.getAppleUserName();
+
+      debugPrint('Name from AuthService: $name');
+
+      // Set the name for the form
+      if (mounted) {
+        setState(() {
+          _initialName = name;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Get name directly from auth service if available (from Apple Sign In)
-    final String? initialName = _authService.getNameFromCredential();
-
     return OwnerForm(
-      initialName: initialName,
+      initialName: _initialName,
       onSubmit: (formData) => _createOwner(context, formData),
       submitButtonName: CompatibilityTexts.createOwner,
     );

@@ -9,7 +9,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'config/notifications.dart';
 import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
@@ -20,6 +19,7 @@ import 'providers/entitlement_provider.dart';
 import 'services/crashlytics_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
+import 'services/secure_storage_service.dart';
 import 'services/unified_analytics_service.dart';
 
 Future<void> main() async {
@@ -36,6 +36,10 @@ Future<void> main() async {
 
   // Setup dependencies early so we can use CrashlyticsService for error reporting
   setupDependencies();
+
+  // Check if this is a fresh install (for ATT debugging)
+  await _checkIfFreshInstall();
+
   await _setupErrorReporting();
 
   // Request App Tracking Transparency permission early - BEFORE any analytics are initialized
@@ -122,7 +126,7 @@ Future<bool> _requestAppTrackingPermission() async {
 Future<void> _checkIfFreshInstall() async {
   try {
     // Create storage instance
-    const storage = FlutterSecureStorage();
+    final storage = getIt<SecureStorageService>();
     final hasRunBefore = await storage.read(key: 'has_run_before');
 
     if (hasRunBefore == null) {
@@ -134,7 +138,7 @@ Future<void> _checkIfFreshInstall() async {
       debugPrint('This is NOT a fresh install - app has run before');
     }
   } catch (e) {
-    debugPrint('Error checking fresh install: $e');
+    debugPrint('Error checking if fresh install: $e');
   }
 }
 

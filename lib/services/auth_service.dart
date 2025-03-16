@@ -1,16 +1,44 @@
 import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
+import '../config/dependency_injection.dart';
+import '../services/secure_storage_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final Function(String, Map<String, dynamic>) _createUserCallback;
+  final SecureStorageService _secureStorage = getIt<SecureStorageService>();
+
+  // Key for storing Apple user name in secure storage
+  static const String _appleNameKey = 'apple_display_name';
 
   AuthService(this._createUserCallback);
 
   User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  // Store user name in secure storage
+  Future<void> storeUserName(String userId, String name) async {
+    try {
+      final key = '${_appleNameKey}_$userId';
+      await _secureStorage.write(key: key, value: name);
+    } catch (e) {
+      debugPrint('Error storing name in secure storage: $e');
+    }
+  }
+
+  // Get user's name from secure storage
+  Future<String?> getUserName(String userId) async {
+    try {
+      final key = '${_appleNameKey}_$userId';
+      return await _secureStorage.read(key: key);
+    } catch (e) {
+      debugPrint('Error getting name from secure storage: $e');
+      return null;
+    }
+  }
 
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
@@ -49,12 +77,79 @@ class AuthService {
   }
 
   Future<UserCredential?> signInWithApple() async {
-    final appleProvider = AppleAuthProvider()
-      ..addScope('email')
-      ..addScope('name');
-    final userCredential = await _auth.signInWithProvider(appleProvider);
-    await _associateEmailWith(userCredential);
-    return userCredential;
+    try {
+      final appleProvider = AppleAuthProvider()
+        ..addScope('email')
+        ..addScope('name')
+        ..addScope('fullName');
+
+      // Debug log
+      debugPrint('Signing in with Apple, requesting name and email');
+
+      // Get credential from Apple
+      final userCredential = await _auth.signInWithProvider(appleProvider);
+
+      // Debug log what we got from Apple
+      debugPrint(
+          'Apple Sign In returned - User: ${userCredential.user?.displayName}, Email: ${userCredential.user?.email}');
+      debugPrint(
+          'Additional info: ${userCredential.additionalUserInfo?.profile}');
+
+      // Extract the name from the user credential
+      String? displayName;
+
+      // Try to get from user profile
+      if (userCredential.user?.displayName != null &&
+          userCredential.user!.displayName!.isNotEmpty) {
+        displayName = userCredential.user!.displayName;
+        debugPrint('Got display name from user profile: $displayName');
+      }
+
+      // Try to get from additionalUserInfo
+      if ((displayName == null || displayName.isEmpty) &&
+          userCredential.additionalUserInfo?.profile != null) {
+        final profile = userCredential.additionalUserInfo!.profile!;
+        debugPrint('Profile data: $profile');
+
+        // Try to extract name from profile data
+        if (profile.containsKey('name')) {
+          displayName = profile['name'] as String?;
+          debugPrint('Got name from profile: $displayName');
+        } else {
+          // Apple sometimes puts the name in specific fields
+          final name = profile['name'];
+          final firstName =
+              profile['firstName'] ?? (name is Map ? name['firstName'] : null);
+          final lastName =
+              profile['lastName'] ?? (name is Map ? name['lastName'] : null);
+
+          if (firstName != null || lastName != null) {
+            final List<String> nameParts = [];
+            if (firstName != null) nameParts.add(firstName.toString());
+            if (lastName != null) nameParts.add(lastName.toString());
+
+            displayName = nameParts.join(' ');
+            debugPrint('Extracted name from profile: $displayName');
+          }
+        }
+      }
+
+      // If we found a name, store it
+      if (displayName != null && displayName.isNotEmpty) {
+        _cachedAppleDisplayName = displayName;
+
+        // Store the name in secure storage for future use
+        if (userCredential.user != null) {
+          await storeUserName(userCredential.user!.uid, displayName);
+        }
+      }
+
+      await _associateEmailWith(userCredential);
+      return userCredential;
+    } catch (e) {
+      debugPrint('Error during Apple Sign In: $e');
+      rethrow;
+    }
   }
 
   Future<UserCredential?> handlePlatformSignIn() async {
@@ -154,13 +249,47 @@ class AuthService {
     }
   }
 
-  // Add a helper method to get the user's name from Apple Sign In
+  // Add a field to cache the display name
+  String? _cachedAppleDisplayName;
+
+  // Improved method to get name from Apple Sign In
   String? getNameFromCredential() {
+    // First check our cache
+    if (_cachedAppleDisplayName != null &&
+        _cachedAppleDisplayName!.isNotEmpty) {
+      return _cachedAppleDisplayName;
+    }
+
+    // Then try Firebase Auth's display name
     if (currentUser?.displayName != null &&
         currentUser!.displayName!.isNotEmpty) {
       return currentUser!.displayName;
     }
+
+    // Try to get from provider data
+    if (currentUser?.providerData.isNotEmpty == true) {
+      for (var info in currentUser!.providerData) {
+        if (info.displayName != null && info.displayName!.isNotEmpty) {
+          return info.displayName;
+        }
+      }
+    }
+
     return null;
+  }
+
+  // Method to get name, prioritizing secure storage
+  Future<String?> getAppleUserName() async {
+    if (currentUser == null) return null;
+
+    // First try to get from secure storage
+    String? storedName = await getUserName(currentUser!.uid);
+    if (storedName != null && storedName.isNotEmpty) {
+      return storedName;
+    }
+
+    // Fall back to in-memory cache or credential
+    return getNameFromCredential();
   }
 }
 
