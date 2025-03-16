@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'config/notifications.dart';
 import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
@@ -34,6 +37,9 @@ Future<void> main() async {
   // Setup dependencies early so we can use CrashlyticsService for error reporting
   setupDependencies();
   await _setupErrorReporting();
+
+  // Request App Tracking Transparency permission early - BEFORE any analytics are initialized
+  await _requestAppTrackingPermission();
 
   // Activate App Check
   await FirebaseAppCheck.instance.activate(
@@ -94,6 +100,41 @@ Future<void> _initializeApp() async {
   await FirebaseAuth.instance.authStateChanges().first;
   if (FirebaseAuth.instance.currentUser != null) {
     await FirestoreService.initializeQuestionsCache();
+  }
+}
+
+// Request App Tracking Transparency permission before any tracking occurs
+Future<bool> _requestAppTrackingPermission() async {
+  if (Platform.isIOS) {
+    debugPrint('Requesting App Tracking Transparency permission');
+
+    // Check if this is a fresh install
+    await _checkIfFreshInstall();
+
+    final status = await Permission.appTrackingTransparency.request();
+    debugPrint('ATT Permission status: ${status.toString()}');
+    return status.isGranted;
+  }
+  return false;
+}
+
+// Helper to detect if this is a fresh install (useful for debugging ATT issues)
+Future<void> _checkIfFreshInstall() async {
+  try {
+    // Create storage instance
+    const storage = FlutterSecureStorage();
+    final hasRunBefore = await storage.read(key: 'has_run_before');
+
+    if (hasRunBefore == null) {
+      // This is the first run after installation
+      debugPrint('⚠️ FRESH INSTALL DETECTED - ATT should show now');
+      await storage.write(key: 'has_run_before', value: 'true');
+    } else {
+      // This is a subsequent run
+      debugPrint('This is NOT a fresh install - app has run before');
+    }
+  } catch (e) {
+    debugPrint('Error checking fresh install: $e');
   }
 }
 

@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/foundation.dart';
 
 class AnalyticsService {
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
@@ -16,11 +17,15 @@ class AnalyticsService {
 
   Future<void> initialize() async {
     if (Platform.isIOS) {
-      final status = await Permission.appTrackingTransparency.request();
+      // Check the current status instead of requesting again
+      final status = await Permission.appTrackingTransparency.status;
+      debugPrint(
+          'Analytics initializing with ATT status: ${status.toString()}');
+
       if (status.isGranted) {
         await _init();
       } else {
-        // User denied permission, initialize with limited tracking
+        // User denied permission or hasn't been prompted, initialize with limited tracking
         await _init(limitedTracking: true);
       }
     } else {

@@ -1,6 +1,7 @@
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FacebookAppEventsService {
   static FacebookAppEventsService? _instance;
@@ -25,16 +26,30 @@ class FacebookAppEventsService {
 
   Future<void> _initialize() async {
     if (!_isInitialized) {
+      // Always enable auto logging
       await _facebookAppEvents.setAutoLogAppEventsEnabled(true);
-      await _facebookAppEvents.setAdvertiserTracking(enabled: true);
 
       if (Platform.isIOS) {
         try {
+          // Check ATT permission status before enabling advertiser tracking
+          final attStatus = await Permission.appTrackingTransparency.status;
+          debugPrint(
+              'Facebook Events initializing with ATT status: ${attStatus.toString()}');
+
+          // Only enable advertiser tracking if permission is granted
+          await _facebookAppEvents.setAdvertiserTracking(
+              enabled: attStatus.isGranted);
+
           debugPrint(
               'Initializing Facebook App Events with SKAdNetwork support');
         } catch (e) {
           debugPrint('Error initializing Facebook App Events for iOS 14+: $e');
+          // Default to disabled tracking on error
+          await _facebookAppEvents.setAdvertiserTracking(enabled: false);
         }
+      } else {
+        // For non-iOS platforms, enable tracking by default
+        await _facebookAppEvents.setAdvertiserTracking(enabled: true);
       }
 
       _isInitialized = true;

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'dart:async'; // Add import for unawaited calls
+import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:permission_handler/permission_handler.dart';
 
 import 'analytics_service.dart';
 import 'facebook_app_events_service.dart';
@@ -18,6 +20,8 @@ class UnifiedAnalyticsService {
   final AnalyticsService _firebaseAnalytics;
   final FacebookAppEventsService _facebookEvents;
   final AdjustService _adjustService;
+  // Track whether ATT permission has been granted
+  bool _isTrackingAllowed = false;
 
   UnifiedAnalyticsService(
     this._firebaseAnalytics,
@@ -28,10 +32,28 @@ class UnifiedAnalyticsService {
   /// Initialize all analytics services at once
   /// This is awaited since it's critical for proper setup
   Future<void> initialize() async {
+    if (Platform.isIOS) {
+      // Check current ATT permission status
+      final attStatus = await Permission.appTrackingTransparency.status;
+      _isTrackingAllowed = attStatus.isGranted;
+      debugPrint(
+          'Unified Analytics initializing with ATT status: ${attStatus.toString()}');
+    } else {
+      // For non-iOS platforms, assume tracking is allowed
+      _isTrackingAllowed = true;
+    }
+
+    // Initialize all services with the current permission status
     await _firebaseAnalytics.initialize();
     await _adjustService.initialize();
-    await _facebookEvents.logActivateApp();
-    debugPrint('Unified Analytics Service initialized');
+
+    // Only activate app tracking if permission was granted
+    if (_isTrackingAllowed || !Platform.isIOS) {
+      await _facebookEvents.logActivateApp();
+    }
+
+    debugPrint(
+        'Unified Analytics Service initialized (tracking allowed: $_isTrackingAllowed)');
   }
 
   /// Log a custom event across all platforms in a non-blocking way
