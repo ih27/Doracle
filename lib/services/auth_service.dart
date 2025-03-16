@@ -146,10 +146,21 @@ class AuthService {
 
   Future<void> _associateEmailWith(UserCredential userCredential) async {
     if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-      await _createUserCallback(userCredential.user!.uid, {
+      final Map<String, dynamic> userData = {
         'email': userCredential.user?.email,
-      });
+      };
+
+      await _createUserCallback(userCredential.user!.uid, userData);
     }
+  }
+
+  // Add a helper method to get the user's name from Apple Sign In
+  String? getNameFromCredential() {
+    if (currentUser?.displayName != null &&
+        currentUser!.displayName!.isNotEmpty) {
+      return currentUser!.displayName;
+    }
+    return null;
   }
 }
 

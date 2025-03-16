@@ -22,7 +22,7 @@ class InitialOwnerCreationScreen extends StatelessWidget {
         elevation: 0,
         forceMaterialTransparency: true,
       ),
-      body: const CreateOwnerScreen(isInitialCreation: true),
+      body: CreateOwnerScreen(isInitialCreation: true),
     );
   }
 }

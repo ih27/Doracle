@@ -5,15 +5,22 @@ import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
 import '../models/owner_model.dart';
 import '../widgets/owner_form.dart';
+import '../config/dependency_injection.dart';
+import '../services/auth_service.dart';
 
 class CreateOwnerScreen extends StatelessWidget {
   final bool isInitialCreation;
+  final AuthService _authService = getIt<AuthService>();
 
-  const CreateOwnerScreen({super.key, this.isInitialCreation = false});
+  CreateOwnerScreen({super.key, this.isInitialCreation = false});
 
   @override
   Widget build(BuildContext context) {
+    // Get name directly from auth service if available (from Apple Sign In)
+    final String? initialName = _authService.getNameFromCredential();
+
     return OwnerForm(
+      initialName: initialName,
       onSubmit: (formData) => _createOwner(context, formData),
       submitButtonName: CompatibilityTexts.createOwner,
     );
