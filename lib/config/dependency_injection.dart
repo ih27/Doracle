@@ -22,6 +22,7 @@ import '../services/revenuecat_service.dart';
 import '../services/unified_analytics_service.dart';
 import '../services/user_service.dart';
 import '../services/fortune_teller_service.dart';
+import '../services/connectivity_service.dart';
 import '../entities/entity_manager.dart';
 import '../viewmodels/fortune_view_model.dart';
 
@@ -97,6 +98,7 @@ void setupDependencies() {
   );
   getIt.registerLazySingleton<HapticService>(() => HapticService());
   getIt.registerLazySingleton<CrashlyticsService>(() => CrashlyticsService());
+  getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
 
   // Providers
   getIt.registerLazySingleton<EntitlementProvider>(

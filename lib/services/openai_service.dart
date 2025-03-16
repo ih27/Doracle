@@ -13,7 +13,7 @@ class OpenAIService {
   OpenAIService(this.apiKey, this.fortuneTellerInstructions,
       this.compatibilityGuesserInstructions, this.dailyHoroscopeInstructions) {
     OpenAI.apiKey = apiKey;
-    OpenAI.requestsTimeOut = const Duration(minutes: 3);
+    OpenAI.requestsTimeOut = const Duration(minutes: 1);
     _initializeFortuneTellerSystemMessage();
     _initializeCompatibilityGuesserSystemMessage();
     _initializeDailyHoroscopeSystemMessage();

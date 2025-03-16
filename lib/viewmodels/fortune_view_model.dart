@@ -1,13 +1,15 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import '../helpers/constants.dart';
 import '../providers/entitlement_provider.dart';
-import '../services/facebook_app_events_service.dart';
 import '../services/fortune_teller_service.dart';
+import '../services/unified_analytics_service.dart';
 import '../services/user_service.dart';
 import '../services/haptic_service.dart';
 import '../services/revenuecat_service.dart';
+import '../services/connectivity_service.dart';
 import '../repositories/fortune_content_repository.dart';
-import 'package:get_it/get_it.dart';
+import '../config/dependency_injection.dart';
 
 class FortuneViewModel extends ChangeNotifier {
   final FortuneContentRepository _fortuneContentRepository;
@@ -17,8 +19,9 @@ class FortuneViewModel extends ChangeNotifier {
   final EntitlementProvider _entitlementProvider;
   bool get isSubscribed => _entitlementProvider.isEntitled;
   final FortuneTeller _fortuneTeller;
-  final FacebookAppEventsService _facebookAppEvents =
-      GetIt.instance<FacebookAppEventsService>();
+  final ConnectivityService _connectivityService = getIt<ConnectivityService>();
+  final UnifiedAnalyticsService _unifiedAnalyticsService =
+      getIt<UnifiedAnalyticsService>();
 
   bool isHome = true;
   String welcomeMessage = '';
@@ -87,13 +90,39 @@ class FortuneViewModel extends ChangeNotifier {
 
     _hapticService.success();
 
-    // Track content view event for analytics
-    _facebookAppEvents.logViewContent(
-      contentType: 'fortune_reading',
-      contentId: 'fortune_question',
+    _unifiedAnalyticsService.logEvent(
+      name: 'fortune_reading',
+      parameters: {
+        'question': question,
+      },
     );
 
-    return _fortuneTeller.getFortune(question);
+    // Create a controller to transform the stream
+    final controller = StreamController<String>();
+
+    // Check connectivity before making the API request
+    _connectivityService.isConnected().then((isConnected) {
+      if (!isConnected) {
+        // Return an error message if there's no connection
+        controller.add(
+            '\n\nI can\'t seem to reach my crystal ball. Please check your internet connection and try again.');
+        controller.close();
+        return;
+      }
+
+      // If connected, proceed with the original request
+      _fortuneTeller.getFortune(question).listen(
+            (data) => controller.add(data),
+            onError: (error) {
+              controller.add(
+                  '\n\nSorry, something went wrong with my crystal ball. Please try again later.');
+              controller.close();
+            },
+            onDone: () => controller.close(),
+          );
+    });
+
+    return controller.stream;
   }
 
   void resetFortuneState() {
@@ -137,8 +166,8 @@ class FortuneViewModel extends ChangeNotifier {
       final String? priceString = cachedPrices[questionCount.toString()];
 
       // Log the purchase event to Facebook with the actual price string
-      _facebookAppEvents.logPurchaseWithPriceString(
-        priceString: priceString,
+      _unifiedAnalyticsService.logPurchaseWithPriceString(
+        priceString: priceString ?? '',
         productIdentifier: questionCount.toString(),
         parameters: {
           'question_count': questionCount,

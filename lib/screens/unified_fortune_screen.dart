@@ -18,6 +18,7 @@ import '../widgets/purchase_success_popup.dart';
 import '../helpers/show_snackbar.dart';
 import '../config/dependency_injection.dart';
 import '../services/unified_analytics_service.dart';
+import '../services/connectivity_service.dart';
 
 class UnifiedFortuneScreen extends StatefulWidget {
   final bool fromPurchase;
@@ -37,12 +38,15 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocusNode = FocusNode();
   final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
+  final ConnectivityService _connectivityService = getIt<ConnectivityService>();
 
   bool _isFortuneInProgress = false;
   bool _isFortuneCompleted = false;
   bool _isKeyboardVisible = false;
   late TypeWriterController _fortuneController;
   late StreamSubscription<bool> _keyboardSubscription;
+  bool _isConnected = true;
+  StreamSubscription? _connectivitySubscription;
 
   @override
   void initState() {
@@ -68,6 +72,39 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         _isKeyboardVisible = visible;
       });
     });
+
+    // Listen for connectivity changes
+    _connectivityService.isConnected().then((connected) {
+      setState(() {
+        _isConnected = connected;
+        if (!connected) {
+          showErrorSnackBar(context,
+              'No internet connection. Please check your network settings.');
+        }
+      });
+    });
+
+    _connectivitySubscription =
+        _connectivityService.connectionStatusStream.listen((connected) {
+      setState(() {
+        bool wasConnected = _isConnected;
+        _isConnected = connected;
+
+        // Only show SnackBar when connection status changes
+        if (!connected && wasConnected) {
+          showErrorSnackBar(context,
+              'Network connection lost. Please check your internet and try again.');
+        } else if (connected && !wasConnected) {
+          showInfoSnackBar(context, 'Internet connection restored.');
+        }
+
+        if (!connected && _isFortuneInProgress) {
+          _isFortuneInProgress = false;
+          _isFortuneCompleted = true;
+          animateProcessingDone();
+        }
+      });
+    });
   }
 
   void _onViewModelChanged() {
@@ -85,6 +122,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _questionFocusNode.dispose();
     _fortuneController.dispose();
     _keyboardSubscription.cancel();
+    _connectivitySubscription?.cancel();
     super.dispose();
   }
 
@@ -142,6 +180,23 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     String buffer = '';
     bool isTyping = false;
 
+    // Add a timeout to prevent hanging indefinitely
+    bool hasTimedOut = false;
+    Future.delayed(const Duration(seconds: 30)).then((_) {
+      if (!fortuneStreamController.isClosed &&
+          _isFortuneInProgress &&
+          !_isFortuneCompleted) {
+        hasTimedOut = true;
+        fortuneStreamController.add(
+            '\n\nUh oh! The connection timed out. Please check your internet connection and try again.');
+        setState(() {
+          _isFortuneCompleted = true;
+          _isFortuneInProgress = false;
+          animateProcessingDone();
+        });
+      }
+    });
+
     void typeBuffer() async {
       isTyping = true;
       while (buffer.isNotEmpty) {
@@ -157,33 +212,59 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
       isTyping = false;
     }
 
-    _viewModel.getFortune(question).listen(
-      (fortunePart) {
-        buffer += fortunePart;
-        if (!isTyping) {
-          typeBuffer();
-        }
-      },
-      onDone: () async {
-        while (buffer.isNotEmpty) {
-          await Future.delayed(FortuneConstants.charDelay);
-        }
+    try {
+      _viewModel.getFortune(question).listen(
+        (fortunePart) {
+          buffer += fortunePart;
+          if (!isTyping) {
+            typeBuffer();
+          }
+        },
+        onDone: () async {
+          // Only process if we haven't already timed out
+          if (!hasTimedOut) {
+            while (buffer.isNotEmpty) {
+              await Future.delayed(FortuneConstants.charDelay);
+            }
+            if (mounted) {
+              setState(() {
+                _isFortuneCompleted = true;
+                _isFortuneInProgress = false;
+                animateProcessingDone();
+              });
+            }
+            await fortuneStreamController.close();
+          }
+        },
+        onError: (error) {
+          // Create a user-friendly error message
+          String errorMessage =
+              '\n\nSorry, I couldn\'t connect to my crystal ball. Please check your internet connection and try again.';
+          fortuneStreamController.add(errorMessage);
+
+          if (mounted) {
+            setState(() {
+              _isFortuneCompleted = true;
+              _isFortuneInProgress = false;
+              animateProcessingDone();
+            });
+          }
+        },
+      );
+    } catch (e) {
+      // Catch any other exceptions that might occur
+      String errorMessage =
+          '\n\nSorry, something went wrong. Please try again later.';
+      fortuneStreamController.add(errorMessage);
+
+      if (mounted) {
         setState(() {
           _isFortuneCompleted = true;
           _isFortuneInProgress = false;
           animateProcessingDone();
         });
-        await fortuneStreamController.close();
-      },
-      onError: (error) {
-        fortuneStreamController.addError('Unexpected error occurred');
-        setState(() {
-          _isFortuneCompleted = true;
-          _isFortuneInProgress = false;
-          animateProcessingDone();
-        });
-      },
-    );
+      }
+    }
   }
 
   void _showIAPOverlay() {
