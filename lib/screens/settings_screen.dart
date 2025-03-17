@@ -12,6 +12,7 @@ import '../services/user_service.dart';
 import '../config/theme.dart';
 import '../helpers/show_snackbar.dart';
 import '../helpers/constants.dart';
+import '../entities/entity_manager.dart';
 import 'feedthedog_screen.dart';
 import 'unlockallfeatures_screen.dart';
 import '../services/unified_analytics_service.dart';
@@ -329,9 +330,21 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
+  // Shared function to clear only user's owner data
+  Future<void> _clearUserData() async {
+    // Only remove owner data, leave pets intact
+    final OwnerManager ownerManager = getIt<OwnerManager>();
+    await ownerManager.removeEntities();
+  }
+
   Future<void> _handleAccountDeletion() async {
     try {
+      // Clear only owner data
+      await _clearUserData();
+
+      // Then delete Firebase account
       await authService.deleteUser();
+
       if (!mounted) return;
       navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
       showInfoSnackBar(navigatorKey.currentContext!,
@@ -340,6 +353,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (e.provider == 'password') {
         String? password = await _promptForPassword();
         if (password != null) {
+          // Clear only owner data
+          await _clearUserData();
+
           await authService.reauthenticateWithPasswordAndDelete(password);
         } else {
           if (!mounted) return;
@@ -348,6 +364,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           return;
         }
       } else {
+        // Clear only owner data
+        await _clearUserData();
+
         await authService.reauthenticateAndDelete(e.provider);
       }
       if (!mounted) return;

@@ -145,7 +145,7 @@ class _OwnerFormState extends State<OwnerForm> {
           children: [
             SendableTextField(
               controller: _nameController,
-              labelText: 'Your Name',
+              labelText: 'Your Display Name',
               onSubmitted: (_) {},
               onChanged: (value) {
                 if (_nameError != null) {

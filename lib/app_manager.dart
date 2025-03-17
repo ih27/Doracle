@@ -243,6 +243,13 @@ class _AppManagerState extends State<AppManager> {
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
       _analytics.logSignUp(signUpMethod: 'email');
+
+      // Check if profile needs to be created and navigate to it
+      await _checkOwnerExists().then((ownerExists) {
+        if (!ownerExists && context.mounted) {
+          _handleInitialOwnerCreation(context);
+        }
+      });
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);
