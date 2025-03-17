@@ -20,6 +20,7 @@ import 'services/revenuecat_service.dart';
 import 'services/user_service.dart';
 import 'services/unified_analytics_service.dart';
 import 'widgets/initial_owner_create.dart';
+import 'services/firestore_service.dart';
 
 class AppManager extends StatefulWidget {
   const AppManager({super.key});
@@ -189,6 +190,10 @@ class _AppManagerState extends State<AppManager> {
 
     if (result is Owner) {
       await _ownerManager.addEntity(result);
+
+      // Ensure questions are cached for first-time users before showing fortune screen
+      await FirestoreService.initializeQuestionsCache();
+
       navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainScreen()),
         (route) => false,
@@ -224,6 +229,14 @@ class _AppManagerState extends State<AppManager> {
     attemptInitialization();
   }
 
+  // Helper method to check if profile exists and create one if needed
+  Future<void> _ensureProfileExists(BuildContext context) async {
+    final ownerExists = await _checkOwnerExists();
+    if (!ownerExists && context.mounted) {
+      await _handleInitialOwnerCreation(context);
+    }
+  }
+
   Future<void> _handleLogin(
       BuildContext context, String? email, String? password) async {
     if (email == null || password == null) return;
@@ -244,12 +257,10 @@ class _AppManagerState extends State<AppManager> {
       await _authService.createUserWithEmailAndPassword(email, password);
       _analytics.logSignUp(signUpMethod: 'email');
 
-      // Check if profile needs to be created and navigate to it
-      await _checkOwnerExists().then((ownerExists) {
-        if (!ownerExists && context.mounted) {
-          _handleInitialOwnerCreation(context);
-        }
-      });
+      // Check profile with shared method
+      if (context.mounted) {
+        await _ensureProfileExists(context);
+      }
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);
@@ -285,6 +296,11 @@ class _AppManagerState extends State<AppManager> {
 
       if (userCredential?.additionalUserInfo?.isNewUser ?? false) {
         _analytics.logSignUp(signUpMethod: Platform.isIOS ? 'apple' : 'google');
+
+        // Check profile with shared method
+        if (context.mounted) {
+          await _ensureProfileExists(context);
+        }
       } else {
         _analytics.logLogin(loginMethod: Platform.isIOS ? 'apple' : 'google');
       }

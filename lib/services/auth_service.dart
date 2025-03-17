@@ -78,70 +78,27 @@ class AuthService {
 
   Future<UserCredential?> signInWithApple() async {
     try {
+      // Create provider with necessary scopes
       final appleProvider = AppleAuthProvider()
         ..addScope('email')
         ..addScope('name')
         ..addScope('fullName');
 
-      // Debug log
-      debugPrint('Signing in with Apple, requesting name and email');
-
-      // Get credential from Apple
+      // Get credentials from Apple
       final userCredential = await _auth.signInWithProvider(appleProvider);
 
-      // Debug log what we got from Apple
-      debugPrint(
-          'Apple Sign In returned - User: ${userCredential.user?.displayName}, Email: ${userCredential.user?.email}');
-      debugPrint(
-          'Additional info: ${userCredential.additionalUserInfo?.profile}');
+      // Debug log
+      debugPrint('Apple Sign In email: ${userCredential.user?.email}');
 
-      // Extract the name from the user credential
-      String? displayName;
+      // Extract display name using a helper method
+      String? displayName = _extractDisplayName(userCredential);
 
-      // Try to get from user profile
-      if (userCredential.user?.displayName != null &&
-          userCredential.user!.displayName!.isNotEmpty) {
-        displayName = userCredential.user!.displayName;
-        debugPrint('Got display name from user profile: $displayName');
-      }
-
-      // Try to get from additionalUserInfo
-      if ((displayName == null || displayName.isEmpty) &&
-          userCredential.additionalUserInfo?.profile != null) {
-        final profile = userCredential.additionalUserInfo!.profile!;
-        debugPrint('Profile data: $profile');
-
-        // Try to extract name from profile data
-        if (profile.containsKey('name')) {
-          displayName = profile['name'] as String?;
-          debugPrint('Got name from profile: $displayName');
-        } else {
-          // Apple sometimes puts the name in specific fields
-          final name = profile['name'];
-          final firstName =
-              profile['firstName'] ?? (name is Map ? name['firstName'] : null);
-          final lastName =
-              profile['lastName'] ?? (name is Map ? name['lastName'] : null);
-
-          if (firstName != null || lastName != null) {
-            final List<String> nameParts = [];
-            if (firstName != null) nameParts.add(firstName.toString());
-            if (lastName != null) nameParts.add(lastName.toString());
-
-            displayName = nameParts.join(' ');
-            debugPrint('Extracted name from profile: $displayName');
-          }
-        }
-      }
-
-      // If we found a name, store it
-      if (displayName != null && displayName.isNotEmpty) {
+      // Store name if found
+      if (displayName != null &&
+          displayName.isNotEmpty &&
+          userCredential.user != null) {
         _cachedAppleDisplayName = displayName;
-
-        // Store the name in secure storage for future use
-        if (userCredential.user != null) {
-          await storeUserName(userCredential.user!.uid, displayName);
-        }
+        await storeUserName(userCredential.user!.uid, displayName);
       }
 
       await _associateEmailWith(userCredential);
@@ -251,6 +208,39 @@ class AuthService {
 
   // Add a field to cache the display name
   String? _cachedAppleDisplayName;
+
+  // Helper method to extract display name from user credentials
+  String? _extractDisplayName(UserCredential userCredential) {
+    // 1. Try Firebase user display name first
+    if (userCredential.user?.displayName != null &&
+        userCredential.user!.displayName!.isNotEmpty) {
+      return userCredential.user!.displayName;
+    }
+
+    // 2. Try to extract from profile data
+    final profile = userCredential.additionalUserInfo?.profile;
+    if (profile == null) return null;
+
+    // Direct name field
+    if (profile.containsKey('name') && profile['name'] != null) {
+      return profile['name'] as String?;
+    }
+
+    // First/last name fields
+    final firstName = profile['firstName'] ??
+        (profile['name'] is Map ? profile['name']['firstName'] : null);
+    final lastName = profile['lastName'] ??
+        (profile['name'] is Map ? profile['name']['lastName'] : null);
+
+    if (firstName != null || lastName != null) {
+      final nameParts = <String>[];
+      if (firstName != null) nameParts.add(firstName.toString());
+      if (lastName != null) nameParts.add(lastName.toString());
+      return nameParts.isNotEmpty ? nameParts.join(' ') : null;
+    }
+
+    return null;
+  }
 
   // Improved method to get name from Apple Sign In
   String? getNameFromCredential() {
