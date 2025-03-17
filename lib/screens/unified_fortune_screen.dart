@@ -68,42 +68,21 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     final keyboardVisibilityController = KeyboardVisibilityController();
     _keyboardSubscription =
         keyboardVisibilityController.onChange.listen((bool visible) {
-      setState(() {
-        _isKeyboardVisible = visible;
-      });
+      if (mounted) {
+        setState(() {
+          _isKeyboardVisible = visible;
+        });
+      }
     });
 
-    // Listen for connectivity changes
-    _connectivityService.isConnected().then((connected) {
-      setState(() {
-        _isConnected = connected;
-        if (!connected) {
-          showErrorSnackBar(context,
-              'No internet connection. Please check your network settings.');
-        }
-      });
-    });
+    // Check initial connectivity without showing snackbar on first load
+    _initConnectivity();
 
-    _connectivitySubscription =
-        _connectivityService.connectionStatusStream.listen((connected) {
-      setState(() {
-        bool wasConnected = _isConnected;
-        _isConnected = connected;
-
-        // Only show SnackBar when connection status changes
-        if (!connected && wasConnected) {
-          showErrorSnackBar(context,
-              'Network connection lost. Please check your internet and try again.');
-        } else if (connected && !wasConnected) {
-          showInfoSnackBar(context, 'Internet connection restored.');
-        }
-
-        if (!connected && _isFortuneInProgress) {
-          _isFortuneInProgress = false;
-          _isFortuneCompleted = true;
-          animateProcessingDone();
-        }
-      });
+    // Listen for connectivity changes only after initial state is established
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _subscribeToConnectivityChanges();
+      }
     });
   }
 
@@ -122,7 +101,10 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     _questionFocusNode.dispose();
     _fortuneController.dispose();
     _keyboardSubscription.cancel();
-    _connectivitySubscription?.cancel();
+    if (_connectivitySubscription != null) {
+      _connectivitySubscription!.cancel();
+      _connectivitySubscription = null;
+    }
     super.dispose();
   }
 
@@ -151,6 +133,13 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
     if (question.trim().isEmpty) {
       showErrorSnackBar(context, 'Please enter a question.');
+      return;
+    }
+
+    // Check connectivity before proceeding
+    if (!_isConnected) {
+      showErrorSnackBar(context,
+          'No internet connection. Please check your network settings and try again.');
       return;
     }
 
@@ -375,5 +364,54 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
 
   void _initializeRiveController(Artboard artboard) {
     initializeRiveController(artboard, FortuneConstants.animationStateMachine);
+  }
+
+  Future<void> _initConnectivity() async {
+    try {
+      final connected = await _connectivityService.isConnected();
+      if (mounted) {
+        setState(() {
+          _isConnected = connected;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error initializing connectivity: $e');
+    }
+  }
+
+  void _subscribeToConnectivityChanges() {
+    // Cancel any existing subscription before creating a new one
+    _connectivitySubscription?.cancel();
+
+    _connectivitySubscription =
+        _connectivityService.connectionStatusStream.listen((connected) {
+      if (mounted) {
+        final bool wasConnected = _isConnected;
+
+        // Only update state and show notifications if there was a change
+        if (connected != wasConnected) {
+          setState(() {
+            _isConnected = connected;
+          });
+
+          // Show appropriate message based on connection change
+          if (!connected) {
+            showErrorSnackBar(context,
+                'Network connection lost. Please check your internet and try again.');
+          } else {
+            showInfoSnackBar(context, 'Internet connection restored.');
+          }
+        }
+
+        // Handle in-progress fortune if connection is lost
+        if (!connected && _isFortuneInProgress) {
+          setState(() {
+            _isFortuneInProgress = false;
+            _isFortuneCompleted = true;
+            animateProcessingDone();
+          });
+        }
+      }
+    });
   }
 }
