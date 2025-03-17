@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/dependency_injection.dart';
 import '../global_key.dart';
 import '../services/auth_service.dart';
@@ -179,37 +180,14 @@ class _SettingsScreenState extends State<SettingsScreen>
             ),
             const Spacer(),
             TextButton(
-              onPressed: () {
-                // Show terms and conditions
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text(TermsAndConditionsTexts.title),
-                      backgroundColor: AppTheme.primaryBackground,
-                      content: SizedBox(
-                        width: double.maxFinite,
-                        child: SingleChildScrollView(
-                          child: Text(
-                            TermsAndConditionsTexts.content,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('Close'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
+              onPressed: () async {
+                final uri = Uri.parse(PurchaseTexts.termsOfServiceUrl);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
               },
               child: Text(
-                TermsAndConditionsTexts.title,
+                PurchaseTexts.termsOfServiceText,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context).primaryColor,
