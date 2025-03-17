@@ -383,23 +383,32 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
     // Cancel any existing subscription before creating a new one
     _connectivitySubscription?.cancel();
 
+    // Set a flag to track whether we've already shown notifications
+    bool hasShownDisconnectMessage = false;
+
     _connectivitySubscription =
         _connectivityService.connectionStatusStream.listen((connected) {
       if (mounted) {
         final bool wasConnected = _isConnected;
 
-        // Only update state and show notifications if there was a change
+        // Real connection change detected (not just initialization)
         if (connected != wasConnected) {
           setState(() {
             _isConnected = connected;
           });
 
-          // Show appropriate message based on connection change
+          // Only show notifications for changes after initial load
           if (!connected) {
-            showErrorSnackBar(context,
-                'Network connection lost. Please check your internet and try again.');
-          } else {
+            // Only show disconnect messages if we haven't shown one already
+            if (!hasShownDisconnectMessage) {
+              showErrorSnackBar(context,
+                  'Network connection lost. Please check your internet and try again.');
+              hasShownDisconnectMessage = true;
+            }
+          } else if (hasShownDisconnectMessage) {
+            // Only show restore message if we previously showed a disconnect message
             showInfoSnackBar(context, 'Internet connection restored.');
+            hasShownDisconnectMessage = false;
           }
         }
 
