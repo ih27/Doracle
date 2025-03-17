@@ -27,10 +27,13 @@ abstract class EntityManager<T> extends ChangeNotifier {
     await prefs.setString(storageKey, _entitiesToJson(_entities));
   }
 
-  // DEBUG METHOD
   Future<void> removeEntities() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(storageKey);
+
+    // Clear in-memory list as well
+    _entities = [];
+    notifyListeners();
   }
 
   Future<void> addEntity(T entity) async {
