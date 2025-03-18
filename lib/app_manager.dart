@@ -229,14 +229,6 @@ class _AppManagerState extends State<AppManager> {
     attemptInitialization();
   }
 
-  // Helper method to check if profile exists and create one if needed
-  Future<void> _ensureProfileExists(BuildContext context) async {
-    final ownerExists = await _checkOwnerExists();
-    if (!ownerExists && context.mounted) {
-      await _handleInitialOwnerCreation(context);
-    }
-  }
-
   Future<void> _handleLogin(
       BuildContext context, String? email, String? password) async {
     if (email == null || password == null) return;
@@ -256,11 +248,6 @@ class _AppManagerState extends State<AppManager> {
     try {
       await _authService.createUserWithEmailAndPassword(email, password);
       _analytics.logSignUp(signUpMethod: 'email');
-
-      // Check profile with shared method
-      if (context.mounted) {
-        await _ensureProfileExists(context);
-      }
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(context, InfoMessages.registerFailure);
@@ -293,16 +280,12 @@ class _AppManagerState extends State<AppManager> {
     try {
       UserCredential? userCredential =
           await _authService.handlePlatformSignIn();
+      final authMethod = Platform.isIOS ? 'apple' : 'google';
 
       if (userCredential?.additionalUserInfo?.isNewUser ?? false) {
-        _analytics.logSignUp(signUpMethod: Platform.isIOS ? 'apple' : 'google');
-
-        // Check profile with shared method
-        if (context.mounted) {
-          await _ensureProfileExists(context);
-        }
+        _analytics.logSignUp(signUpMethod: authMethod);
       } else {
-        _analytics.logLogin(loginMethod: Platform.isIOS ? 'apple' : 'google');
+        _analytics.logLogin(loginMethod: authMethod);
       }
     } catch (e) {
       if (context.mounted) {
