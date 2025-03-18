@@ -81,7 +81,7 @@ class AppRouter {
         builder = (BuildContext context) => const OwnerCompatabilityScreen();
         break;
       case '/owner/create':
-        builder = (BuildContext context) => CreateOwnerScreen();
+        builder = (BuildContext context) => const CreateOwnerScreen();
         break;
       case '/owner/edit':
         final args = settings.arguments as Map<String, dynamic>;
