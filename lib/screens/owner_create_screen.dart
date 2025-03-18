@@ -20,7 +20,7 @@ class CreateOwnerScreen extends StatefulWidget {
 
 class _CreateOwnerScreenState extends State<CreateOwnerScreen> {
   final AuthService _authService = getIt<AuthService>();
-  late String? _initialName;
+  String? _initialName;
   bool _isAppleSignIn = false;
 
   @override
@@ -49,8 +49,8 @@ class _CreateOwnerScreenState extends State<CreateOwnerScreen> {
 
       debugPrint('Name from AuthService: $name');
 
-      // Set the name for the form
-      if (mounted) {
+      // Only update state if component is still mounted and name is not null
+      if (mounted && name != null) {
         setState(() {
           _initialName = name;
         });
