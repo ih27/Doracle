@@ -151,7 +151,12 @@ class AuthService {
           }
           break;
         case 'apple.com':
-          await _reauthenticateWithApple();
+          try {
+            await _reauthenticateWithApple();
+          } catch (e) {
+            debugPrint('Apple reauthentication failed in deletion flow: $e');
+            rethrow; // Propagate to UI layer for showing in snackbar
+          }
           break;
         default:
           throw Exception('Unsupported provider: $provider');
@@ -159,15 +164,22 @@ class AuthService {
 
       await currentUser!.delete();
     } catch (e) {
+      debugPrint('Account deletion failed: $e');
       rethrow;
     }
   }
 
   Future<void> _reauthenticateWithApple() async {
-    final appleProvider = AppleAuthProvider()
-      ..addScope('email')
-      ..addScope('name');
-    await currentUser!.reauthenticateWithProvider(appleProvider);
+    try {
+      final appleProvider = AppleAuthProvider()
+        ..addScope('email')
+        ..addScope('name');
+      await currentUser!.reauthenticateWithProvider(appleProvider);
+    } catch (e) {
+      debugPrint('Apple reauthentication failed: $e');
+      // Rethrow with more descriptive message but don't crash the app
+      throw Exception('Failed to re-authenticate with Apple Sign In');
+    }
   }
 
   Future<void> reauthenticateWithPasswordAndDelete(String password) async {
@@ -179,7 +191,8 @@ class AuthService {
       await currentUser!.reauthenticateWithCredential(credential);
       await currentUser!.delete();
     } catch (e) {
-      rethrow;
+      debugPrint('Password reauthentication failed: $e');
+      throw Exception('Failed to authenticate with password');
     }
   }
 

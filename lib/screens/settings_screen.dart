@@ -337,44 +337,74 @@ class _SettingsScreenState extends State<SettingsScreen>
     await ownerManager.removeEntities();
   }
 
+  // Handle successful account deletion
+  void _handleSuccessfulDeletion() {
+    if (!mounted) return;
+    navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
+    showInfoSnackBar(navigatorKey.currentContext!,
+        'Your account has been deleted successfully.');
+  }
+
+  // Handle authentication errors with specific provider messages
+  void _handleAuthError(Object error) {
+    if (!mounted) return;
+    String errorMessage = 'Error deleting account';
+
+    if (error.toString().contains('apple')) {
+      errorMessage = 'Apple authentication failed. Please try again later.';
+    } else if (error.toString().contains('google')) {
+      errorMessage = 'Google authentication failed. Please try again later.';
+    } else if (error.toString().contains('password')) {
+      errorMessage = 'Password authentication failed. Please try again.';
+    }
+
+    showErrorSnackBar(context, errorMessage);
+  }
+
+  // Attempt to delete with provider-based reauthentication
+  Future<void> _deleteWithReauthentication(String provider) async {
+    try {
+      await _clearUserData();
+      await authService.reauthenticateAndDelete(provider);
+      _handleSuccessfulDeletion();
+    } catch (e) {
+      _handleAuthError(e);
+    }
+  }
+
   Future<void> _handleAccountDeletion() async {
     try {
-      // Clear only owner data
+      // Try direct deletion first
       await _clearUserData();
-
-      // Then delete Firebase account
       await authService.deleteUser();
-
-      if (!mounted) return;
-      navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
-      showInfoSnackBar(navigatorKey.currentContext!,
-          'Your account has been deleted successfully.');
+      _handleSuccessfulDeletion();
     } on NeedsReauthenticationException catch (e) {
+      // Handle password provider separately
       if (e.provider == 'password') {
         String? password = await _promptForPassword();
-        if (password != null) {
-          // Clear only owner data
-          await _clearUserData();
-
-          await authService.reauthenticateWithPasswordAndDelete(password);
-        } else {
-          if (!mounted) return;
-          showErrorSnackBar(
-              context, 'Password is required for account deletion.');
+        if (password == null) {
+          if (mounted) {
+            showErrorSnackBar(
+                context, 'Password is required for account deletion.');
+          }
           return;
         }
-      } else {
-        // Clear only owner data
-        await _clearUserData();
 
-        await authService.reauthenticateAndDelete(e.provider);
+        try {
+          await _clearUserData();
+          await authService.reauthenticateWithPasswordAndDelete(password);
+          _handleSuccessfulDeletion();
+        } catch (e) {
+          _handleAuthError(e);
+        }
+      } else {
+        // Handle other providers
+        await _deleteWithReauthentication(e.provider);
       }
-      if (!mounted) return;
-      navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
-      showInfoSnackBar(navigatorKey.currentContext!,
-          'Your account has been deleted successfully.');
     } catch (e) {
-      showErrorSnackBar(context, 'Error deleting account.');
+      if (mounted) {
+        showErrorSnackBar(context, 'Error deleting account: ${e.toString()}');
+      }
     }
   }
 
