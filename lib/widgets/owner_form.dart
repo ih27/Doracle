@@ -84,6 +84,8 @@ class _OwnerFormState extends State<OwnerForm> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName);
+    debugPrint(
+        'OwnerForm initState - setting name controller with: ${widget.initialName}');
     _birthdateController = TextEditingController(
       text: widget.initialBirthdate != null
           ? formatDate(widget.initialBirthdate!)
@@ -108,6 +110,19 @@ class _OwnerFormState extends State<OwnerForm> {
     _groomingCommitment = widget.initialGroomingCommitment;
     _noiseTolerance = widget.initialNoiseTolerance;
     _petReason = widget.initialPetReason;
+  }
+
+  @override
+  void didUpdateWidget(OwnerForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update name controller if initialName changes
+    if (widget.initialName != oldWidget.initialName &&
+        widget.initialName != null) {
+      debugPrint(
+          'OwnerForm didUpdateWidget - updating name controller from: ${oldWidget.initialName} to: ${widget.initialName}');
+      _nameController.text = widget.initialName!;
+    }
   }
 
   @override
@@ -153,9 +168,13 @@ class _OwnerFormState extends State<OwnerForm> {
                     _nameError = null;
                   });
                 }
+                // Debug log text field content
+                debugPrint('Display name field changed to: $value');
               },
               errorText: _nameError,
               maxLength: 40,
+              key: ValueKey(
+                  'display_name_field_${widget.initialName ?? "empty"}'),
             ),
             const SizedBox(height: 8),
             _buildGenderSection(),

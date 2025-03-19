@@ -19,7 +19,6 @@ import 'providers/entitlement_provider.dart';
 import 'services/crashlytics_service.dart';
 import 'services/firestore_service.dart';
 import 'services/haptic_service.dart';
-import 'services/secure_storage_service.dart';
 import 'services/unified_analytics_service.dart';
 
 Future<void> main() async {
@@ -36,9 +35,6 @@ Future<void> main() async {
 
   // Setup dependencies early so we can use CrashlyticsService for error reporting
   setupDependencies();
-
-  // Check if this is a fresh install (for ATT debugging)
-  await _checkIfFreshInstall();
 
   await _setupErrorReporting();
 
@@ -112,34 +108,11 @@ Future<bool> _requestAppTrackingPermission() async {
   if (Platform.isIOS) {
     debugPrint('Requesting App Tracking Transparency permission');
 
-    // Check if this is a fresh install
-    await _checkIfFreshInstall();
-
     final status = await Permission.appTrackingTransparency.request();
     debugPrint('ATT Permission status: ${status.toString()}');
     return status.isGranted;
   }
   return false;
-}
-
-// Helper to detect if this is a fresh install (useful for debugging ATT issues)
-Future<void> _checkIfFreshInstall() async {
-  try {
-    // Create storage instance
-    final storage = getIt<SecureStorageService>();
-    final hasRunBefore = await storage.read(key: 'has_run_before');
-
-    if (hasRunBefore == null) {
-      // This is the first run after installation
-      debugPrint('⚠️ FRESH INSTALL DETECTED - ATT should show now');
-      await storage.write(key: 'has_run_before', value: 'true');
-    } else {
-      // This is a subsequent run
-      debugPrint('This is NOT a fresh install - app has run before');
-    }
-  } catch (e) {
-    debugPrint('Error checking if fresh install: $e');
-  }
 }
 
 class MyApp extends StatelessWidget {

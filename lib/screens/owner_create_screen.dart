@@ -32,6 +32,21 @@ class _CreateOwnerScreenState extends State<CreateOwnerScreen> {
   void _loadUserData() async {
     // Get user data from Firebase Auth
     User? user = _authService.currentUser;
+    debugPrint('CreateOwnerScreen - Current user: ${user?.uid}');
+    debugPrint(
+        'CreateOwnerScreen - Current user display name from Firebase: ${user?.displayName}');
+
+    // Log provider data
+    if (user?.providerData != null) {
+      debugPrint(
+          'CreateOwnerScreen - Provider data count: ${user!.providerData.length}');
+      for (var provider in user.providerData) {
+        debugPrint('CreateOwnerScreen - Provider ID: ${provider.providerId}');
+        debugPrint(
+            'CreateOwnerScreen - Provider display name: ${provider.displayName}');
+        debugPrint('CreateOwnerScreen - Provider email: ${provider.email}');
+      }
+    }
 
     // Check if user signed in with Apple
     bool isAppleUser =
@@ -44,22 +59,33 @@ class _CreateOwnerScreenState extends State<CreateOwnerScreen> {
     _isAppleSignIn = isAppleUser;
 
     if (_isAppleSignIn) {
+      debugPrint('CreateOwnerScreen - Attempting to get Apple user name');
       // Try to get name from various sources, prioritizing secure storage
       String? name = await _authService.getAppleUserName();
 
       debugPrint('Name from AuthService: $name');
 
+      // Check cached name in AuthService
+      String? cachedName = _authService.getNameFromCredential();
+      debugPrint(
+          'CreateOwnerScreen - Cached name from credentials: $cachedName');
+
       // Only update state if component is still mounted and name is not null
       if (mounted && name != null) {
+        debugPrint('CreateOwnerScreen - Setting initial name to: $name');
         setState(() {
           _initialName = name;
         });
+      } else {
+        debugPrint(
+            'CreateOwnerScreen - Name not set: mounted=$mounted, name=$name');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('CreateOwnerScreen build - initialName: $_initialName');
     return OwnerForm(
       initialName: _initialName,
       onSubmit: (formData) => _createOwner(context, formData),
