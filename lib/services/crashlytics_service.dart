@@ -27,8 +27,6 @@ class CrashlyticsService {
       );
     } catch (e) {
       // If Crashlytics itself crashes, just log locally
-      debugPrint('Failed to record error to Crashlytics: $e');
-      debugPrint('Original error: $error');
     }
   }
 
@@ -38,7 +36,6 @@ class CrashlyticsService {
       await _crashlytics.recordFlutterFatalError(errorDetails);
     } catch (e) {
       // If Crashlytics recording fails, extract key info and try a simpler approach
-      debugPrint('Failed to record Flutter error to Crashlytics: $e');
       try {
         // Try recording just the exception and stack trace instead
         await _crashlytics.recordError(
@@ -49,8 +46,6 @@ class CrashlyticsService {
         );
       } catch (e2) {
         // If that also fails, just log locally
-        debugPrint('Failed alternative error reporting: $e2');
-        debugPrint('Original error: ${errorDetails.exception}');
       }
     }
   }

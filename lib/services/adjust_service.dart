@@ -14,7 +14,7 @@ class AdjustService {
     if (_isInitialized) return;
 
     if (_appToken.isEmpty) {
-      debugPrint('Warning: ADJUST_APP_TOKEN is missing from .env file');
+      // Warning: ADJUST_APP_TOKEN is missing from .env file
       return;
     }
 
@@ -32,8 +32,6 @@ class AdjustService {
     // Initialize the SDK
     Adjust.initSdk(config);
     _isInitialized = true;
-
-    debugPrint('Adjust SDK initialized');
   }
 
   /// Track a custom event
@@ -41,8 +39,7 @@ class AdjustService {
       {Map<String, String>? callbackParameters,
       Map<String, String>? partnerParameters}) async {
     if (!_isInitialized) {
-      debugPrint(
-          'Warning: Adjust SDK not initialized. Initialize before tracking events.');
+      // Warning: Adjust SDK not initialized
       return;
     }
 
@@ -63,7 +60,6 @@ class AdjustService {
     }
 
     Adjust.trackEvent(event);
-    debugPrint('Adjust event tracked: $eventToken');
   }
 
   /// Track revenue event
@@ -71,8 +67,7 @@ class AdjustService {
       {Map<String, String>? callbackParameters,
       Map<String, String>? partnerParameters}) async {
     if (!_isInitialized) {
-      debugPrint(
-          'Warning: Adjust SDK not initialized. Initialize before tracking revenue.');
+      // Warning: Adjust SDK not initialized
       return;
     }
 
@@ -94,6 +89,5 @@ class AdjustService {
     }
 
     Adjust.trackEvent(event);
-    debugPrint('Adjust revenue event tracked: $eventToken ($amount $currency)');
   }
 }

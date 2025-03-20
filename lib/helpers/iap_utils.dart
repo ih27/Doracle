@@ -17,7 +17,7 @@ class IAPUtils {
         await _purchaseService.ensureInitialized();
         return await _purchaseService.fetchSubscriptionPrices();
       } catch (e) {
-        debugPrint('Error loading prices: $e');
+        // Error loading prices
       }
     }
     return cachedPrices;
@@ -84,7 +84,7 @@ class IAPUtils {
 
       return true;
     } catch (e) {
-      debugPrint('Purchase error: $e');
+      // Purchase error
       return false;
     }
   }

@@ -375,7 +375,7 @@ class _UnifiedFortuneScreenState extends State<UnifiedFortuneScreen>
         });
       }
     } catch (e) {
-      debugPrint('Error initializing connectivity: $e');
+      // Error occurred while initializing connectivity
     }
   }
 

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
@@ -36,8 +35,6 @@ class UnifiedAnalyticsService {
       // Check current ATT permission status
       final attStatus = await Permission.appTrackingTransparency.status;
       _isTrackingAllowed = attStatus.isGranted;
-      debugPrint(
-          'Unified Analytics initializing with ATT status: ${attStatus.toString()}');
     } else {
       // For non-iOS platforms, assume tracking is allowed
       _isTrackingAllowed = true;
@@ -51,9 +48,6 @@ class UnifiedAnalyticsService {
     if (_isTrackingAllowed || !Platform.isIOS) {
       await _facebookEvents.logActivateApp();
     }
-
-    debugPrint(
-        'Unified Analytics Service initialized (tracking allowed: $_isTrackingAllowed)');
   }
 
   /// Log a custom event across all platforms in a non-blocking way
@@ -98,10 +92,8 @@ class UnifiedAnalyticsService {
         unawaited(_adjustService.trackEvent(adjustEventToken,
             callbackParameters: adjustParams));
       }
-
-      debugPrint('Event logged to all services: $name');
     } catch (e) {
-      debugPrint('Error logging event to analytics services: $e');
+      // Error logging event
     }
   }
 
@@ -116,10 +108,8 @@ class UnifiedAnalyticsService {
         contentType: 'screen',
         contentId: screenName,
       ));
-
-      debugPrint('Screen view logged to all services: $screenName');
     } catch (e) {
-      debugPrint('Error logging screen view: $e');
+      // Error logging screen view
     }
   }
 
@@ -142,10 +132,8 @@ class UnifiedAnalyticsService {
           _adjustService.trackEvent(adjustEventToken, callbackParameters: {
         'method': signUpMethod,
       }));
-
-      debugPrint('Sign up logged to all services: $signUpMethod');
     } catch (e) {
-      debugPrint('Error logging sign up: $e');
+      // Error logging sign up
     }
   }
 
@@ -169,10 +157,8 @@ class UnifiedAnalyticsService {
           _adjustService.trackEvent(adjustEventToken, callbackParameters: {
         'method': loginMethod,
       }));
-
-      debugPrint('Login logged to all services: $loginMethod');
     } catch (e) {
-      debugPrint('Error logging login: $e');
+      // Error logging login
     }
   }
 
@@ -235,11 +221,8 @@ class UnifiedAnalyticsService {
         currency,
         callbackParameters: adjustParams,
       ));
-
-      debugPrint(
-          'Purchase logged to all services: $productId, $price $currency');
     } catch (e) {
-      debugPrint('Error logging purchase: $e');
+      // Error logging purchase
     }
   }
 
@@ -331,11 +314,8 @@ class UnifiedAnalyticsService {
           callbackParameters: adjustParams,
         ));
       }
-
-      debugPrint(
-          'Purchase with price string logged: $productIdentifier, $priceString');
     } catch (e) {
-      debugPrint('Error logging purchase with price string: $e');
+      // Error logging purchase with price string
     }
   }
 
@@ -389,11 +369,8 @@ class UnifiedAnalyticsService {
         currency,
         callbackParameters: adjustParams,
       ));
-
-      debugPrint(
-          'Subscription logged to all services: $subscriptionId, $price $currency');
     } catch (e) {
-      debugPrint('Error logging subscription: $e');
+      // Error logging subscription
     }
   }
 
@@ -450,11 +427,8 @@ class UnifiedAnalyticsService {
         adjustEventToken,
         callbackParameters: adjustParams,
       ));
-
-      debugPrint(
-          'Subscription with price string logged: $subscriptionId, $priceString');
     } catch (e) {
-      debugPrint('Error logging subscription with price string: $e');
+      // Error logging subscription with price string
     }
   }
 
@@ -466,9 +440,8 @@ class UnifiedAnalyticsService {
     try {
       // Firebase Analytics - fire and forget
       unawaited(_firebaseAnalytics.setUserProperty(name: name, value: value));
-      debugPrint('User property set: $name = $value');
     } catch (e) {
-      debugPrint('Error setting user property: $e');
+      // Error setting user property
     }
   }
 
@@ -476,7 +449,6 @@ class UnifiedAnalyticsService {
   static void unawaited(Future<void> future) {
     // Intentionally not awaiting the future
     future.catchError((error) {
-      debugPrint('Caught error in unawaited analytics call: $error');
       // Errors are only logged, not propagated
       return null;
     });

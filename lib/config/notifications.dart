@@ -2,7 +2,6 @@ import 'dart:async' show TimeoutException;
 import 'dart:io' show Platform;
 import 'package:eraser/eraser.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 
 const int _maxRetries = 3;
 const Duration _retryDelay = Duration(minutes: 15);
@@ -13,7 +12,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // make sure you call `initializeApp` before using other Firebase services.
   //await Firebase.initializeApp();
 
-  debugPrint("Handling a background message: ${message.messageId}");
+  // Handle background message
+  // Message ID: ${message.messageId}
 }
 
 Future<void> setupNotifications() async {
@@ -28,18 +28,16 @@ Future<void> setupNotifications() async {
   );
 
   FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
-    debugPrint('FCM token refresh callback called...');
+    // FCM token refresh callback
   }).onError((err) {
-    debugPrint('Error in token refresh: $err');
+    // Error occurred during token refresh
   });
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('Got a message whilst in the foreground!');
-    debugPrint('Message data: ${message.data}');
-
+    // Handle foreground message
+    // Message data available in message.data
     if (message.notification != null) {
-      debugPrint(
-          'Message also contained a notification: ${message.notification}');
+      // Notification payload available
     }
   });
 
@@ -53,14 +51,14 @@ Future<void> setupNotifications() async {
   }
 }
 
-void cleanUpNotifications() {  
+void cleanUpNotifications() {
   Eraser.clearAllAppNotifications();
   Eraser.resetBadgeCountAndRemoveNotificationsFromCenter();
 }
 
 Future<void> _getFCMToken({int retryCount = 0}) async {
   if (retryCount >= _maxRetries) {
-    debugPrint('Max retries reached for FCM token. Giving up.');
+    // Maximum retries reached for FCM token
     return;
   }
 
@@ -72,18 +70,18 @@ Future<void> _getFCMToken({int retryCount = 0}) async {
       },
     );
     if (token != null) {
-      // debugPrint("My FCM token: $token");
+      // Token retrieved successfully
       // Here you would typically send this token to your server
     }
   } catch (e) {
-    debugPrint('Error getting FCM token: $e');
+    // Error occurred while getting FCM token
     _scheduleTokenRetry(_getFCMToken, retryCount + 1);
   }
 }
 
 Future<void> _getAPNSToken({int retryCount = 0}) async {
   if (retryCount >= _maxRetries) {
-    debugPrint('Max retries reached for APNS token. Giving up.');
+    // Maximum retries reached for APNS token
     return;
   }
 
@@ -95,11 +93,11 @@ Future<void> _getAPNSToken({int retryCount = 0}) async {
       },
     );
     if (token != null) {
-      // debugPrint("My APNS token: $token");
+      // Token retrieved successfully
       // Here you would typically send this token to your server
     }
   } catch (e) {
-    debugPrint('Error getting APNS token: $e');
+    // Error occurred while getting APNS token
     _scheduleTokenRetry(_getAPNSToken, retryCount + 1);
   }
 }

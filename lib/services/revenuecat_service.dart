@@ -56,26 +56,22 @@ class RevenueCatService with ChangeNotifier {
       await ensureInitialized();
       final String? productIdentifier = _productsHash[questionCount];
       if (productIdentifier == null) {
-        debugPrint("Invalid question count: $questionCount");
         return false;
       }
 
       final StoreProduct? product = await _getProduct(productIdentifier);
       if (product == null) {
-        debugPrint("Product not found for identifier: $productIdentifier");
         return false;
       }
 
       await Purchases.purchaseStoreProduct(product);
       return true;
     } catch (e) {
-      debugPrint("Purchase product error: $e");
       return false;
     }
   }
 
   Future<bool> buySubscription(String subscriptionType) async {
-    debugPrint('Trying to purchase: $subscriptionType');
     try {
       await ensureInitialized();
       CustomerInfo customerInfo = await Purchases.purchasePackage(
@@ -91,13 +87,11 @@ class RevenueCatService with ChangeNotifier {
       notifyListeners();
       return _isEntitled;
     } catch (e) {
-      debugPrint("Buy subscription error: $e");
       return _isEntitled;
     }
   }
 
   Future<bool> restorePurchase() async {
-    debugPrint('Trying to restore purchase...');
     try {
       await ensureInitialized();
       CustomerInfo customerInfo = await Purchases.restorePurchases();
@@ -108,7 +102,6 @@ class RevenueCatService with ChangeNotifier {
       }
       return _isEntitled;
     } catch (e) {
-      debugPrint("Restore subscription error: $e");
       return _isEntitled;
     }
   }
@@ -119,7 +112,6 @@ class RevenueCatService with ChangeNotifier {
       final products = await _getProducts();
       return {for (var p in products) p.identifier: p.priceString};
     } catch (e) {
-      debugPrint("Error fetching prices: $e");
       return {};
     }
   }
@@ -133,7 +125,6 @@ class RevenueCatService with ChangeNotifier {
           p.identifier: p.storeProduct.priceString
       };
     } catch (e) {
-      debugPrint("Error fetching subscription prices: $e");
       return {};
     }
   }
@@ -169,7 +160,6 @@ class RevenueCatService with ChangeNotifier {
 
       _initializationCompleter!.complete();
     } catch (e) {
-      debugPrint("Error in initializeAndLogin: $e");
       _initializationCompleter!.completeError(e);
       // Reset the completer and last user ID on error
       _initializationCompleter = null;
@@ -205,7 +195,6 @@ class RevenueCatService with ChangeNotifier {
       _cachedProducts ??= await Purchases.getProducts(_products);
       return _cachedProducts!;
     } catch (e) {
-      debugPrint("Error getting products: $e");
       return [];
     }
   }
@@ -222,7 +211,6 @@ class RevenueCatService with ChangeNotifier {
       }
       return _cachedSubscriptions;
     } catch (e) {
-      debugPrint("Error getting subscriptions: $e");
       return {};
     }
   }
@@ -232,7 +220,6 @@ class RevenueCatService with ChangeNotifier {
       final products = await Purchases.getProducts([identifier]);
       return products.isNotEmpty ? products.first : null;
     } catch (e) {
-      debugPrint("Error getting product: $e");
       return null;
     }
   }
@@ -258,12 +245,8 @@ class RevenueCatService with ChangeNotifier {
     final lastUserId = await _getLastLoggedInUserId();
 
     if (lastUserId != userId) {
-      final loginResult = await Purchases.logIn(userId);
+      await Purchases.logIn(userId);
       await _setLastLoggedInUserId(userId);
-      debugPrint(
-          "RevenueCat login successful for ${loginResult.customerInfo.originalAppUserId}");
-    } else {
-      debugPrint("User $userId already logged in to RevenueCat.");
     }
   }
 
@@ -272,7 +255,6 @@ class RevenueCatService with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getString(_lastUserIdKey);
     } catch (e) {
-      debugPrint("Error getting last logged in user ID: $e");
       return null;
     }
   }
@@ -282,7 +264,7 @@ class RevenueCatService with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_lastUserIdKey, userId);
     } catch (e) {
-      debugPrint("Error setting last logged in user ID: $e");
+      // Ignore errors
     }
   }
 }

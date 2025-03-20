@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import '../models/owner_model.dart';
 import '../models/pet_model.dart';
 import 'ai_prompt_generation_service.dart';
@@ -23,7 +22,6 @@ class CompatibilityContentService {
             pet as Pet, entity as Pet, PromptType.tenDayPlan);
     final response = await openAIService.getCompatibility(prompt);
 
-    debugPrint(response.choices.first.message.content?.first.text);
     String jsonString =
         response.choices.first.message.content?.first.text ?? '{}';
 
@@ -35,7 +33,7 @@ class CompatibilityContentService {
       }
       return planMap;
     } catch (e) {
-      debugPrint('Error parsing JSON: $e');
+      // Error parsing JSON
       return {
         'error': 'Failed to parse improvement plan',
         'rawContent': jsonString
@@ -55,7 +53,6 @@ class CompatibilityContentService {
     // Parse the content as JSON
     final String jsonString =
         response.choices.first.message.content?.first.text ?? '{}';
-    debugPrint(jsonString);
     return json.decode(jsonString) as Map<String, dynamic>;
   }
 
@@ -66,7 +63,6 @@ class CompatibilityContentService {
         : _generatePetPetPrompt(
             pet as Pet, entity as Pet, PromptType.astrologicalCompatibility);
     final response = await openAIService.getCompatibility(prompt);
-    debugPrint(response.choices.first.message.content?.first.text); // DELETE
     return response.choices.first.message.content?.first.text;
   }
 

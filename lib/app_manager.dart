@@ -67,7 +67,7 @@ class _AppManagerState extends State<AppManager> {
             color: AppTheme.primaryColor,
           ));
         } else if (snapshot.hasData) {
-          debugPrint('Auth userId: ${snapshot.data!.uid}');
+          // User authenticated with ID: ${snapshot.data!.uid}
           return FutureBuilder(
             future: _loadUser(snapshot.data!.uid),
             builder: (context, userSnapshot) {
@@ -215,7 +215,6 @@ class _AppManagerState extends State<AppManager> {
       try {
         await _revenueCatService.initializeAndLogin(userId);
       } catch (e) {
-        debugPrint('RevenueCat initialization error: $e');
         if (retryCount < maxRetries) {
           retryCount++;
           Timer(retryDelay, attemptInitialization);

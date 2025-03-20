@@ -166,7 +166,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       // Save the compatibility score
       await _saveCompatibilityScore(result);
     } catch (e) {
-      debugPrint('Error fetching scores: $e');
+      // Error occurred while fetching scores
       setState(() {
         _isLoading = false;
       });
@@ -178,7 +178,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       await _compatibilityDataRepository.saveCompatibilityScore(
           widget.entity1, widget.entity2, scores);
     } catch (e) {
-      debugPrint('Error saving compatibility score: $e');
+      // Error occurred while saving compatibility score
     }
   }
 
@@ -197,7 +197,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       });
       await _saveCardAvailability();
     } catch (e) {
-      debugPrint('Error fetching astrology: $e');
+      // Error occurred while fetching astrology
     }
   }
 
@@ -216,7 +216,7 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
       });
       await _saveCardAvailability();
     } catch (e) {
-      debugPrint('Error fetching recommendations: $e');
+      // Error occurred while fetching recommendations
     }
   }
 
@@ -238,15 +238,12 @@ class _CompatibilityResultScreenState extends State<CompatibilityResultScreen> {
             _isCardDataAvailable[CompatibilityTexts.improvementCardId] = true;
           });
         } else {
-          // Handle the error case
-          debugPrint('Error in improvement plan: ${plan['error']}');
           if (mounted) {
             showErrorSnackBar(context,
                 'Failed to generate improvement plan. Please try again later.');
           }
         }
       } catch (e) {
-        debugPrint('Error fetching improvement plan: $e');
         if (mounted) {
           showErrorSnackBar(context,
               'An error occurred while generating the improvement plan.');

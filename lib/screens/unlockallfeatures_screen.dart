@@ -54,7 +54,7 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
       await _purchaseService.ensureInitialized();
       _prices = await _purchaseService.fetchSubscriptionPrices();
     } catch (e) {
-      debugPrint('Error loading prices: $e');
+      // Error occurred while loading prices
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -115,7 +115,6 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
       await _userService.updateSubscriptionHistory(subscriptionType);
       return true;
     } catch (e) {
-      debugPrint('Purchase error: $e');
       return false;
     }
   }

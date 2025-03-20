@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Service for securely storing and retrieving data using flutter_secure_storage
@@ -35,9 +34,7 @@ class SecureStorageService {
   Future<void> write({required String key, required String? value}) async {
     try {
       await _secureStorage.write(key: key, value: value);
-      debugPrint('Stored value for key: $key');
     } catch (e) {
-      debugPrint('Error storing value for key: $key - $e');
       rethrow;
     }
   }
@@ -48,7 +45,6 @@ class SecureStorageService {
       final value = await _secureStorage.read(key: key);
       return value;
     } catch (e) {
-      debugPrint('Error reading value for key: $key - $e');
       return null;
     }
   }
@@ -57,9 +53,8 @@ class SecureStorageService {
   Future<void> delete({required String key}) async {
     try {
       await _secureStorage.delete(key: key);
-      debugPrint('Deleted value for key: $key');
     } catch (e) {
-      debugPrint('Error deleting value for key: $key - $e');
+      // Error deleting value
     }
   }
 
@@ -67,9 +62,8 @@ class SecureStorageService {
   Future<void> deleteAll() async {
     try {
       await _secureStorage.deleteAll();
-      debugPrint('Deleted all stored values');
     } catch (e) {
-      debugPrint('Error deleting all values - $e');
+      // Error deleting all values
     }
   }
 }

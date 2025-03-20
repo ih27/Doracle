@@ -451,13 +451,15 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   Future<void> _handleRestore() async {
     if (await purchaseService.restorePurchase()) {
-      debugPrint('Successfully restored a subscription from settings screen');
-      if (!mounted) return;
-      showInfoSnackBar(context, 'Subscription restored successfully.');
+      // Successfully restored subscription from settings screen
+      if (mounted) {
+        showInfoSnackBar(context, 'Successfully restored your subscription!');
+      }
     } else {
-      debugPrint('Restore  subscription failed in settings screen');
-      if (!mounted) return;
-      showErrorSnackBar(context, 'Subscription restore failed.');
+      // Failed to restore subscription in settings screen
+      if (mounted) {
+        showErrorSnackBar(context, 'No active subscription found.');
+      }
     }
   }
 }

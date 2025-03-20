@@ -1,6 +1,5 @@
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FacebookAppEventsService {
@@ -33,17 +32,12 @@ class FacebookAppEventsService {
         try {
           // Check ATT permission status before enabling advertiser tracking
           final attStatus = await Permission.appTrackingTransparency.status;
-          debugPrint(
-              'Facebook Events initializing with ATT status: ${attStatus.toString()}');
 
           // Only enable advertiser tracking if permission is granted
           await _facebookAppEvents.setAdvertiserTracking(
               enabled: attStatus.isGranted);
-
-          debugPrint(
-              'Initializing Facebook App Events with SKAdNetwork support');
         } catch (e) {
-          debugPrint('Error initializing Facebook App Events for iOS 14+: $e');
+          // Error initializing Facebook App Events for iOS 14+
           // Default to disabled tracking on error
           await _facebookAppEvents.setAdvertiserTracking(enabled: false);
         }
@@ -313,9 +307,8 @@ class FacebookAppEventsService {
         name: 'fb_mobile_update_conversion_value',
         parameters: {'value': value.toString(), 'schema': _skadNetworkSchema},
       );
-      debugPrint('Updated SKAdNetwork conversion value to: $value');
     } catch (e) {
-      debugPrint('Error updating SKAdNetwork conversion value: $e');
+      // Error updating SKAdNetwork conversion value
     }
   }
 

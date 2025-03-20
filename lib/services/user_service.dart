@@ -54,7 +54,7 @@ class UserService extends ValueNotifier<AppUser?> {
 
         notifyListeners();
       } catch (e) {
-        debugPrint('Error creating AppUser: $e');
+        // Error creating AppUser
       }
     } else {
       // No existing user data, create new user with current canVibrate status
@@ -122,7 +122,6 @@ class UserService extends ValueNotifier<AppUser?> {
 
   Future<void> updateUserField<T>(String fieldName, T fieldValue) async {
     if (value != null) {
-      debugPrint("Updating $fieldName to $fieldValue");
       await _userRepository.updateUser(value!.id, {fieldName: fieldValue});
       value!.updateField(fieldName, fieldValue);
       notifyListeners();

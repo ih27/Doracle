@@ -75,7 +75,7 @@ Future<void> _setupErrorReporting() async {
     try {
       crashlyticsService.recordFlutterError(errorDetails);
     } catch (e) {
-      debugPrint('Error reporting to Crashlytics: $e');
+      // Error reporting to Crashlytics
     }
   };
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
@@ -83,7 +83,7 @@ Future<void> _setupErrorReporting() async {
     try {
       crashlyticsService.recordError(error, stack, fatal: true);
     } catch (e) {
-      debugPrint('Error reporting to Crashlytics: $e');
+      // Error reporting to Crashlytics
     }
     return true;
   };
@@ -106,10 +106,9 @@ Future<void> _initializeApp() async {
 // Request App Tracking Transparency permission before any tracking occurs
 Future<bool> _requestAppTrackingPermission() async {
   if (Platform.isIOS) {
-    debugPrint('Requesting App Tracking Transparency permission');
-
+    // Requesting App Tracking Transparency permission
     final status = await Permission.appTrackingTransparency.request();
-    debugPrint('ATT Permission status: ${status.toString()}');
+    // ATT Permission status
     return status.isGranted;
   }
   return false;

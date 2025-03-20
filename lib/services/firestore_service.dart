@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math' show Random;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/constants.dart';
 
@@ -29,7 +28,7 @@ class FirestoreService {
         return statsDoc.data()?['startingCount'] ?? defaultStartingCount;
       }
     } catch (e) {
-      debugPrint('Error fetching starting count: $e');
+      // Error fetching starting count
       return defaultStartingCount;
     }
     return defaultStartingCount;
@@ -55,7 +54,7 @@ class FirestoreService {
         _loadCachedQuestions(prefs);
       }
     } catch (e) {
-      debugPrint('Error initializing questions cache: $e');
+      // Error initializing questions cache
       _questionsCache.clear();
     }
   }
@@ -89,7 +88,7 @@ class FirestoreService {
             snapshot.docs.map((doc) => doc['question'] as String).toList();
         _questionsCache[category] = categoryQuestions;
       } catch (e) {
-        debugPrint('Error fetching questions for category $category: $e');
+        // Error fetching questions for category
         fetchSuccessful = false;
         // If fetching fails for a category, add previously cached questions if available
         final prefs = await SharedPreferences.getInstance();
@@ -117,7 +116,7 @@ class FirestoreService {
             _lastSuccessfulFetchTimeKey, DateTime.now().millisecondsSinceEpoch);
       }
     } catch (e) {
-      debugPrint('Error saving questions cache: $e');
+      // Error saving questions cache
     }
   }
 
@@ -145,7 +144,7 @@ class FirestoreService {
       }
       return _getRandomQuestionsFromCache(numberOfQuestionsPerCategory);
     } catch (e) {
-      debugPrint('Error fetching random questions: $e');
+      // Error fetching random questions
       return [];
     }
   }

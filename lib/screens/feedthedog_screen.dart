@@ -43,8 +43,6 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
     try {
       await _purchaseService.ensureInitialized();
       _prices = await _purchaseService.fetchPrices();
-    } catch (e) {
-      debugPrint('Error loading prices: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -94,7 +92,6 @@ class FeedTheDogScreenState extends State<FeedTheDogScreen> {
         },
       );
     } catch (e) {
-      debugPrint('Purchase error: $e');
       if (mounted) {
         showErrorSnackBar(context, 'Purchase failed. Please try again.');
       }

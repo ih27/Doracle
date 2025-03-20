@@ -148,7 +148,7 @@ class FortuneViewModel extends ChangeNotifier {
         cachedPrices = await _purchaseService.fetchPrices();
         notifyListeners();
       } catch (e) {
-        debugPrint('Error loading prices: $e');
+        // Error occurred while loading prices
       }
     }
   }
@@ -179,7 +179,6 @@ class FortuneViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      debugPrint('Purchase error: $e');
       return false;
     }
   }
