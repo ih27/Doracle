@@ -18,7 +18,7 @@ class FirestoreService {
   static const String _lastFetchTimeKey = 'last_fetch_time';
   static const String _lastSuccessfulFetchTimeKey =
       'last_successful_fetch_time';
-  static const Duration _cacheDuration = Duration(days: 30);
+  static const Duration _cacheDuration = Duration(days: 7);
   static const Duration _retryAfterErrorDuration = Duration(hours: 24);
 
   static Future<int> getStartingCount() async {
@@ -73,12 +73,14 @@ class FirestoreService {
   }
 
   static Future<void> _fetchAndCacheQuestions() async {
-    final categories = ['Love', 'Finance', 'Health', 'Career', 'Mixed'];
+    debugPrint('Starting to fetch and cache questions...');
+    const categories = QuestionCategories.all;
     _questionsCache.clear();
     bool fetchSuccessful = true;
 
     for (String category in categories) {
       try {
+        debugPrint('Fetching questions for category: $category');
         final snapshot = await _firestore
             .collection('questions')
             .where('category', isEqualTo: category)
@@ -88,6 +90,8 @@ class FirestoreService {
         final categoryQuestions =
             snapshot.docs.map((doc) => doc['question'] as String).toList();
         _questionsCache[category] = categoryQuestions;
+        debugPrint(
+            'Fetched ${categoryQuestions.length} questions for $category');
       } catch (e) {
         debugPrint('Error fetching questions for category $category: $e');
         fetchSuccessful = false;

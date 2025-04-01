@@ -8,7 +8,6 @@ import 'entities/entity_manager.dart';
 import 'global_key.dart';
 import 'helpers/constants.dart';
 import 'helpers/show_snackbar.dart';
-import 'models/owner_model.dart';
 import 'screens/main_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -182,23 +181,35 @@ class _AppManagerState extends State<AppManager> {
   }
 
   Future<void> _handleInitialOwnerCreation(BuildContext context) async {
-    final result = await navigatorKey.currentState?.push(
+    // Use a Completer to resolve when owner creation is complete
+    final completer = Completer<void>();
+
+    // Replace the login screen with owner creation screen
+    navigatorKey.currentState?.pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const InitialOwnerCreationScreen(),
+        builder: (context) => InitialOwnerCreationScreen(
+          onOwnerCreated: (owner) async {
+            // Add the owner directly
+            await _ownerManager.addEntity(owner);
+
+            // Cache questions
+            await FirestoreService.initializeQuestionsCache();
+
+            // Navigate to main screen
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const MainScreen()),
+              (route) => false,
+            );
+
+            // Complete the async operation
+            completer.complete();
+          },
+        ),
       ),
     );
 
-    if (result is Owner) {
-      await _ownerManager.addEntity(result);
-
-      // Ensure questions are cached for first-time users before showing fortune screen
-      await FirestoreService.initializeQuestionsCache();
-
-      navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-        (route) => false,
-      );
-    }
+    // Wait for the owner creation process to complete
+    return completer.future;
   }
 
   Future<void> _loadUser(String userId) async {

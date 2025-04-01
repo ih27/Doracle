@@ -11,8 +11,13 @@ import '../services/auth_service.dart';
 
 class CreateOwnerScreen extends StatefulWidget {
   final bool isInitialCreation;
+  final Function(Owner)? onOwnerCreated;
 
-  const CreateOwnerScreen({super.key, this.isInitialCreation = false});
+  const CreateOwnerScreen({
+    super.key,
+    this.isInitialCreation = false,
+    this.onOwnerCreated,
+  });
 
   @override
   _CreateOwnerScreenState createState() => _CreateOwnerScreenState();
@@ -111,7 +116,14 @@ class _CreateOwnerScreenState extends State<CreateOwnerScreen> {
       petReason: formData['petReason'],
     );
 
-    Navigator.of(context).pop(newOwner);
+    if (widget.isInitialCreation && widget.onOwnerCreated != null) {
+      // Use the callback for initial creation
+      widget.onOwnerCreated!(newOwner);
+    } else {
+      // Standard behavior for regular use
+      Navigator.of(context).pop(newOwner);
+    }
+
     showInfoSnackBar(context, CompatibilityTexts.createOwnerSuccess);
   }
 }

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../screens/owner_create_screen.dart';
 import '../helpers/constants.dart';
+import '../models/owner_model.dart';
 
 class InitialOwnerCreationScreen extends StatelessWidget {
-  const InitialOwnerCreationScreen({super.key});
+  final Function(Owner)? onOwnerCreated;
+
+  const InitialOwnerCreationScreen({
+    super.key,
+    this.onOwnerCreated,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +28,10 @@ class InitialOwnerCreationScreen extends StatelessWidget {
         elevation: 0,
         forceMaterialTransparency: true,
       ),
-      body: const CreateOwnerScreen(isInitialCreation: true),
+      body: CreateOwnerScreen(
+        isInitialCreation: true,
+        onOwnerCreated: onOwnerCreated,
+      ),
     );
   }
 }

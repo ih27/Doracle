@@ -67,7 +67,7 @@ class OpenAIService {
       model: model,
       messages: [fortuneTellerSystemMessage, userMessage],
       n: 1,
-      maxTokens: 120,
+      maxTokens: 200, // 150 words × 4/3 tokens/word
       temperature: 0.75,
     );
   }
