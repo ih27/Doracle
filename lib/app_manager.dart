@@ -143,6 +143,8 @@ class _AppManagerState extends State<AppManager> {
     if (isFromTutorial) {
       await _completeTutorial();
     }
+    // Log screen view before navigation
+    _analytics.logScreenView(screenName: 'login_screen');
     navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (_) => LoginScreen(
@@ -162,6 +164,8 @@ class _AppManagerState extends State<AppManager> {
     if (isFromTutorial) {
       await _completeTutorial();
     }
+    // Log screen view before navigation
+    _analytics.logScreenView(screenName: 'register_screen');
     navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (_) => RegisterScreen(
