@@ -76,8 +76,10 @@ class CustomTimePicker extends StatelessWidget {
                 : AppTheme.primaryColor),
       ),
       textTheme: theme.textTheme.copyWith(
-        bodyMedium: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.primaryText),
-        labelSmall: theme.textTheme.labelSmall?.copyWith(color: AppTheme.secondaryText),
+        bodyMedium:
+            theme.textTheme.bodyMedium?.copyWith(color: AppTheme.primaryText),
+        labelSmall:
+            theme.textTheme.labelSmall?.copyWith(color: AppTheme.secondaryText),
       ),
     );
 
@@ -87,11 +89,14 @@ class CustomTimePicker extends StatelessWidget {
       builder: (context, child) {
         return Theme(
           data: timePickerTheme,
-          child: child!,
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+            child: child!,
+          ),
         );
       },
     );
-    
+
     if (picked != null && picked != initialTime) {
       onTimeSelected(picked);
     }
