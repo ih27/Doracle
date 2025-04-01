@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/form_button.dart';
-import '../config/theme.dart';
 import '../widgets/sendable_textfield.dart';
 import '../config/dependency_injection.dart';
 import '../services/unified_analytics_service.dart';
@@ -190,9 +189,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  FormButton(
-                    text: showPasswordRecovery ? 'Recover' : 'Log In',
-                    onPressed: submit,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 200,
+                        child: FormButton(
+                          text: showPasswordRecovery ? 'Recover' : 'Log In',
+                          onPressed: submit,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: Theme.of(context).primaryColor, width: 2),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Platform.isIOS
+                                ? Icons.apple
+                                : FontAwesomeIcons.google,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          onPressed: onPlatformSignIn,
+                          style: IconButton.styleFrom(
+                            padding: const EdgeInsets.all(12),
+                            minimumSize: const Size(48, 48),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Center(
@@ -218,29 +248,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Text(
-                      'Or sign in with',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelMedium
-                          ?.copyWith(color: Colors.black54),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildSocialButton(
-                          icon: Platform.isIOS
-                              ? FontAwesomeIcons.apple
-                              : FontAwesomeIcons.google,
-                          onPressed: () async {
-                            await onPlatformSignIn();
-                          }),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -257,29 +264,6 @@ class _LoginScreenState extends State<LoginScreen> {
         color: Theme.of(context).primaryColor,
       ),
       onPressed: onTap,
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    VoidCallback? onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.accent1,
-        shape: BoxShape.circle,
-        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-      ),
-      child: IconButton(
-        icon: Icon(
-          icon,
-          color: Theme.of(context).primaryColor,
-        ),
-        onPressed: onPressed,
-        style: IconButton.styleFrom(
-          padding: const EdgeInsets.all(12),
-        ),
-      ),
     );
   }
 }

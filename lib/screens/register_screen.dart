@@ -1,7 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../config/theme.dart';
 import '../widgets/form_button.dart';
 import '../widgets/sendable_textfield.dart';
 
@@ -188,9 +187,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 }),
               ),
               const SizedBox(height: 16),
-              FormButton(
-                text: 'Create Account',
-                onPressed: submit,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    child: FormButton(
+                      text: 'Sign Up',
+                      onPressed: submit,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Platform.isIOS ? Icons.apple : FontAwesomeIcons.google,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      onPressed: _handlePlatformSignIn,
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                        minimumSize: const Size(48, 48),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Center(
@@ -207,33 +235,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextSpan(
                           text: 'Sign In',
                           style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  'Or sign up with',
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelMedium
-                      ?.copyWith(color: Colors.black54),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                _buildSocialButton(
-                    icon: Platform.isIOS
-                        ? FontAwesomeIcons.apple
-                        : FontAwesomeIcons.google,
-                    onPressed: _handlePlatformSignIn),
-              ]),
             ],
           ),
         )
@@ -248,29 +258,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Theme.of(context).primaryColor,
       ),
       onPressed: onTap,
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    VoidCallback? onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.accent1,
-        shape: BoxShape.circle,
-        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-      ),
-      child: IconButton(
-        icon: Icon(
-          icon,
-          color: Theme.of(context).primaryColor,
-        ),
-        onPressed: onPressed,
-        style: IconButton.styleFrom(
-          padding: const EdgeInsets.all(12),
-        ),
-      ),
     );
   }
 }
