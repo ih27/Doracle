@@ -309,3 +309,78 @@ class QuestionCategories {
   static const String enrichmentPlay = 'Enrichment and Play';
   static const String bondingRelationships = 'Bonding and Relationships';
 }
+
+class PetBreeds {
+  static const List<String> dogBreeds = [
+    'Labrador Retriever',
+    'German Shepherd',
+    'Golden Retriever',
+    'French Bulldog',
+    'Bulldog',
+    'Poodle',
+    'Beagle',
+    'Rottweiler',
+    'Dachshund',
+    'Yorkshire Terrier',
+    'Boxer',
+    'Siberian Husky',
+    'Great Dane',
+    'Doberman',
+    'Shih Tzu',
+    'Chihuahua',
+    'Border Collie',
+    'Pug',
+    'Australian Shepherd',
+    'Bernese Mountain Dog',
+    'Other',
+  ];
+
+  static const List<String> catBreeds = [
+    'Persian',
+    'Maine Coon',
+    'Siamese',
+    'British Shorthair',
+    'Ragdoll',
+    'Bengal',
+    'American Shorthair',
+    'Sphynx',
+    'Russian Blue',
+    'Scottish Fold',
+    'Other',
+  ];
+
+  static const List<String> birdBreeds = [
+    'Budgerigar (Budgie)',
+    'Cockatiel',
+    'African Grey Parrot',
+    'Canary',
+    'Lovebird',
+    'Other',
+  ];
+
+  static const List<String> fishBreeds = [
+    'Betta',
+    'Goldfish',
+    'Guppy',
+    'Angelfish',
+    'Neon Tetra',
+    'Other',
+  ];
+
+  static List<String> getBreedsForSpecies(String? species) {
+    if (species == null) return [];
+
+    switch (species.toLowerCase()) {
+      case 'dog':
+        return dogBreeds;
+      case 'cat':
+        return catBreeds;
+      case 'bird':
+        return birdBreeds;
+      case 'fish':
+        return fishBreeds;
+      default:
+        return [];
+    }
+  }
+}

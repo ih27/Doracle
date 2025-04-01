@@ -12,6 +12,7 @@ import 'custom_timepicker.dart';
 class PetForm extends StatefulWidget {
   final String? initialName;
   final String? initialSpecies;
+  final String? initialBreed;
   final DateTime? initialBirthdate;
   final TimeOfDay? initialBirthtime;
   //final String? initialLocation;
@@ -27,6 +28,7 @@ class PetForm extends StatefulWidget {
     super.key,
     this.initialName,
     this.initialSpecies,
+    this.initialBreed,
     this.initialBirthdate,
     this.initialBirthtime,
     //this.initialLocation,
@@ -50,6 +52,7 @@ class _PetFormState extends State<PetForm> {
   //late TextEditingController _locationController;
 
   String? _species;
+  String? _breed;
   DateTime? _birthdate;
   TimeOfDay? _birthtime;
   //String? _location;
@@ -80,6 +83,7 @@ class _PetFormState extends State<PetForm> {
     //_locationController = TextEditingController(text: widget.initialLocation);
 
     _species = widget.initialSpecies;
+    _breed = widget.initialBreed;
     _birthdate = widget.initialBirthdate;
     _birthtime = widget.initialBirthtime;
     //_location = widget.initialLocation;
@@ -220,7 +224,94 @@ class _PetFormState extends State<PetForm> {
                 style: const TextStyle(color: AppTheme.error, fontSize: 12),
               ),
             ),
+          if (_species != null) ...[
+            const SizedBox(height: 8),
+            _buildBreedSection(),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildBreedSection() {
+    final breeds = PetBreeds.getBreedsForSpecies(_species);
+    if (breeds.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Breed',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontSize: 18,
+                  letterSpacing: 0,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: breeds.map((breed) => _buildBreedChip(breed)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBreedChip(String breed) {
+    final isSelected = _breed == breed;
+    return ChoiceChip(
+      label: Text(breed),
+      selected: isSelected,
+      showCheckmark: false,
+      onSelected: (bool selected) {
+        setState(() {
+          _breed = selected ? breed : null;
+        });
+      },
+      backgroundColor: AppTheme.alternateColor,
+      selectedColor: AppTheme.secondaryColor,
+      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
+            letterSpacing: 0,
+          ),
+      elevation: isSelected ? 4 : 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    );
+  }
+
+  Widget _buildTypeChip(String label, IconData icon) {
+    final isSelected = _species == label;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      showCheckmark: false,
+      onSelected: (bool selected) {
+        setState(() {
+          _species = selected ? label : null;
+          _breed = null; // Clear breed when species changes
+          if (_speciesError != null) {
+            _speciesError = null;
+          }
+        });
+      },
+      avatar: Icon(icon,
+          size: 18,
+          color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText),
+      backgroundColor: AppTheme.alternateColor,
+      selectedColor: AppTheme.secondaryColor,
+      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
+            letterSpacing: 0,
+          ),
+      elevation: isSelected ? 4 : 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
     );
   }
@@ -527,36 +618,6 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
-  Widget _buildTypeChip(String label, IconData icon) {
-    final isSelected = _species == label;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      showCheckmark: false,
-      onSelected: (bool selected) {
-        setState(() {
-          _species = selected ? label : null;
-          if (_speciesError != null) {
-            _speciesError = null;
-          }
-        });
-      },
-      avatar: Icon(icon,
-          size: 18,
-          color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText),
-      backgroundColor: AppTheme.alternateColor,
-      selectedColor: AppTheme.secondaryColor,
-      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: isSelected ? AppTheme.primaryText : AppTheme.secondaryText,
-            letterSpacing: 0,
-          ),
-      elevation: isSelected ? 4 : 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-    );
-  }
-
   Widget _buildTemperamentChip(String label) {
     final isSelected = _temperament.contains(label);
     return FilterChip(
@@ -616,6 +677,7 @@ class _PetFormState extends State<PetForm> {
       widget.onSubmit({
         'name': _nameController.text,
         'species': _species,
+        'breed': _breed,
         'birthdate': _birthdate,
         'birthtime': _birthtime,
         //'location': _location,
@@ -645,7 +707,6 @@ class _PetFormState extends State<PetForm> {
       isValid = false;
     }
 
-    // New checks
     if (_birthdate == null) {
       setState(() {
         _birthdateError = CompatibilityTexts.petBirthdateError;

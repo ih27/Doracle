@@ -5,6 +5,7 @@ class Pet implements Entity {
   final String id;
   final String name;
   final String species;
+  final String? breed;
   final String birthdate;
   final String birthtime;
   //final String? location;
@@ -16,6 +17,7 @@ class Pet implements Entity {
     required this.id,
     required this.name,
     required this.species,
+    this.breed,
     required this.birthdate,
     required this.birthtime,
     //this.location,
@@ -29,6 +31,7 @@ class Pet implements Entity {
       'id': id,
       'name': name,
       'species': species,
+      'breed': breed,
       'birthdate': birthdate,
       'birthtime': birthtime,
       //'location': location,
@@ -43,6 +46,7 @@ class Pet implements Entity {
       id: json['id'],
       name: json['name'],
       species: json['species'],
+      breed: json['breed'],
       birthdate: json['birthdate'],
       birthtime: json['birthtime'],
       //location: json['location'],
@@ -67,6 +71,8 @@ class Pet implements Entity {
         return name;
       case 'species':
         return species;
+      case 'breed':
+        return breed;
       case 'birthdate':
         return birthdate;
       case 'birthtime':
