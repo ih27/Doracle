@@ -90,8 +90,9 @@ Future<void> _setupErrorReporting() async {
 }
 
 Future<void> _initializeApp() async {
-  // Initialize Unified Analytics Service (handles all analytics initialization)
-  await getIt<UnifiedAnalyticsService>().initialize();
+  // Initialize analytics services
+  final analytics = getIt<UnifiedAnalyticsService>();
+  await analytics.initialize();
 
   // Initialize HapticService early
   await getIt<HapticService>().initialize();

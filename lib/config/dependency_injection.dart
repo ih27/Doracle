@@ -24,6 +24,7 @@ import '../services/unified_analytics_service.dart';
 import '../services/user_service.dart';
 import '../services/fortune_teller_service.dart';
 import '../services/connectivity_service.dart';
+import '../services/scate_service.dart';
 import '../entities/entity_manager.dart';
 import '../viewmodels/fortune_view_model.dart';
 
@@ -60,6 +61,8 @@ void setupDependencies() {
   getIt.registerLazySingleton<SecureStorageService>(
       () => SecureStorageService());
   getIt.registerLazySingleton<AdjustService>(() => AdjustService());
+  getIt.registerLazySingleton<ScateService>(
+      () => ScateService(appId: dotenv.env['SCATE_APP_ID']!));
   getIt.registerLazySingleton<FacebookAppEventsService>(
       () => FacebookAppEventsService());
   getIt.registerLazySingleton<AIPromptGenerationService>(
@@ -70,6 +73,7 @@ void setupDependencies() {
             getIt<AnalyticsService>(),
             getIt<FacebookAppEventsService>(),
             getIt<AdjustService>(),
+            getIt<ScateService>(),
           ));
   getIt.registerLazySingleton<AuthService>(
     () => AuthService(
