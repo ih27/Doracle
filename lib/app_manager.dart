@@ -218,17 +218,22 @@ class _AppManagerState extends State<AppManager> {
 
   Future<void> _loadUser(String userId) async {
     await _userService.loadCurrentUser(userId);
-    _initializeRevenueCat(userId);
+    await _initializeRevenueCat(userId);
   }
 
-  void _initializeRevenueCat(String userId) {
+  Future<void> _initializeRevenueCat(String userId) async {
     const int maxRetries = 3;
     const Duration retryDelay = Duration(minutes: 1);
     int retryCount = 0;
 
     Future<void> attemptInitialization() async {
       try {
-        await _revenueCatService.initializeAndLogin(userId);
+        // First try to migrate any existing anonymous user
+        if (_revenueCatService.isAnonymousUser) {
+          await _revenueCatService.migrateAnonymousUser(userId);
+        } else {
+          await _revenueCatService.initializeAndLogin(userId);
+        }
       } catch (e) {
         debugPrint('RevenueCat initialization error: $e');
         if (retryCount < maxRetries) {
@@ -241,7 +246,7 @@ class _AppManagerState extends State<AppManager> {
       }
     }
 
-    attemptInitialization();
+    await attemptInitialization();
   }
 
   Future<void> _handleLogin(

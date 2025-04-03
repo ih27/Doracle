@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:in_app_review/in_app_review.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
@@ -7,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config/dependency_injection.dart';
 import '../global_key.dart';
 import '../services/auth_service.dart';
+import '../services/first_launch_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/user_service.dart';
 import '../config/theme.dart';
@@ -195,6 +197,18 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
               ),
             ),
+            if (kDebugMode) ...[
+              const Divider(),
+              ListTile(
+                title: const Text('Reset Tutorial'),
+                subtitle: const Text('Debug: Reset first launch state'),
+                onTap: () async {
+                  await FirstLaunchService.resetFirstLaunch();
+                  showSnackBar(
+                      context, 'Tutorial state reset. Please restart the app.');
+                },
+              ),
+            ],
           ],
         ),
       ),

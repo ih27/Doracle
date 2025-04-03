@@ -16,6 +16,7 @@ class RevenueCatService with ChangeNotifier {
     PurchaseTexts.largeTreatQuestionCount: PurchaseTexts.largeTreatPackageId,
   };
   String? _lastInitializedUserId;
+  String? _anonymousUserId;
   bool _isConfigured = false;
   List<StoreProduct>? _cachedProducts;
   Map<String, Package> _cachedSubscriptions = {};
@@ -285,4 +286,41 @@ class RevenueCatService with ChangeNotifier {
       debugPrint("Error setting last logged in user ID: $e");
     }
   }
+
+  String _generateAnonymousUserId() {
+    return 'anon_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  Future<void> initializeForAnonymousUser() async {
+    if (_anonymousUserId != null) {
+      // Already initialized as anonymous user
+      return;
+    }
+
+    _anonymousUserId = _generateAnonymousUserId();
+    debugPrint(
+        'Initializing RevenueCat with anonymous user: $_anonymousUserId');
+    await initializeAndLogin(_anonymousUserId!);
+  }
+
+  Future<void> migrateAnonymousUser(String actualUserId) async {
+    if (_anonymousUserId != null) {
+      debugPrint('Migrating anonymous user $_anonymousUserId to $actualUserId');
+      try {
+        final loginResult = await Purchases.logIn(actualUserId);
+        _anonymousUserId = null;
+        await _setLastLoggedInUserId(actualUserId);
+        debugPrint(
+            "Anonymous user migrated to: ${loginResult.customerInfo.originalAppUserId}");
+      } catch (e) {
+        debugPrint('Error migrating anonymous user: $e');
+        // Still clear anonymous user ID to prevent repeated migration attempts
+        _anonymousUserId = null;
+        // Rethrow to allow caller to handle the error
+        rethrow;
+      }
+    }
+  }
+
+  bool get isAnonymousUser => _anonymousUserId != null;
 }
