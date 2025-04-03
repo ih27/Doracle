@@ -216,6 +216,13 @@ class _TutorialScreenState extends State<TutorialScreen>
                       PurchaseTexts.defaultMonthlyPrice,
                   false,
                 ),
+                _buildSubscriptionCard(
+                  context,
+                  PurchaseTexts.weekly,
+                  _prices[PurchaseTexts.weeklyPackageId] ??
+                      PurchaseTexts.defaultWeeklyPrice,
+                  false,
+                ),
               ],
             )
                 .animate()
@@ -253,7 +260,8 @@ class _TutorialScreenState extends State<TutorialScreen>
   ) {
     bool isSelected = _selectedPlan == planType;
     bool isAnnual = planType == PurchaseTexts.annual;
-    double cardWidth = 140;
+    bool isWeekly = planType == PurchaseTexts.weekly;
+    double cardWidth = 110;
     double cardHeight = 160;
     double bestOfferHeight = 24;
 
@@ -268,7 +276,9 @@ class _TutorialScreenState extends State<TutorialScreen>
             // Track subscription with unified analytics
             String? priceString = _prices[isAnnual
                 ? PurchaseTexts.annualPackageId
-                : PurchaseTexts.monthlyPackageId];
+                : planType == PurchaseTexts.monthly
+                    ? PurchaseTexts.monthlyPackageId
+                    : PurchaseTexts.weeklyPackageId];
 
             if (priceString != null) {
               _analytics.logSubscriptionWithPriceString(
@@ -370,16 +380,20 @@ class _TutorialScreenState extends State<TutorialScreen>
                               ),
                         ),
                         Text(
-                          isAnnual ? '/year' : '/month',
+                          isAnnual
+                              ? '/year'
+                              : isWeekly
+                                  ? '/week'
+                                  : '/month',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context).primaryColor,
                                     fontSize: 12,
                                   ),
                         ),
-                        if (isAnnual)
+                        if (isAnnual || isWeekly)
                           Text(
-                            '(${convertAnnualToMonthly(price)}/month)',
+                            '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Theme.of(context).primaryColor,

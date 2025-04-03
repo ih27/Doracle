@@ -110,6 +110,13 @@ class GoDeeperOverlay extends StatelessWidget {
                 PurchaseTexts.defaultMonthlyPrice,
             false,
           ),
+          _buildSubscriptionCard(
+            context,
+            PurchaseTexts.weekly,
+            prices[PurchaseTexts.weeklyPackageId] ??
+                PurchaseTexts.defaultWeeklyPrice,
+            false,
+          ),
         ],
       ),
     );
@@ -118,13 +125,16 @@ class GoDeeperOverlay extends StatelessWidget {
   Widget _buildSubscriptionCard(
       BuildContext context, String packageId, String price, bool isBestValue) {
     bool isAnnual = packageId == PurchaseTexts.annual;
+    bool isWeekly = packageId == PurchaseTexts.weekly;
+    double cardWidth = 110;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: MediaQuery.of(context).size.width * 0.42,
-          height: 280,
-          padding: const EdgeInsets.all(16),
+          width: cardWidth,
+          height: 200,
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isBestValue
                 ? AppTheme.lemonChiffon
@@ -151,7 +161,7 @@ class GoDeeperOverlay extends StatelessWidget {
                 '${packageId.capitalize()}\nPlan',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 22,
+                      fontSize: 18,
                       letterSpacing: 0,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -169,15 +179,19 @@ class GoDeeperOverlay extends StatelessWidget {
                     minFontSize: 18,
                   ),
                   Text(
-                    isAnnual ? '/year' : '/month',
+                    isAnnual
+                        ? '/year'
+                        : isWeekly
+                            ? '/week'
+                            : '/month',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           letterSpacing: 0,
                           color: Theme.of(context).primaryColor,
                         ),
                   ),
-                  if (isAnnual)
+                  if (isAnnual || isWeekly)
                     Text(
-                      '(${convertAnnualToMonthly(price)}/month)',
+                      '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.normal,
@@ -194,7 +208,7 @@ class GoDeeperOverlay extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
                 child: Text(
                   'Subscribe',

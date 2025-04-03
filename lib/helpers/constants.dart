@@ -231,6 +231,7 @@ class PurchaseTexts {
   static const bestValueLabel = 'Best Value';
   static const defaultMonthlyPrice = '\$2.99';
   static const defaultAnnualPrice = '\$29.99';
+  static const defaultWeeklyPrice = '\$0.79';
 
   static const discountedSmallTreatPrice = '\$0.99';
   static const defaultSmallTreatPrice = '\$4.99';
@@ -253,9 +254,11 @@ class PurchaseTexts {
 
   static String monthly = 'monthly';
   static String annual = 'annual';
+  static String weekly = 'weekly';
 
   static String monthlyPackageId = '\$rc_monthly';
   static String annualPackageId = '\$rc_annual';
+  static String weeklyPackageId = '\$rc_weekly';
 
   static String smallTreatDescription =
       'Just a nibble! Keep the pup happy and keep the questions coming.';
