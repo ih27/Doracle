@@ -36,7 +36,39 @@ class _TutorialScreenState extends State<TutorialScreen>
   final RevenueCatService _purchaseService = getIt<RevenueCatService>();
   Map<String, String> _prices = {};
   String _selectedPlan = PurchaseTexts.annual;
-  late final List<TutorialPageData> _pageData;
+
+  final List<TutorialPageData> _pageData = [
+    TutorialPageData(
+      imagePath: 'assets/images/tuto01.png',
+      title: 'Pet-Parent Compatibility Check',
+      description:
+          'Discover how well you and your pet\'s zodiac signs align, offering insights into your relationship and communication style.',
+    ),
+    TutorialPageData(
+      imagePath: 'assets/images/tuto02.png',
+      title: 'Multi-Pet Harmony Forecast',
+      description:
+          'Planning to add a new pet to your home? Check how well potential new additions will mesh with your current pets based on their astrological profiles.',
+    ),
+    TutorialPageData(
+      imagePath: 'assets/images/tuto03.png',
+      title: 'Daily Paw-roscopes',
+      description:
+          'Start each day with tailored horoscopes for both you and your pets, giving you a playful glimpse into what the stars have in store for your furry friends.',
+    ),
+    TutorialPageData(
+      imagePath: 'assets/images/tuto04.png',
+      title: 'The Dog Oracle',
+      description:
+          'The ultimate source of pet wisdom! Ask anything and receive enlightened answers about you and your pets.',
+    ),
+    TutorialPageData(
+      imagePath: 'assets/images/subscribe_plan.png',
+      title: 'Unlock All Features',
+      description:
+          '-Detailed Compatibility Analysis\n-Unlimited Pet Oracle Questions\n-Personalized Improvement Plans\n-Comprehensive Results History\n-Multi-Pet Harmony Insights\n-Daily Pet & Owner Horoscopes',
+    ),
+  ];
 
   @override
   void initState() {
@@ -44,52 +76,20 @@ class _TutorialScreenState extends State<TutorialScreen>
     _model = TutorialScreenModel();
     _initializeAnonymousUser();
     _loadPrices();
-    _initializePages();
 
-    // Log screen view
-    _analytics.logScreenView(screenName: 'tutorial_screen');
-  }
-
-  void _initializePages() {
-    _pageData = [
-      TutorialPageData(
-        imagePath: 'assets/images/tuto01.png',
-        title: 'Pet-Parent Compatibility Check',
-        description:
-            'Discover how well you and your pet\'s zodiac signs align, offering insights into your relationship and communication style.',
-      ),
-      TutorialPageData(
-        imagePath: 'assets/images/tuto02.png',
-        title: 'Multi-Pet Harmony Forecast',
-        description:
-            'Planning to add a new pet to your home? Check how well potential new additions will mesh with your current pets based on their astrological profiles.',
-      ),
-      TutorialPageData(
-        imagePath: 'assets/images/tuto03.png',
-        title: 'Daily Paw-roscopes',
-        description:
-            'Start each day with tailored horoscopes for both you and your pets, giving you a playful glimpse into what the stars have in store for your furry friends.',
-      ),
-      TutorialPageData(
-        imagePath: 'assets/images/tuto04.png',
-        title: 'The Dog Oracle',
-        description:
-            'The ultimate source of pet wisdom! Ask anything and receive enlightened answers about you and your pets.',
-      ),
-      TutorialPageData(
-        imagePath: 'assets/images/subscribe_plan.png',
-        title: 'Unlock All Features',
-        description:
-            '-Detailed Compatibility Analysis\n-Unlimited Pet Oracle Questions\n-Personalized Improvement Plans\n-Comprehensive Results History\n-Multi-Pet Harmony Insights\n-Daily Pet & Owner Horoscopes',
-      ),
+    // Add the last page with subscription content
+    _pageData.add(
       TutorialPageData(
         imagePath: 'assets/images/subscribe_plan.png',
         title: 'Unlock All Features',
         description:
             'Compatibility insights, unlimited oracles, personalized plans, history tracking, multi-pet harmony, and daily horoscopes!',
-        extraContent: (context) => _buildSubscriptionContent(context),
+        extraContent: _buildSubscriptionContent,
       ),
-    ];
+    );
+
+    // Log screen view
+    _analytics.logScreenView(screenName: 'tutorial_screen');
   }
 
   Future<void> _initializeAnonymousUser() async {
