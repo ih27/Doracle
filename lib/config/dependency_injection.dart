@@ -27,6 +27,7 @@ import '../services/connectivity_service.dart';
 import '../services/scate_service.dart';
 import '../entities/entity_manager.dart';
 import '../viewmodels/fortune_view_model.dart';
+import '../services/event_bus_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -53,13 +54,34 @@ void setupDependencies() {
   getIt.registerLazySingleton<CompatibilityDataRepository>(
       () => CompatibilityDataRepository());
 
+  // Event Bus
+  getIt.registerLazySingleton<EventBusService>(() => EventBusService());
+
   // Managers
   getIt.registerLazySingleton<PetManager>(() => PetManager());
   getIt.registerLazySingleton<OwnerManager>(() => OwnerManager());
 
-  // Services
+  // Core Services
   getIt.registerLazySingleton<SecureStorageService>(
       () => SecureStorageService());
+  getIt.registerLazySingleton<AuthService>(() => AuthService(
+      (userId, userData) => getIt<UserService>().addUser(userId, userData)));
+  getIt.registerLazySingleton<RevenueCatService>(
+      () => RevenueCatService(getIt<AuthService>()));
+
+  // User Management
+  getIt.registerLazySingleton<UserService>(() => UserService(
+        getIt<UserRepository>(),
+        getIt<EventBusService>(),
+      ));
+
+  // Providers
+  getIt.registerLazySingleton<EntitlementProvider>(() => EntitlementProvider(
+        getIt<RevenueCatService>(),
+        getIt<EventBusService>(),
+      ));
+
+  // Services
   getIt.registerLazySingleton<AdjustService>(() => AdjustService());
   getIt.registerLazySingleton<ScateService>(
       () => ScateService(appId: dotenv.env['SCATE_APP_ID']!));
@@ -75,15 +97,6 @@ void setupDependencies() {
             getIt<AdjustService>(),
             getIt<ScateService>(),
           ));
-  getIt.registerLazySingleton<AuthService>(
-    () => AuthService(
-        (userId, userData) => getIt<UserService>().addUser(userId, userData)),
-  );
-  getIt.registerLazySingleton<UserService>(
-      () => UserService(getIt<UserRepository>()));
-  getIt.registerLazySingleton<RevenueCatService>(() => RevenueCatService(
-        getIt<AuthService>(),
-      ));
   getIt.registerLazySingleton<DailyHoroscopeService>(
       () => DailyHoroscopeService());
   getIt.registerLazySingleton<FortuneTeller>(() => FortuneTeller(
@@ -106,9 +119,4 @@ void setupDependencies() {
   getIt.registerLazySingleton<HapticService>(() => HapticService());
   getIt.registerLazySingleton<CrashlyticsService>(() => CrashlyticsService());
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
-
-  // Providers
-  getIt.registerLazySingleton<EntitlementProvider>(
-    () => EntitlementProvider(getIt<RevenueCatService>()),
-  );
 }

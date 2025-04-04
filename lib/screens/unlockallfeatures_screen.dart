@@ -40,10 +40,10 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     // Track screen view
     _analytics.logScreenView(screenName: 'subscription_screen');
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final entitlementProvider =
           Provider.of<EntitlementProvider>(context, listen: false);
-      entitlementProvider.refreshEntitlementStatus();
+      await entitlementProvider.checkEntitlementStatus();
       _updateSelectedPlan(entitlementProvider.currentSubscriptionPlan);
     });
   }
@@ -75,8 +75,8 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
 
     if (mounted) {
       if (success) {
-        Provider.of<EntitlementProvider>(context, listen: false)
-            .refreshEntitlementStatus();
+        await Provider.of<EntitlementProvider>(context, listen: false)
+            .checkEntitlementStatus();
         showDialog(
           context: context,
           builder: (BuildContext buildContext) {

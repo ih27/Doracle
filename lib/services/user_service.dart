@@ -1,32 +1,39 @@
 import 'package:flutter/foundation.dart';
-import '../providers/entitlement_provider.dart';
-import 'haptic_service.dart';
+import '../services/haptic_service.dart';
 import '../config/dependency_injection.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
+import '../services/event_bus_service.dart';
+import 'dart:async';
 
 class UserService extends ValueNotifier<AppUser?> {
   final UserRepository _userRepository;
   final HapticService _hapticService = getIt<HapticService>();
-  final EntitlementProvider _entitlementProvider = getIt<EntitlementProvider>();
+  final EventBusService _eventBusService;
+  StreamSubscription? _entitlementSubscription;
+  bool _isEntitled = false;
 
-  UserService(this._userRepository) : super(null) {
-    _entitlementProvider.addListener(_onEntitlementChanged);
+  UserService(this._userRepository, this._eventBusService) : super(null) {
+    _setupEntitlementListener();
   }
 
-  bool get isEntitled => _entitlementProvider.isEntitled;
+  bool get isEntitled => _isEntitled;
 
-  void _onEntitlementChanged() {
-    if (value != null && value!.isEntitled != isEntitled) {
-      value!.isEntitled = isEntitled;
-      _updateUserEntitlementStatus();
-      notifyListeners();
-    }
+  void _setupEntitlementListener() {
+    _entitlementSubscription =
+        _eventBusService.entitlementStream.listen((event) {
+      if (value != null && value!.isEntitled != event.isEntitled) {
+        value!.isEntitled = event.isEntitled;
+        _isEntitled = event.isEntitled;
+        _updateUserEntitlementStatus();
+        notifyListeners();
+      }
+    });
   }
 
   @override
   void dispose() {
-    _entitlementProvider.removeListener(_onEntitlementChanged);
+    _entitlementSubscription?.cancel();
     super.dispose();
   }
 
@@ -46,12 +53,6 @@ class UserService extends ValueNotifier<AppUser?> {
           await updateUserField('canVibrate', currentCanVibrate);
         }
 
-        // Update the isEntitled status based on the EntitlementProvider
-        if (value!.isEntitled != isEntitled) {
-          value!.isEntitled = isEntitled;
-          await _updateUserEntitlementStatus();
-        }
-
         notifyListeners();
       } catch (e) {
         debugPrint('Error creating AppUser: $e');
@@ -62,7 +63,7 @@ class UserService extends ValueNotifier<AppUser?> {
         id: userId,
         email: '', // You might want to get this from Firebase Auth
         canVibrate: currentCanVibrate,
-        isEntitled: isEntitled,
+        isEntitled: _isEntitled,
       );
       await _userRepository.addUser(userId, value!.toMap());
       notifyListeners();
@@ -116,7 +117,6 @@ class UserService extends ValueNotifier<AppUser?> {
     if (value != null) {
       await _userRepository
           .updateUser(value!.id, {'isEntitled': value!.isEntitled});
-      notifyListeners();
     }
   }
 
