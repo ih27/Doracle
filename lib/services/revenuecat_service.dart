@@ -181,23 +181,12 @@ class RevenueCatService with ChangeNotifier {
   }
 
   Future<void> ensureInitialized() async {
-    if (_initializationCompleter == null) {
-      // If not initialized, attempt to initialize with the last known user ID
-      String? userId = await _getLastLoggedInUserId();
-      if (userId == null) {
-        final currentUser = _authService.currentUser;
-        if (currentUser != null) {
-          userId = currentUser.uid;
-          // Update the last logged in user ID in SharedPreferences
-          await _setLastLoggedInUserId(userId);
-        } else {
-          // If still no user, then throw the StateError
-          throw StateError(
-              'RevenueCatService cannot auto-initialize without a user ID. Call initializeAndLogin first.');
-        }
-      }
-      return initializeAndLogin(userId);
+    if (_initializationCompleter != null) {
+      return _initializationCompleter!.future;
     }
+
+    // If not initialized, initialize as anonymous
+    await initializeForAnonymousUser();
     return _initializationCompleter!.future;
   }
 
@@ -301,7 +290,7 @@ class RevenueCatService with ChangeNotifier {
   Future<void> initializeForAnonymousUser() async {
     if (_anonymousUserId != null) {
       // Already initialized as anonymous user
-      return;
+      return _initializationCompleter?.future;
     }
 
     _anonymousUserId = _generateAnonymousUserId();

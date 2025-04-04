@@ -74,8 +74,7 @@ class _TutorialScreenState extends State<TutorialScreen>
   void initState() {
     super.initState();
     _model = TutorialScreenModel();
-    _initializeAnonymousUser();
-    _loadPrices();
+    _initialize();
 
     // Add the last page with subscription content
     _pageData.add(
@@ -92,16 +91,19 @@ class _TutorialScreenState extends State<TutorialScreen>
     _analytics.logScreenView(screenName: 'tutorial_screen');
   }
 
-  Future<void> _initializeAnonymousUser() async {
+  Future<void> _initialize() async {
     try {
-      await _purchaseService.initializeForAnonymousUser();
+      // Wait for initialization before loading prices
+      await _purchaseService.ensureInitialized();
+      await _loadPrices();
     } catch (e) {
-      debugPrint('Error initializing anonymous user: $e');
+      debugPrint('Error in tutorial initialization: $e');
     }
   }
 
   Future<void> _loadPrices() async {
     try {
+      if (!mounted) return;
       // No need to call ensureInitialized here as we've already initialized in _initializeAnonymousUser
       final prices = await _purchaseService.fetchSubscriptionPrices();
       if (mounted) {
