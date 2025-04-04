@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'config/dependency_injection.dart';
 import 'config/theme.dart';
 import 'entities/entity_manager.dart';
@@ -20,6 +21,7 @@ import 'services/user_service.dart';
 import 'services/unified_analytics_service.dart';
 import 'widgets/initial_owner_create.dart';
 import 'services/firestore_service.dart';
+import 'providers/entitlement_provider.dart';
 
 class AppManager extends StatefulWidget {
   const AppManager({super.key});
@@ -44,83 +46,102 @@ class _AppManagerState extends State<AppManager> {
   }
 
   Future<void> _checkFirstLaunch() async {
-    // DEBUG
-    // await _authService.signOut();
-    // await FirstLaunchService.resetFirstLaunch();
-    // await _ownerManager.removeEntities();
-    // DEBUG END
     final isFirstLaunch = await FirstLaunchService.isFirstLaunch();
-    setState(() {
-      _isFirstLaunch = isFirstLaunch;
-    });
+    if (mounted) {
+      setState(() {
+        _isFirstLaunch = isFirstLaunch;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: _authService.authStateChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return Consumer<EntitlementProvider>(
+      builder: (context, entitlementProvider, _) {
+        // Show loading indicator while initializing entitlements
+        if (!entitlementProvider.isInitialized) {
           return const Center(
-              child: CircularProgressIndicator(
-            color: AppTheme.primaryColor,
-          ));
-        } else if (snapshot.hasData) {
-          debugPrint('Auth userId: ${snapshot.data!.uid}');
-          return FutureBuilder(
-            future: _loadUser(snapshot.data!.uid),
-            builder: (context, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                    child: CircularProgressIndicator(
+            child: CircularProgressIndicator(
+              color: AppTheme.primaryColor,
+            ),
+          );
+        }
+
+        return StreamBuilder<User?>(
+          stream: _authService.authStateChanges,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
                   color: AppTheme.primaryColor,
-                ));
+                ),
+              );
+            } else if (snapshot.hasData) {
+              debugPrint('Auth userId: ${snapshot.data!.uid}');
+              return FutureBuilder(
+                future: _loadUser(snapshot.data!.uid),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppTheme.primaryColor,
+                      ),
+                    );
+                  } else {
+                    return FutureBuilder<bool>(
+                      future: _checkOwnerExists(),
+                      builder: (context, ownerSnapshot) {
+                        if (ownerSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.primaryColor,
+                            ),
+                          );
+                        } else if (ownerSnapshot.data == true) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            navigatorKey.currentState?.pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (_) => const MainScreen()),
+                              (route) => false,
+                            );
+                          });
+                          return const SizedBox.shrink();
+                        } else {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _handleInitialOwnerCreation(context);
+                          });
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.primaryColor,
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  }
+                },
+              );
+            } else {
+              if (_isFirstLaunch) {
+                return TutorialScreen(
+                  onComplete: _completeTutorial,
+                  onSignIn: () =>
+                      _navigateToSignIn(context, isFromTutorial: true),
+                  onSignUp: () =>
+                      _navigateToSignUp(context, isFromTutorial: true),
+                );
               } else {
-                return FutureBuilder<bool>(
-                  future: _checkOwnerExists(),
-                  builder: (context, ownerSnapshot) {
-                    if (ownerSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return const Center(
-                          child: CircularProgressIndicator(
-                        color: AppTheme.primaryColor,
-                      ));
-                    } else if (ownerSnapshot.data == true) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        navigatorKey.currentState?.pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const MainScreen()),
-                          (route) => false,
-                        );
-                      });
-                      return const SizedBox.shrink();
-                    } else {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _handleInitialOwnerCreation(context);
-                      });
-                      return const Center(
-                          child: CircularProgressIndicator(
-                        color: AppTheme.primaryColor,
-                      ));
-                    }
-                  },
+                return SplashScreen(
+                  onSignIn: () =>
+                      _navigateToSignIn(context, isFromTutorial: false),
+                  onSignUp: () =>
+                      _navigateToSignUp(context, isFromTutorial: false),
                 );
               }
-            },
-          );
-        } else {
-          if (_isFirstLaunch) {
-            return TutorialScreen(
-              onComplete: _completeTutorial,
-              onSignIn: () => _navigateToSignIn(context, isFromTutorial: true),
-              onSignUp: () => _navigateToSignUp(context, isFromTutorial: true),
-            );
-          } else {
-            return SplashScreen(
-              onSignIn: () => _navigateToSignIn(context, isFromTutorial: false),
-              onSignUp: () => _navigateToSignUp(context, isFromTutorial: false),
-            );
-          }
-        }
+            }
+          },
+        );
       },
     );
   }

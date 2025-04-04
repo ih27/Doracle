@@ -47,11 +47,17 @@ Future<void> main() async {
           kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck);
 
   await setupNotifications();
+
+  // Create and initialize EntitlementProvider first
+  final entitlementProvider = getIt<EntitlementProvider>();
+
+  // Initialize all app services
   await _initializeApp();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => getIt<EntitlementProvider>(),
+    ChangeNotifierProvider.value(
+      // Use .value to reuse the same instance
+      value: entitlementProvider,
       child: const MyApp(),
     ),
   );
@@ -96,6 +102,15 @@ Future<void> _initializeApp() async {
 
   // Initialize HapticService early
   await getIt<HapticService>().initialize();
+
+  // Initialize RevenueCat and check entitlements
+  try {
+    final entitlementProvider = getIt<EntitlementProvider>();
+    await entitlementProvider.checkEntitlementStatus();
+  } catch (e) {
+    debugPrint('Error initializing RevenueCat: $e');
+    // Don't rethrow - we want the app to continue even if RevenueCat fails
+  }
 
   // Random questions cache initialization
   await FirebaseAuth.instance.authStateChanges().first;
