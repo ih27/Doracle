@@ -5,10 +5,8 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/constants.dart';
-import 'auth_service.dart';
 
 class RevenueCatService with ChangeNotifier {
-  final AuthService _authService;
   final String _lastUserIdKey = 'last_revenue_cat_user_id';
   final Map<int, String> _productsHash = {
     PurchaseTexts.smallTreatQuestionCount: PurchaseTexts.smallTreatPackageId,
@@ -37,7 +35,7 @@ class RevenueCatService with ChangeNotifier {
   String? _currentSubscriptionPlan;
   String? get currentSubscriptionPlan => _currentSubscriptionPlan;
 
-  RevenueCatService(this._authService);
+  RevenueCatService();
 
   Future<bool> getEntitlementStatus() async {
     final customerInfo = await Purchases.getCustomerInfo();

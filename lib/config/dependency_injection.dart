@@ -66,8 +66,7 @@ void setupDependencies() {
       () => SecureStorageService());
   getIt.registerLazySingleton<AuthService>(() => AuthService(
       (userId, userData) => getIt<UserService>().addUser(userId, userData)));
-  getIt.registerLazySingleton<RevenueCatService>(
-      () => RevenueCatService(getIt<AuthService>()));
+  getIt.registerLazySingleton<RevenueCatService>(() => RevenueCatService());
 
   // User Management
   getIt.registerLazySingleton<UserService>(() => UserService(
