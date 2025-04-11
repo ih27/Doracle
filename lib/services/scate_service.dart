@@ -3,15 +3,10 @@ import 'package:scatesdk_flutter/scatesdk_flutter.dart';
 import 'package:adjust_sdk/adjust.dart';
 
 class ScateService {
-  static ScateService? _instance;
-  bool _isInitialized = false;
   final String _appId;
+  bool _isInitialized = false;
 
-  ScateService._({required String appId}) : _appId = appId;
-
-  factory ScateService({required String appId}) {
-    return _instance ??= ScateService._(appId: appId);
-  }
+  ScateService({required String appId}) : _appId = appId;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
