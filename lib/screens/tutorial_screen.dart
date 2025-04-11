@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart'
     as smooth_page_indicator;
+import 'package:provider/provider.dart';
 
 import '../config/theme.dart';
 import '../config/dependency_injection.dart';
 import '../services/unified_analytics_service.dart';
+import '../services/revenuecat_service.dart';
+import '../helpers/constants.dart';
+import '../helpers/string_extensions.dart';
+import '../helpers/purchase_utils.dart';
+import '../providers/entitlement_provider.dart';
 import 'splash_screen.dart';
 
 class TutorialScreen extends StatefulWidget {
@@ -13,11 +19,12 @@ class TutorialScreen extends StatefulWidget {
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
 
-  const TutorialScreen(
-      {super.key,
-      required this.onComplete,
-      required this.onSignIn,
-      required this.onSignUp});
+  const TutorialScreen({
+    super.key,
+    required this.onComplete,
+    required this.onSignIn,
+    required this.onSignUp,
+  });
 
   @override
   _TutorialScreenState createState() => _TutorialScreenState();
@@ -27,41 +34,76 @@ class _TutorialScreenState extends State<TutorialScreen>
     with TickerProviderStateMixin {
   late TutorialScreenModel _model;
   final UnifiedAnalyticsService _analytics = getIt<UnifiedAnalyticsService>();
-
-  final List<TutorialPageData> _pageData = [
-    TutorialPageData(
-      imagePath: 'assets/images/tuto01.png',
-      title: 'Pet-Parent Compatibility Check',
-      description:
-          'Discover how well you and your pet\'s zodiac signs align, offering insights into your relationship and communication style.',
-    ),
-    TutorialPageData(
-      imagePath: 'assets/images/tuto02.png',
-      title: 'Multi-Pet Harmony Forecast',
-      description:
-          'Planning to add a new pet to your home? Check how well potential new additions will mesh with your current pets based on their astrological profiles.',
-    ),
-    TutorialPageData(
-      imagePath: 'assets/images/tuto03.png',
-      title: 'Daily Paw-roscopes',
-      description:
-          'Start each day with tailored horoscopes for both you and your pets, giving you a playful glimpse into what the stars have in store for your furry friends.',
-    ),
-    TutorialPageData(
-      imagePath: 'assets/images/tuto04.png',
-      title: 'The Dog Oracle',
-      description:
-          'The ultimate source of pet wisdom! Ask anything and receive enlightened answers about you and your pets.',
-    ),
-  ];
+  final RevenueCatService _purchaseService = getIt<RevenueCatService>();
+  Map<String, String> _prices = {};
+  String _selectedPlan = PurchaseTexts.annual;
+  late final List<TutorialPageData> _pageData;
 
   @override
   void initState() {
     super.initState();
     _model = TutorialScreenModel();
+    _loadPrices();
+    _initializePages();
 
     // Log screen view
     _analytics.logScreenView(screenName: 'tutorial_screen');
+  }
+
+  void _initializePages() {
+    _pageData = [
+      TutorialPageData(
+        imagePath: 'assets/images/tuto01.png',
+        title: 'Pet-Parent Compatibility Check',
+        description:
+            'Discover how well you and your pet\'s zodiac signs align, offering insights into your relationship and communication style.',
+      ),
+      TutorialPageData(
+        imagePath: 'assets/images/tuto02.png',
+        title: 'Multi-Pet Harmony Forecast',
+        description:
+            'Planning to add a new pet to your home? Check how well potential new additions will mesh with your current pets based on their astrological profiles.',
+      ),
+      TutorialPageData(
+        imagePath: 'assets/images/tuto03.png',
+        title: 'Daily Paw-roscopes',
+        description:
+            'Start each day with tailored horoscopes for both you and your pets, giving you a playful glimpse into what the stars have in store for your furry friends.',
+      ),
+      TutorialPageData(
+        imagePath: 'assets/images/tuto04.png',
+        title: 'The Dog Oracle',
+        description:
+            'The ultimate source of pet wisdom! Ask anything and receive enlightened answers about you and your pets.',
+      ),
+      TutorialPageData(
+        imagePath: 'assets/images/subscribe_plan.png',
+        title: 'Unlock All Features',
+        description:
+            '-Detailed Compatibility Analysis\n-Unlimited Pet Oracle Questions\n-Personalized Improvement Plans\n-Comprehensive Results History\n-Multi-Pet Harmony Insights\n-Daily Pet & Owner Horoscopes',
+      ),
+      TutorialPageData(
+        imagePath: 'assets/images/subscribe_plan.png',
+        title: 'Unlock All Features',
+        description:
+            'Compatibility insights, unlimited oracles, personalized plans, history tracking, multi-pet harmony, and daily horoscopes!',
+        extraContent: (context) => _buildSubscriptionContent(context),
+      ),
+    ];
+  }
+
+  Future<void> _loadPrices() async {
+    try {
+      await _purchaseService.ensureInitialized();
+      final prices = await _purchaseService.fetchSubscriptionPrices();
+      if (mounted) {
+        setState(() {
+          _prices = prices;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading prices: $e');
+    }
   }
 
   @override
@@ -76,50 +118,260 @@ class _TutorialScreenState extends State<TutorialScreen>
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: AppTheme.primaryBackground,
-        body: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Stack(
-            children: [
-              PageView(
-                controller: _model.pageViewController,
-                scrollDirection: Axis.horizontal,
-                children: [
-                  ..._pageData.map((data) =>
-                      TutorialPage(data: data, onNextPressed: _nextPage)),
-                  _buildFinalPage(),
-                ],
-              ),
-              Align(
-                alignment: const AlignmentDirectional(-0.85, 0.85),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 0),
-                  child: smooth_page_indicator.SmoothPageIndicator(
-                    controller: _model.pageViewController,
-                    count: _pageData.length + 1,
-                    axisDirection: Axis.horizontal,
-                    onDotClicked: (i) async {
-                      await _model.pageViewController.animateToPage(
-                        i,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.ease,
-                      );
-                    },
-                    effect: const smooth_page_indicator.ExpandingDotsEffect(
-                      expansionFactor: 2,
-                      spacing: 8,
-                      radius: 16,
-                      dotWidth: 16,
-                      dotHeight: 4,
-                      dotColor: AppTheme.accent1,
-                      activeDotColor: AppTheme.secondaryColor,
-                      paintStyle: PaintingStyle.fill,
+        body: SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: Stack(
+              children: [
+                PageView(
+                  controller: _model.pageViewController,
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    ..._pageData.map((data) =>
+                        TutorialPage(data: data, onNextPressed: _nextPage)),
+                    _buildFinalPage(),
+                  ],
+                ),
+                Align(
+                  alignment: const AlignmentDirectional(-0.85, 0.85),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 0),
+                    child: smooth_page_indicator.SmoothPageIndicator(
+                      controller: _model.pageViewController,
+                      count: _pageData.length + 1,
+                      axisDirection: Axis.horizontal,
+                      onDotClicked: (i) async {
+                        await _model.pageViewController.animateToPage(
+                          i,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.ease,
+                        );
+                      },
+                      effect: const smooth_page_indicator.ExpandingDotsEffect(
+                        expansionFactor: 2,
+                        spacing: 8,
+                        radius: 16,
+                        dotWidth: 16,
+                        dotHeight: 4,
+                        dotColor: AppTheme.accent1,
+                        activeDotColor: AppTheme.secondaryColor,
+                        paintStyle: PaintingStyle.fill,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionContent(BuildContext context) {
+    return Consumer<EntitlementProvider>(
+      builder: (context, entitlementProvider, child) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildSubscriptionCard(
+                  context,
+                  PurchaseTexts.annual,
+                  _prices[PurchaseTexts.annualPackageId] ??
+                      PurchaseTexts.defaultAnnualPrice,
+                  true,
+                ),
+                _buildSubscriptionCard(
+                  context,
+                  PurchaseTexts.monthly,
+                  _prices[PurchaseTexts.monthlyPackageId] ??
+                      PurchaseTexts.defaultMonthlyPrice,
+                  false,
+                ),
+              ],
+            )
+                .animate()
+                .fade(duration: 600.ms)
+                .moveY(begin: 80, end: 0, duration: 600.ms),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.security,
+                    color: Theme.of(context).primaryColor, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  'Secured with App Store. Cancel anytime.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 12,
+                      ),
+                ),
+              ],
+            )
+                .animate()
+                .fade(duration: 600.ms)
+                .moveY(begin: 100, end: 0, duration: 600.ms),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSubscriptionCard(
+    BuildContext context,
+    String planType,
+    String price,
+    bool isBestOffer,
+  ) {
+    bool isSelected = _selectedPlan == planType;
+    bool isAnnual = planType == PurchaseTexts.annual;
+    double cardWidth = 140;
+    double cardHeight = 160;
+    double bestOfferHeight = 24;
+
+    return GestureDetector(
+      onTap: () async {
+        setState(() {
+          _selectedPlan = planType;
+        });
+        try {
+          await _purchaseService.ensureInitialized();
+          if (await _purchaseService.buySubscription(planType)) {
+            // Track subscription with unified analytics
+            String? priceString = _prices[isAnnual
+                ? PurchaseTexts.annualPackageId
+                : PurchaseTexts.monthlyPackageId];
+
+            if (priceString != null) {
+              _analytics.logSubscriptionWithPriceString(
+                  subscriptionId: planType, priceString: priceString);
+            }
+
+            if (mounted) {
+              widget.onComplete();
+            }
+          }
+        } catch (e) {
+          debugPrint('Purchase error: $e');
+        }
+      },
+      child: SizedBox(
+        width: cardWidth,
+        height: isBestOffer ? cardHeight + bestOfferHeight : cardHeight,
+        child: Column(
+          children: [
+            if (isBestOffer)
+              Container(
+                width: cardWidth,
+                height: bestOfferHeight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.secondary,
+                      Theme.of(context).primaryColor
+                    ],
+                    stops: const [0, 1],
+                    begin: const AlignmentDirectional(0, -1),
+                    end: const AlignmentDirectional(0, 1),
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    PurchaseTexts.bestValueLabel,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
+            Container(
+              width: cardWidth,
+              height: cardHeight,
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [AppTheme.lemonChiffon, AppTheme.naplesYellow],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )
+                    : null,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(isBestOffer ? 0 : 16),
+                  topRight: Radius.circular(isBestOffer ? 0 : 16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
+                ),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${planType.capitalize()}\nPlan',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 18,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          price,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.copyWith(
+                                color: AppTheme.success,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        Text(
+                          isAnnual ? '/year' : '/month',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 12,
+                                  ),
+                        ),
+                        if (isAnnual)
+                          Text(
+                            '(${convertAnnualToMonthly(price)}/month)',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -144,11 +396,13 @@ class TutorialPageData {
   final String imagePath;
   final String title;
   final String description;
+  final Widget Function(BuildContext)? extraContent;
 
   TutorialPageData({
     required this.imagePath,
     required this.title,
     required this.description,
+    this.extraContent,
   });
 }
 
@@ -170,7 +424,7 @@ class TutorialPage extends StatelessWidget {
         Image.asset(
           data.imagePath,
           width: double.infinity,
-          height: 500,
+          height: 300,
           fit: BoxFit.contain,
           alignment: const Alignment(0, 1),
         ).animate().fade(duration: 600.ms).scale(
@@ -207,6 +461,7 @@ class TutorialPage extends StatelessWidget {
                     .fade(duration: 600.ms)
                     .moveY(begin: 80, end: 0, duration: 600.ms),
               ),
+              if (data.extraContent != null) data.extraContent!(context),
               Padding(
                 padding: const EdgeInsets.only(top: 24),
                 child: Row(
