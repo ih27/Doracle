@@ -1112,6 +1112,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  scatesdk_flutter:
+    dependency: "direct main"
+    description:
+      name: scatesdk_flutter
+      sha256: a51d0e512ceef90d0f87724d74ddcff7b66116706089ec75ca4b76f12294f58b
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.14"
   scrollable:
     dependency: "direct main"
     description:

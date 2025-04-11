@@ -3,16 +3,18 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:scatesdk_flutter/scatesdk_flutter.dart' show ScateEvents;
 
 import 'analytics_service.dart';
 import 'facebook_app_events_service.dart';
 import 'adjust_service.dart';
+import 'scate_service.dart';
 import '../config/adjust_config.dart';
 
 /// UnifiedAnalyticsService
 ///
 /// A unified interface for analytics that sends events to all configured
-/// analytics services (Firebase, Facebook, Adjust) with a single call.
+/// analytics services (Firebase, Facebook, Adjust, Scate) with a single call.
 ///
 /// All analytics calls are non-blocking (fire-and-forget) to ensure they
 /// don't impact app performance or user experience.
@@ -20,6 +22,7 @@ class UnifiedAnalyticsService {
   final AnalyticsService _firebaseAnalytics;
   final FacebookAppEventsService _facebookEvents;
   final AdjustService _adjustService;
+  final ScateService _scateService;
   // Track whether ATT permission has been granted
   bool _isTrackingAllowed = false;
 
@@ -27,6 +30,7 @@ class UnifiedAnalyticsService {
     this._firebaseAnalytics,
     this._facebookEvents,
     this._adjustService,
+    this._scateService,
   );
 
   /// Initialize all analytics services at once
@@ -46,6 +50,7 @@ class UnifiedAnalyticsService {
     // Initialize all services with the current permission status
     await _firebaseAnalytics.initialize();
     await _adjustService.initialize();
+    await _scateService.initialize();
 
     // Only activate app tracking if permission was granted
     if (_isTrackingAllowed || !Platform.isIOS) {
@@ -99,6 +104,15 @@ class UnifiedAnalyticsService {
             callbackParameters: adjustParams));
       }
 
+      // Track in Scate
+      if (parameters != null && parameters.isNotEmpty) {
+        // If we have parameters, use EventWithValue with the first parameter
+        final firstParam = parameters.entries.first;
+        _scateService.trackEventWithValue(name, firstParam.value.toString());
+      } else {
+        _scateService.trackEvent(name);
+      }
+
       debugPrint('Event logged to all services: $name');
     } catch (e) {
       debugPrint('Error logging event to analytics services: $e');
@@ -116,6 +130,9 @@ class UnifiedAnalyticsService {
         contentType: 'screen',
         contentId: screenName,
       ));
+
+      // Track in Scate as a feature click
+      _scateService.trackFeatureClicked(screenName);
 
       debugPrint('Screen view logged to all services: $screenName');
     } catch (e) {
@@ -143,6 +160,9 @@ class UnifiedAnalyticsService {
         'method': signUpMethod,
       }));
 
+      // Track in Scate
+      _scateService.trackLoginSuccess(signUpMethod);
+
       debugPrint('Sign up logged to all services: $signUpMethod');
     } catch (e) {
       debugPrint('Error logging sign up: $e');
@@ -169,6 +189,9 @@ class UnifiedAnalyticsService {
           _adjustService.trackEvent(adjustEventToken, callbackParameters: {
         'method': loginMethod,
       }));
+
+      // Track in Scate
+      _scateService.trackLoginSuccess(loginMethod);
 
       debugPrint('Login logged to all services: $loginMethod');
     } catch (e) {
@@ -235,6 +258,11 @@ class UnifiedAnalyticsService {
         currency,
         callbackParameters: adjustParams,
       ));
+
+      // Track in Scate
+      if (productId != null) {
+        _scateService.trackPaywallPurchased(productId);
+      }
 
       debugPrint(
           'Purchase logged to all services: $productId, $price $currency');
@@ -390,6 +418,9 @@ class UnifiedAnalyticsService {
         callbackParameters: adjustParams,
       ));
 
+      // Track in Scate
+      _scateService.trackPaywallPurchased(subscriptionId);
+
       debugPrint(
           'Subscription logged to all services: $subscriptionId, $price $currency');
     } catch (e) {
@@ -480,5 +511,30 @@ class UnifiedAnalyticsService {
       // Errors are only logged, not propagated
       return null;
     });
+  }
+
+  // Scate-specific methods
+  void logOnboardingStart() => _scateService.trackOnboardingStart();
+  void logOnboardingStep(String step) =>
+      _scateService.trackOnboardingStep(step);
+  void logOnboardingFinish() => _scateService.trackOnboardingFinish();
+
+  void logPaywallShown(String name) => _scateService.trackPaywallShown(name);
+  void logPaywallClosed(String name) => _scateService.trackPaywallClosed(name);
+  void logPaywallAttempted(String name) =>
+      _scateService.trackPaywallAttempted(name);
+  void logPaywallCancelled(String name) =>
+      _scateService.trackPaywallCancelled(name);
+
+  Future<String> getRemoteConfig(String key, String defaultValue) async {
+    return _scateService.getRemoteConfig(key, defaultValue);
+  }
+
+  void addScateListener(ScateEvents event, Function(dynamic) callback) {
+    _scateService.addListener(event, callback);
+  }
+
+  void removeScateListener(ScateEvents event) {
+    _scateService.removeListener(event);
   }
 }
