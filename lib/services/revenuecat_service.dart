@@ -10,6 +10,7 @@ import 'auth_service.dart';
 class RevenueCatService with ChangeNotifier {
   final AuthService _authService;
   final String _lastUserIdKey = 'last_revenue_cat_user_id';
+  final String _anonymousUserIdKey = 'anonymous_revenue_cat_user_id';
   final Map<int, String> _productsHash = {
     PurchaseTexts.smallTreatQuestionCount: PurchaseTexts.smallTreatPackageId,
     PurchaseTexts.mediumTreatQuestionCount: PurchaseTexts.mediumTreatPackageId,
@@ -181,18 +182,14 @@ class RevenueCatService with ChangeNotifier {
 
   Future<void> ensureInitialized() async {
     if (_initializationCompleter == null) {
-      // If not initialized, attempt to initialize with the last known user ID
       String? userId = await _getLastLoggedInUserId();
       if (userId == null) {
         final currentUser = _authService.currentUser;
         if (currentUser != null) {
           userId = currentUser.uid;
-          // Update the last logged in user ID in SharedPreferences
           await _setLastLoggedInUserId(userId);
         } else {
-          // If still no user, then throw the StateError
-          throw StateError(
-              'RevenueCatService cannot auto-initialize without a user ID. Call initializeAndLogin first.');
+          userId = await _getOrCreateAnonymousUserId();
         }
       }
       return initializeAndLogin(userId);
@@ -263,9 +260,21 @@ class RevenueCatService with ChangeNotifier {
 
   Future<void> _loginIfNeeded(String userId) async {
     final lastUserId = await _getLastLoggedInUserId();
+    final anonymousId = await _getOrCreateAnonymousUserId();
 
     if (lastUserId != userId) {
-      final loginResult = await Purchases.logIn(userId);
+      LogInResult loginResult;
+
+      // If coming from anonymous user and moving to real user
+      if (lastUserId == anonymousId && !userId.startsWith('anon_')) {
+        loginResult = await Purchases.logIn(userId);
+        await _clearAnonymousUser();
+        debugPrint(
+            "Transferred purchases from anonymous to authenticated user");
+      } else {
+        loginResult = await Purchases.logIn(userId);
+      }
+
       await _setLastLoggedInUserId(userId);
       debugPrint(
           "RevenueCat login successful for ${loginResult.customerInfo.originalAppUserId}");
@@ -291,5 +300,21 @@ class RevenueCatService with ChangeNotifier {
     } catch (e) {
       debugPrint("Error setting last logged in user ID: $e");
     }
+  }
+
+  Future<String> _getOrCreateAnonymousUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? anonymousId = prefs.getString(_anonymousUserIdKey);
+    if (anonymousId == null) {
+      // Create a new anonymous ID with 'anon_' prefix and timestamp
+      anonymousId = 'anon_${DateTime.now().millisecondsSinceEpoch}';
+      await prefs.setString(_anonymousUserIdKey, anonymousId);
+    }
+    return anonymousId;
+  }
+
+  Future<void> _clearAnonymousUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_anonymousUserIdKey);
   }
 }
