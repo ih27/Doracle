@@ -266,150 +266,160 @@ class _TutorialScreenState extends State<TutorialScreen>
   ) {
     return Consumer<EntitlementProvider>(
       builder: (context, entitlementProvider, child) {
-        bool isSelected = _selectedPlan == planType;
+        final bool isSubscribed = entitlementProvider.isEntitled;
+        final bool isCurrentPlan =
+            entitlementProvider.currentSubscriptionPlan == planType;
+
+        // If subscribed, only highlight current plan
+        // If not subscribed, only highlight selected plan
+        final bool isHighlighted =
+            isSubscribed ? isCurrentPlan : _selectedPlan == planType;
+
         bool isAnnual = planType == PurchaseTexts.annual;
         bool isWeekly = planType == PurchaseTexts.weekly;
         double cardWidth = 110;
         double cardHeight = 160;
         double bestOfferHeight = 24;
 
-        // If already entitled to this plan, show different state
-        bool isCurrentPlan =
-            entitlementProvider.currentSubscriptionPlan == planType;
-
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedPlan = planType;
-            });
-            _handleSubscription(planType);
-          },
-          child: SizedBox(
-            width: cardWidth,
-            height: isBestOffer ? cardHeight + bestOfferHeight : cardHeight,
-            child: Column(
-              children: [
-                if (isBestOffer)
-                  Container(
-                    width: cardWidth,
-                    height: bestOfferHeight,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.secondary,
-                          Theme.of(context).primaryColor
-                        ],
-                        stops: const [0, 1],
-                        begin: const AlignmentDirectional(0, -1),
-                        end: const AlignmentDirectional(0, 1),
-                      ),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        PurchaseTexts.bestValueLabel,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ),
-                  ),
-                Container(
-                  width: cardWidth,
-                  height: cardHeight,
-                  decoration: BoxDecoration(
-                    gradient: isSelected
-                        ? const LinearGradient(
-                            colors: [
-                              AppTheme.lemonChiffon,
-                              AppTheme.naplesYellow
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          )
-                        : null,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(isBestOffer ? 0 : 16),
-                      topRight: Radius.circular(isBestOffer ? 0 : 16),
-                      bottomLeft: const Radius.circular(16),
-                      bottomRight: const Radius.circular(16),
-                    ),
-                    border: Border.all(
-                      color: isCurrentPlan
-                          ? AppTheme.success
-                          : Theme.of(context).primaryColor,
-                      width: isCurrentPlan ? 3 : 2,
-                    ),
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${planType.capitalize()}\nPlan',
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 18,
-                                  ),
+          onTap: isSubscribed
+              ? null
+              : () {
+                  setState(() {
+                    _selectedPlan = planType;
+                  });
+                  _handleSubscription(planType);
+                },
+          child: Opacity(
+            opacity: isSubscribed && !isCurrentPlan ? 0.6 : 1.0,
+            child: SizedBox(
+              width: cardWidth,
+              height: isBestOffer ? cardHeight + bestOfferHeight : cardHeight,
+              child: Column(
+                children: [
+                  if (isBestOffer)
+                    Container(
+                      width: cardWidth,
+                      height: bestOfferHeight,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.secondary,
+                            Theme.of(context).primaryColor
+                          ],
+                          stops: const [0, 1],
+                          begin: const AlignmentDirectional(0, -1),
+                          end: const AlignmentDirectional(0, 1),
                         ),
-                        const SizedBox(height: 8),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              price,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(
-                                    color: AppTheme.success,
-                                    fontSize: 22,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          PurchaseTexts.bestValueLabel,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
-                            ),
-                            Text(
-                              isAnnual
-                                  ? '/year'
-                                  : isWeekly
-                                      ? '/week'
-                                      : '/month',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 11,
-                                  ),
-                            ),
-                            if (isAnnual || isWeekly)
+                        ),
+                      ),
+                    ),
+                  Container(
+                    width: cardWidth,
+                    height: cardHeight,
+                    decoration: BoxDecoration(
+                      gradient: isHighlighted
+                          ? const LinearGradient(
+                              colors: [
+                                AppTheme.lemonChiffon,
+                                AppTheme.naplesYellow
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            )
+                          : null,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(isBestOffer ? 0 : 16),
+                        topRight: Radius.circular(isBestOffer ? 0 : 16),
+                        bottomLeft: const Radius.circular(16),
+                        bottomRight: const Radius.circular(16),
+                      ),
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${planType.capitalize()}\nPlan',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 18,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               Text(
-                                '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
+                                price,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodySmall
+                                    .headlineLarge
                                     ?.copyWith(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
+                                      color: AppTheme.success,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
                               ),
-                          ],
-                        ),
-                      ],
+                              Text(
+                                isAnnual
+                                    ? '/year'
+                                    : isWeekly
+                                        ? '/week'
+                                        : '/month',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 11,
+                                    ),
+                              ),
+                              if (isAnnual || isWeekly)
+                                Text(
+                                  '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context).primaryColor,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
