@@ -47,13 +47,6 @@ class _TutorialScreenState extends State<TutorialScreen>
     _initializePages();
 
     _analytics.logScreenView(screenName: 'tutorial_screen');
-
-    // Initialize entitlement status
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final entitlementProvider =
-          Provider.of<EntitlementProvider>(context, listen: false);
-      entitlementProvider.refreshEntitlementStatus();
-    });
   }
 
   void _initializePages() {
@@ -176,63 +169,59 @@ class _TutorialScreenState extends State<TutorialScreen>
   }
 
   Widget _buildSubscriptionContent(BuildContext context) {
-    return Consumer<EntitlementProvider>(
-      builder: (context, entitlementProvider, child) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildSubscriptionCard(
-                  context,
-                  PurchaseTexts.annual,
-                  _prices[PurchaseTexts.annualPackageId] ??
-                      PurchaseTexts.defaultAnnualPrice,
-                  true,
-                ),
-                _buildSubscriptionCard(
-                  context,
-                  PurchaseTexts.monthly,
-                  _prices[PurchaseTexts.monthlyPackageId] ??
-                      PurchaseTexts.defaultMonthlyPrice,
-                  false,
-                ),
-                _buildSubscriptionCard(
-                  context,
-                  PurchaseTexts.weekly,
-                  _prices[PurchaseTexts.weeklyPackageId] ??
-                      PurchaseTexts.defaultWeeklyPrice,
-                  false,
-                ),
-              ],
-            )
-                .animate()
-                .fade(duration: 600.ms)
-                .moveY(begin: 80, end: 0, duration: 600.ms),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.security,
-                    color: Theme.of(context).primaryColor, size: 16),
-                const SizedBox(width: 6),
-                Text(
-                  'Secured with App Store. Cancel anytime.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                      ),
-                ),
-              ],
-            )
-                .animate()
-                .fade(duration: 600.ms)
-                .moveY(begin: 100, end: 0, duration: 600.ms),
+            _buildSubscriptionCard(
+              context,
+              PurchaseTexts.annual,
+              _prices[PurchaseTexts.annualPackageId] ??
+                  PurchaseTexts.defaultAnnualPrice,
+              true,
+            ),
+            _buildSubscriptionCard(
+              context,
+              PurchaseTexts.monthly,
+              _prices[PurchaseTexts.monthlyPackageId] ??
+                  PurchaseTexts.defaultMonthlyPrice,
+              false,
+            ),
+            _buildSubscriptionCard(
+              context,
+              PurchaseTexts.weekly,
+              _prices[PurchaseTexts.weeklyPackageId] ??
+                  PurchaseTexts.defaultWeeklyPrice,
+              false,
+            ),
           ],
-        );
-      },
+        )
+            .animate()
+            .fade(duration: 600.ms)
+            .moveY(begin: 80, end: 0, duration: 600.ms),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.security,
+                color: Theme.of(context).primaryColor, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              'Secured with App Store. Cancel anytime.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                  ),
+            ),
+          ],
+        )
+            .animate()
+            .fade(duration: 600.ms)
+            .moveY(begin: 100, end: 0, duration: 600.ms),
+      ],
     );
   }
 
@@ -253,7 +242,7 @@ class _TutorialScreenState extends State<TutorialScreen>
         }
 
         if (mounted) {
-          // Refresh entitlement state
+          // Refresh entitlement state after successful purchase
           Provider.of<EntitlementProvider>(context, listen: false)
               .refreshEntitlementStatus();
 
