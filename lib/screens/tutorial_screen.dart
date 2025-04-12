@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart'
     as smooth_page_indicator;
 import 'package:provider/provider.dart';
-
 import '../config/theme.dart';
 import '../config/dependency_injection.dart';
 import '../services/unified_analytics_service.dart';
@@ -11,6 +10,7 @@ import '../services/revenuecat_service.dart';
 import '../helpers/constants.dart';
 import '../helpers/string_extensions.dart';
 import '../helpers/purchase_utils.dart';
+import '../helpers/show_snackbar.dart';
 import '../providers/entitlement_provider.dart';
 import 'splash_screen.dart';
 
@@ -230,6 +230,35 @@ class _TutorialScreenState extends State<TutorialScreen>
     );
   }
 
+  Future<void> _handleSubscription(String planType) async {
+    try {
+      await _purchaseService.ensureInitialized();
+      if (await _purchaseService.buySubscription(planType)) {
+        // Track subscription with unified analytics
+        String? priceString = _prices[planType == PurchaseTexts.annual
+            ? PurchaseTexts.annualPackageId
+            : planType == PurchaseTexts.monthly
+                ? PurchaseTexts.monthlyPackageId
+                : PurchaseTexts.weeklyPackageId];
+
+        if (priceString != null) {
+          _analytics.logSubscriptionWithPriceString(
+              subscriptionId: planType, priceString: priceString);
+        }
+
+        if (mounted) {
+          showInfoSnackBar(context, InfoMessages.subscriptionSuccess);
+          _nextPage(); // Continue to the next page which has sign up/sign in options
+        }
+      }
+    } catch (e) {
+      debugPrint('Purchase error: $e');
+      if (mounted) {
+        showErrorSnackBar(context, InfoMessages.purchaseFailure);
+      }
+    }
+  }
+
   Widget _buildSubscriptionCard(
     BuildContext context,
     String planType,
@@ -244,32 +273,11 @@ class _TutorialScreenState extends State<TutorialScreen>
     double bestOfferHeight = 24;
 
     return GestureDetector(
-      onTap: () async {
+      onTap: () {
         setState(() {
           _selectedPlan = planType;
         });
-        try {
-          await _purchaseService.ensureInitialized();
-          if (await _purchaseService.buySubscription(planType)) {
-            // Track subscription with unified analytics
-            String? priceString = _prices[isAnnual
-                ? PurchaseTexts.annualPackageId
-                : planType == PurchaseTexts.monthly
-                    ? PurchaseTexts.monthlyPackageId
-                    : PurchaseTexts.weeklyPackageId];
-
-            if (priceString != null) {
-              _analytics.logSubscriptionWithPriceString(
-                  subscriptionId: planType, priceString: priceString);
-            }
-
-            if (mounted) {
-              widget.onComplete();
-            }
-          }
-        } catch (e) {
-          debugPrint('Purchase error: $e');
-        }
+        _handleSubscription(planType);
       },
       child: SizedBox(
         width: cardWidth,

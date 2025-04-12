@@ -17,6 +17,9 @@ class InfoMessages {
   static const purchaseSuccess = 'Purchase successful!';
   static const restoreSuccess = 'Purchases restored successfully!';
   static const restoreFailure = 'No purchases to restore';
+  static const purchaseFailure = 'Purchase failed. Please try again.';
+  static const subscriptionSuccess =
+      'Welcome to Premium! Let\'s create your account.';
 
   static const openSettingsFailure =
       'Unable to open settings. Please try again.';
