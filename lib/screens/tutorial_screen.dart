@@ -240,6 +240,30 @@ class _TutorialScreenState extends State<TutorialScreen>
         setState(() {
           _selectedPlan = planType;
         });
+        // Disabled RevenueCat functionality in tutorial mode
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Subscription Disabled'),
+                content:
+                    const Text('Subscriptions are disabled in tutorial mode.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      widget.onComplete();
+                    },
+                    child: const Text('Continue'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+        // Original RevenueCat functionality - commented out for testing
+        /*
         try {
           await _purchaseService.ensureInitialized();
           if (await _purchaseService.buySubscription(planType)) {
@@ -260,6 +284,7 @@ class _TutorialScreenState extends State<TutorialScreen>
         } catch (e) {
           debugPrint('Purchase error: $e');
         }
+        */
       },
       child: SizedBox(
         width: cardWidth,
