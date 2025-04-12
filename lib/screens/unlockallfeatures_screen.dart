@@ -105,7 +105,9 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
       // Track subscription with unified analytics
       String? price = _prices[subscriptionType == PurchaseTexts.annual
           ? PurchaseTexts.annualPackageId
-          : PurchaseTexts.monthlyPackageId];
+          : subscriptionType == PurchaseTexts.monthly
+              ? PurchaseTexts.monthlyPackageId
+              : PurchaseTexts.weeklyPackageId];
 
       if (price != null) {
         _analytics.logSubscriptionWithPriceString(
@@ -220,6 +222,15 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
             isSubscribed,
             currentPlan == PurchaseTexts.monthly,
           ),
+          _buildSubscriptionCard(
+            context,
+            PurchaseTexts.weekly,
+            _prices[PurchaseTexts.weeklyPackageId] ??
+                PurchaseTexts.defaultWeeklyPrice,
+            false,
+            isSubscribed,
+            currentPlan == PurchaseTexts.weekly,
+          ),
         ],
       ),
     );
@@ -240,7 +251,8 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
     }
 
     bool isAnnual = planType == PurchaseTexts.annual;
-    double cardWidth = 150;
+    bool isWeekly = planType == PurchaseTexts.weekly;
+    double cardWidth = 110;
     double cardHeight = 200;
     double bestOfferHeight = 30;
 
@@ -287,84 +299,81 @@ class UnlockAllFeaturesScreenState extends State<UnlockAllFeaturesScreen> {
                   ),
                 ),
               ),
-            Container(
-              width: cardWidth,
-              height: cardHeight,
-              decoration: BoxDecoration(
-                gradient: isCurrentPlan
-                    ? const LinearGradient(
-                        colors: [Colors.white, AppTheme.secondaryColor],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      )
-                    : isSelected
-                        ? const LinearGradient(
-                            colors: [
-                              AppTheme.lemonChiffon,
-                              AppTheme.naplesYellow
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          )
-                        : null,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(isBestOffer ? 0 : 20),
-                  topRight: Radius.circular(isBestOffer ? 0 : 20),
-                  bottomLeft: const Radius.circular(20),
-                  bottomRight: const Radius.circular(20),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
+                      : null,
+                  border: Border.all(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.secondary
+                        : Theme.of(context).dividerColor,
+                    width: isSelected ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(isBestOffer ? 0 : 20),
+                    topRight: Radius.circular(isBestOffer ? 0 : 20),
+                    bottomLeft: const Radius.circular(20),
+                    bottomRight: const Radius.circular(20),
+                  ),
                 ),
-                border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      '${planType.capitalize()}\nPlan',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 22,
-                          ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Text(
-                          price,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineLarge
-                              ?.copyWith(
-                                color: AppTheme.success,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        Text(
-                          isAnnual ? '/year' : '/month',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                        ),
-                        if (isAnnual)
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        '${planType.capitalize()}\nPlan',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: 18,
+                            ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
                           Text(
-                            '(${convertAnnualToMonthly(price)}/month)',
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.normal,
-                                    ),
+                            price,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(
+                                  color: AppTheme.success,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
-                      ],
-                    ),
-                  ],
+                          Text(
+                            isAnnual
+                                ? '/year'
+                                : isWeekly
+                                    ? '/week'
+                                    : '/month',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                          ),
+                          if (isAnnual || isWeekly)
+                            Text(
+                              '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

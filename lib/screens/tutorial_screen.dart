@@ -194,6 +194,13 @@ class _TutorialScreenState extends State<TutorialScreen>
                       PurchaseTexts.defaultMonthlyPrice,
                   false,
                 ),
+                _buildSubscriptionCard(
+                  context,
+                  PurchaseTexts.weekly,
+                  _prices[PurchaseTexts.weeklyPackageId] ??
+                      PurchaseTexts.defaultWeeklyPrice,
+                  false,
+                ),
               ],
             )
                 .animate()
@@ -231,7 +238,8 @@ class _TutorialScreenState extends State<TutorialScreen>
   ) {
     bool isSelected = _selectedPlan == planType;
     bool isAnnual = planType == PurchaseTexts.annual;
-    double cardWidth = 140;
+    bool isWeekly = planType == PurchaseTexts.weekly;
+    double cardWidth = 110;
     double cardHeight = 160;
     double bestOfferHeight = 24;
 
@@ -246,7 +254,9 @@ class _TutorialScreenState extends State<TutorialScreen>
             // Track subscription with unified analytics
             String? priceString = _prices[isAnnual
                 ? PurchaseTexts.annualPackageId
-                : PurchaseTexts.monthlyPackageId];
+                : planType == PurchaseTexts.monthly
+                    ? PurchaseTexts.monthlyPackageId
+                    : PurchaseTexts.weeklyPackageId];
 
             if (priceString != null) {
               _analytics.logSubscriptionWithPriceString(
@@ -281,8 +291,8 @@ class _TutorialScreenState extends State<TutorialScreen>
                     end: const AlignmentDirectional(0, 1),
                   ),
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
                 ),
                 child: Center(
@@ -297,32 +307,29 @@ class _TutorialScreenState extends State<TutorialScreen>
                 ),
               ),
             Container(
-              width: cardWidth,
               height: cardHeight,
               decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                        colors: [AppTheme.lemonChiffon, AppTheme.naplesYellow],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      )
+                color: isSelected
+                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
                     : null,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(isBestOffer ? 0 : 16),
-                  topRight: Radius.circular(isBestOffer ? 0 : 16),
-                  bottomLeft: const Radius.circular(16),
-                  bottomRight: const Radius.circular(16),
-                ),
                 border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).dividerColor,
+                  width: isSelected ? 2 : 1,
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(isBestOffer ? 0 : 20),
+                  topRight: Radius.circular(isBestOffer ? 0 : 20),
+                  bottomLeft: const Radius.circular(20),
+                  bottomRight: const Radius.circular(20),
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                padding: const EdgeInsets.all(5),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       '${planType.capitalize()}\nPlan',
@@ -332,9 +339,8 @@ class _TutorialScreenState extends State<TutorialScreen>
                             fontSize: 18,
                           ),
                     ),
-                    const SizedBox(height: 8),
                     Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(
                           price,
@@ -348,16 +354,20 @@ class _TutorialScreenState extends State<TutorialScreen>
                               ),
                         ),
                         Text(
-                          isAnnual ? '/year' : '/month',
+                          isAnnual
+                              ? '/year'
+                              : isWeekly
+                                  ? '/week'
+                                  : '/month',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context).primaryColor,
                                     fontSize: 12,
                                   ),
                         ),
-                        if (isAnnual)
+                        if (isAnnual || isWeekly)
                           Text(
-                            '(${convertAnnualToMonthly(price)}/month)',
+                            '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Theme.of(context).primaryColor,

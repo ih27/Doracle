@@ -213,12 +213,19 @@ class RevenueCatService with ChangeNotifier {
   Future<Map<String, Package>> _getSubscriptions() async {
     try {
       Offerings offerings = await Purchases.getOfferings();
-      if (offerings.current != null &&
-          offerings.current?.monthly != null &&
-          offerings.current?.annual != null) {
-        _cachedSubscriptions[PurchaseTexts.monthly] =
-            offerings.current!.monthly!;
-        _cachedSubscriptions[PurchaseTexts.annual] = offerings.current!.annual!;
+      if (offerings.current != null) {
+        if (offerings.current?.weekly != null) {
+          _cachedSubscriptions[PurchaseTexts.weekly] =
+              offerings.current!.weekly!;
+        }
+        if (offerings.current?.monthly != null) {
+          _cachedSubscriptions[PurchaseTexts.monthly] =
+              offerings.current!.monthly!;
+        }
+        if (offerings.current?.annual != null) {
+          _cachedSubscriptions[PurchaseTexts.annual] =
+              offerings.current!.annual!;
+        }
       }
       return _cachedSubscriptions;
     } catch (e) {
