@@ -222,12 +222,6 @@ class _AppManagerState extends State<AppManager> {
   }
 
   void _initializeRevenueCat(String userId) {
-    // Skip RevenueCat initialization if in tutorial mode
-    if (_isFirstLaunch) {
-      debugPrint('Skipping RevenueCat initialization during tutorial');
-      return;
-    }
-
     const int maxRetries = 3;
     const Duration retryDelay = Duration(minutes: 1);
     int retryCount = 0;
