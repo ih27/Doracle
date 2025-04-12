@@ -291,8 +291,8 @@ class _TutorialScreenState extends State<TutorialScreen>
                     end: const AlignmentDirectional(0, 1),
                   ),
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
                 ),
                 child: Center(
@@ -307,29 +307,32 @@ class _TutorialScreenState extends State<TutorialScreen>
                 ),
               ),
             Container(
+              width: cardWidth,
               height: cardHeight,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [AppTheme.lemonChiffon, AppTheme.naplesYellow],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )
                     : null,
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.secondary
-                      : Theme.of(context).dividerColor,
-                  width: isSelected ? 2 : 1,
-                ),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(isBestOffer ? 0 : 20),
-                  topRight: Radius.circular(isBestOffer ? 0 : 20),
-                  bottomLeft: const Radius.circular(20),
-                  bottomRight: const Radius.circular(20),
+                  topLeft: Radius.circular(isBestOffer ? 0 : 16),
+                  topRight: Radius.circular(isBestOffer ? 0 : 16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
+                ),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       '${planType.capitalize()}\nPlan',
@@ -339,8 +342,9 @@ class _TutorialScreenState extends State<TutorialScreen>
                             fontSize: 18,
                           ),
                     ),
+                    const SizedBox(height: 8),
                     Column(
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           price,
@@ -349,7 +353,7 @@ class _TutorialScreenState extends State<TutorialScreen>
                               .headlineLarge
                               ?.copyWith(
                                 color: AppTheme.success,
-                                fontSize: 24,
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -362,7 +366,7 @@ class _TutorialScreenState extends State<TutorialScreen>
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context).primaryColor,
-                                    fontSize: 12,
+                                    fontSize: 11,
                                   ),
                         ),
                         if (isAnnual || isWeekly)

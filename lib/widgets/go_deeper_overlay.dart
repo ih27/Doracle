@@ -123,26 +123,34 @@ class GoDeeperOverlay extends StatelessWidget {
   }
 
   Widget _buildSubscriptionCard(
-      BuildContext context, String packageId, String price, bool isBestValue) {
-    bool isAnnual = packageId == PurchaseTexts.annual;
-    bool isWeekly = packageId == PurchaseTexts.weekly;
+    BuildContext context,
+    String planType,
+    String price,
+    bool isBestOffer,
+  ) {
+    bool isAnnual = planType == PurchaseTexts.annual;
+    bool isWeekly = planType == PurchaseTexts.weekly;
+    double cardWidth = 110;
+    double cardHeight = 160;
+    double bestOfferHeight = 24;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: 110,
-          height: 200,
+          width: cardWidth,
+          height: cardHeight,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isBestValue
+            color: isBestOffer
                 ? AppTheme.lemonChiffon
                 : AppTheme.primaryBackground,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isBestValue ? AppTheme.sandyBrown : AppTheme.accent1,
-              width: isBestValue ? 4 : 2,
+              color: isBestOffer ? AppTheme.sandyBrown : AppTheme.accent1,
+              width: isBestOffer ? 4 : 2,
             ),
-            boxShadow: isBestValue
+            boxShadow: isBestOffer
                 ? [
                     const BoxShadow(
                       blurRadius: 4,
@@ -156,12 +164,11 @@ class GoDeeperOverlay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${packageId.capitalize()}\nPlan',
+                '${planType.capitalize()}\nPlan',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 18,
-                      letterSpacing: 0,
                       color: Theme.of(context).primaryColor,
+                      fontSize: 18,
                     ),
               ),
               Column(
@@ -170,7 +177,7 @@ class GoDeeperOverlay extends StatelessWidget {
                     price,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           color: AppTheme.success,
-                          letterSpacing: 0,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                     maxLines: 1,
@@ -183,8 +190,8 @@ class GoDeeperOverlay extends StatelessWidget {
                             ? '/week'
                             : '/month',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          letterSpacing: 0,
                           color: Theme.of(context).primaryColor,
+                          fontSize: 11,
                         ),
                   ),
                   if (isAnnual || isWeekly)
@@ -192,15 +199,16 @@ class GoDeeperOverlay extends StatelessWidget {
                       '(${isAnnual ? convertAnnualToMonthly(price) : convertWeeklyToMonthly(price)}/month)',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).primaryColor,
+                            fontSize: 10,
                             fontWeight: FontWeight.normal,
                           ),
                     ),
                 ],
               ),
               ElevatedButton(
-                onPressed: () => onPurchase(packageId),
+                onPressed: () => onPurchase(planType),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isBestValue
+                  backgroundColor: isBestOffer
                       ? AppTheme.secondaryColor
                       : AppTheme.primaryColor,
                   shape: RoundedRectangleBorder(
@@ -219,7 +227,7 @@ class GoDeeperOverlay extends StatelessWidget {
             ],
           ),
         ),
-        if (isBestValue)
+        if (isBestOffer)
           Positioned(
             top: -12,
             left: 0,
@@ -227,7 +235,7 @@ class GoDeeperOverlay extends StatelessWidget {
             child: Center(
               child: Container(
                 width: 100,
-                height: 25,
+                height: bestOfferHeight,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppTheme.tomato, AppTheme.sandyBrown],
