@@ -22,7 +22,7 @@ class UnifiedAnalyticsService {
   final AnalyticsService _firebaseAnalytics;
   final FacebookAppEventsService _facebookEvents;
   final AdjustService _adjustService;
-  final ScateService? _scateService;
+  final ScateService _scateService;
   // Track whether ATT permission has been granted
   bool _isTrackingAllowed = false;
 
@@ -51,9 +51,7 @@ class UnifiedAnalyticsService {
     await _firebaseAnalytics.initialize();
     await _adjustService.initialize();
     // Initialize Scate only if available
-    if (_scateService != null) {
-      await _scateService.initialize();
-    }
+    await _scateService.initialize();
 
     // Only activate app tracking if permission was granted
     if (_isTrackingAllowed || !Platform.isIOS) {
@@ -111,9 +109,9 @@ class UnifiedAnalyticsService {
       if (parameters != null && parameters.isNotEmpty) {
         // If we have parameters, use EventWithValue with the first parameter
         final firstParam = parameters.entries.first;
-        _scateService?.trackEventWithValue(name, firstParam.value.toString());
+        _scateService.trackEventWithValue(name, firstParam.value.toString());
       } else {
-        _scateService?.trackEvent(name);
+        _scateService.trackEvent(name);
       }
 
       debugPrint('Event logged to all services: $name');
@@ -135,7 +133,7 @@ class UnifiedAnalyticsService {
       ));
 
       // Track in Scate as a feature click
-      _scateService?.trackFeatureClicked(screenName);
+      _scateService.trackFeatureClicked(screenName);
 
       debugPrint('Screen view logged to all services: $screenName');
     } catch (e) {
@@ -164,7 +162,7 @@ class UnifiedAnalyticsService {
       }));
 
       // Track in Scate
-      _scateService?.trackLoginSuccess(signUpMethod);
+      _scateService.trackLoginSuccess(signUpMethod);
 
       debugPrint('Sign up logged to all services: $signUpMethod');
     } catch (e) {
@@ -194,7 +192,7 @@ class UnifiedAnalyticsService {
       }));
 
       // Track in Scate
-      _scateService?.trackLoginSuccess(loginMethod);
+      _scateService.trackLoginSuccess(loginMethod);
 
       debugPrint('Login logged to all services: $loginMethod');
     } catch (e) {
@@ -264,7 +262,7 @@ class UnifiedAnalyticsService {
 
       // Track in Scate
       if (productId != null) {
-        _scateService?.trackPaywallPurchased(productId);
+        _scateService.trackPaywallPurchased(productId);
       }
 
       debugPrint(
@@ -422,7 +420,7 @@ class UnifiedAnalyticsService {
       ));
 
       // Track in Scate
-      _scateService?.trackPaywallPurchased(subscriptionId);
+      _scateService.trackPaywallPurchased(subscriptionId);
 
       debugPrint(
           'Subscription logged to all services: $subscriptionId, $price $currency');
@@ -517,30 +515,27 @@ class UnifiedAnalyticsService {
   }
 
   // Scate-specific methods - make them no-op if Scate is not available
-  void logOnboardingStart() => _scateService?.trackOnboardingStart();
+  void logOnboardingStart() => _scateService.trackOnboardingStart();
   void logOnboardingStep(String step) =>
-      _scateService?.trackOnboardingStep(step);
-  void logOnboardingFinish() => _scateService?.trackOnboardingFinish();
+      _scateService.trackOnboardingStep(step);
+  void logOnboardingFinish() => _scateService.trackOnboardingFinish();
 
-  void logPaywallShown(String name) => _scateService?.trackPaywallShown(name);
-  void logPaywallClosed(String name) => _scateService?.trackPaywallClosed(name);
+  void logPaywallShown(String name) => _scateService.trackPaywallShown(name);
+  void logPaywallClosed(String name) => _scateService.trackPaywallClosed(name);
   void logPaywallAttempted(String name) =>
-      _scateService?.trackPaywallAttempted(name);
+      _scateService.trackPaywallAttempted(name);
   void logPaywallCancelled(String name) =>
-      _scateService?.trackPaywallCancelled(name);
+      _scateService.trackPaywallCancelled(name);
 
   Future<String> getRemoteConfig(String key, String defaultValue) async {
-    if (_scateService != null) {
-      return _scateService.getRemoteConfig(key, defaultValue);
-    }
-    return defaultValue;
+    return _scateService.getRemoteConfig(key, defaultValue);
   }
 
   void addScateListener(ScateEvents event, Function(dynamic) callback) {
-    _scateService?.addListener(event, callback);
+    _scateService.addListener(event, callback);
   }
 
   void removeScateListener(ScateEvents event) {
-    _scateService?.removeListener(event);
+    _scateService.removeListener(event);
   }
 }
