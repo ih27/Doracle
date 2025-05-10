@@ -1,11 +1,12 @@
 import 'package:dart_openai/dart_openai.dart';
+import '../helpers/constants.dart';
 
 class OpenAIService {
   final String apiKey;
   String fortuneTellerInstructions;
   String compatibilityGuesserInstructions;
   String dailyHoroscopeInstructions;
-  final String model = 'gpt-4o-mini';
+  final String model = OpenAIConstants.model;
   late OpenAIChatCompletionChoiceMessageModel fortuneTellerSystemMessage;
   late OpenAIChatCompletionChoiceMessageModel compatibilityGuesserSystemMessage;
   late OpenAIChatCompletionChoiceMessageModel dailyHoroscopeSystemMessage;
@@ -13,7 +14,7 @@ class OpenAIService {
   OpenAIService(this.apiKey, this.fortuneTellerInstructions,
       this.compatibilityGuesserInstructions, this.dailyHoroscopeInstructions) {
     OpenAI.apiKey = apiKey;
-    OpenAI.requestsTimeOut = const Duration(minutes: 1);
+    OpenAI.requestsTimeOut = OpenAIConstants.requestTimeout;
     _initializeFortuneTellerSystemMessage();
     _initializeCompatibilityGuesserSystemMessage();
     _initializeDailyHoroscopeSystemMessage();
@@ -67,8 +68,8 @@ class OpenAIService {
       model: model,
       messages: [fortuneTellerSystemMessage, userMessage],
       n: 1,
-      maxTokens: 200, // 150 words × 4/3 tokens/word
-      temperature: 0.75,
+      maxTokens: OpenAIConstants.fortuneMaxTokens,
+      temperature: OpenAIConstants.defaultTemperature,
     );
   }
 
@@ -82,9 +83,8 @@ class OpenAIService {
       model: model,
       messages: [compatibilityGuesserSystemMessage, userMessage],
       n: 1,
-      //maxTokens: 500,
-      temperature: 0.75,
-      responseFormat: {"type": "json_object"},
+      temperature: OpenAIConstants.defaultTemperature,
+      responseFormat: OpenAIConstants.jsonResponseFormat,
     );
   }
 
@@ -98,9 +98,8 @@ class OpenAIService {
       model: model,
       messages: [dailyHoroscopeSystemMessage, userMessage],
       n: 1,
-      //maxTokens: 500,
-      temperature: 0.75,
-      responseFormat: {"type": "json_object"},
+      temperature: OpenAIConstants.defaultTemperature,
+      responseFormat: OpenAIConstants.jsonResponseFormat,
     );
   }
 }

@@ -390,3 +390,11 @@ class PetBreeds {
     }
   }
 }
+
+class OpenAIConstants {
+  static const String model = 'gpt-4.1-nano';
+  static const Duration requestTimeout = Duration(minutes: 1);
+  static const int fortuneMaxTokens = 200; // 150 words × 4/3 tokens/word
+  static const double defaultTemperature = 0.75;
+  static const Map<String, String> jsonResponseFormat = {"type": "json_object"};
+}
